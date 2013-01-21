@@ -1,0 +1,14 @@
+{
+	"filters": [
+		"Cor",                // All columns
+		{"first_name": "Be"}, // Specific column
+	],
+	"paging": {
+		"page": 1,
+		"division": 10,
+	},
+	"sort": {
+		"column": "last_name",
+		"direction": "asc"
+	}
+}
