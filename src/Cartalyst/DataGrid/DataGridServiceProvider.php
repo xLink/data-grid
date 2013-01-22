@@ -34,7 +34,7 @@ class DataGridServiceProvider extends ServiceProvider {
 
 		$this->registerDataGrid();
 
-		
+
 	}
 
 	protected function registerIlluminateRequestProvider()
