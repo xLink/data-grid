@@ -229,32 +229,32 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 				$me = $this;
 				$this->query->whereNested(function($query) use ($me, $filter)
 				{
-					$me->filterColumns($query, $filter);
+					$me->globalFilter($query, $filter);
 				});
 			}
 		}
 	}
 
 	/**
-	 * Applies a filter across all registered columns. The
+	 * Applies a global filter across all registered columns. The
 	 * filter is applied in a "or where" fashion, where
 	 * the value can be matched across any column.
 	 *
-	 * @param  Illuminate\Database\Eloquent\Builder  $query
+	 * @param  Illuminate\Database\Eloquent\Builder  $nestedQuery
 	 * @param  string  $filter
 	 * @return void
 	 */
-	public function filterColumns(QueryBuilder $query, $filter)
+	public function globalFilter(QueryBuilder $nestedQuery, $filter)
 	{
 		foreach ($this->columns as $key => $value)
 		{
 			if (is_numeric($key))
 			{
-				$query->orWhere($value, 'like', "%{$filter}%");
+				$nestedQuery->orWhere($value, 'like', "%{$filter}%");
 			}
 			else
 			{
-				$query->orWhere($key, 'like', "%{$filter}%");
+				$nestedQuery->orWhere($key, 'like', "%{$filter}%");
 			}
 		}
 	}
@@ -443,6 +443,51 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	public function getQuery()
 	{
 		return $this->query;
+	}
+
+	/**
+	 * Gets the data grid response.
+	 *
+	 * @return array
+	 */
+	public function getResponse()
+	{
+		return $this->response;
+	}
+
+	/**
+	 * Sets the response for the data grid.
+	 *
+	 * @param  array  $response
+	 * @return void
+	 */
+	public function setResponse(array $response)
+	{
+		$this->response = $response;
+	}
+
+	/**
+	 * Sets an attribute in the response array, where the
+	 * attribute provided is a dot-notation key in the array.
+	 *
+	 * @param  string  $attribute
+	 * @param  mixed   $value
+	 * @return void
+	 */
+	public function setResponseAttribute($attribute, $value = null)
+	{
+		array_set($this->response, $attribute, $value);
+	}
+
+	/**
+	 * Returns the value of an attribute in the response array.
+	 *
+	 * @param  string $attribute
+	 * @return mixed
+	 */
+	public function getResponseAttribute($attribute)
+	{
+		return array_get($this->response, $attribute);
 	}
 
 	/**
