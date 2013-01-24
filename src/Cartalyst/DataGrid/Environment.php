@@ -49,9 +49,19 @@ class Environment {
 	 */
 	public function make($query, array $columns)
 	{
-		$dataGrid = new DataGrid($this, $query, $columns);
+		return $this->createDataGrid($query, $columns)->setupDataGridContext();
+	}
 
-		return $dataGrid->setupDataGridContext();
+	/**
+	 * Creates a new instance of the data grid.
+	 *
+	 * @param  mixed  $query
+	 * @param  array  $columns
+	 * @return Cartalyst\DataGrid\DataGrid
+	 */
+	public function createDataGrid($query, array $columns)
+	{
+		return new DataGrid($this, $query, $columns);
 	}
 
 	/**
@@ -72,7 +82,7 @@ class Environment {
 	 */
 	public function setRequestProvider(RequestProviderInterface $requestProvider)
 	{
-		$this->request = $requestProvider;
+		$this->requestProvider = $requestProvider;
 	}
 
 }
