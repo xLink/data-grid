@@ -1,26 +1,27 @@
 <div id="grid" data-source="http://example.com/grid/source" data-results=".grid-results" data-filters=".grid-filters" data-applied-filters=".grid-applied-filters" data-pagination=".grid-pagination">
 
 	<div class="grid-filters">
-		<ul class="nav">
-			<li>
-				<div class="form-inline">
-					<input type="text">
-					<button class="btn add-global-filter">
-						Add Global Filter
-					</button>
-				</div>
-			</li>
-			<li data-template>
-				<div class="form-inline">
+		<div class="form-inline">
+			<div class="input-append">
+				<input type="text" placeholder="Filter All">
+				<button class="btn add-global-filter">
+					Add
+				</button>
+			</div>
+		</div>
 
-					<!-- Label -->
-					<label for="grid-filters-[[column]]">[[label]]</label>
+		<hr>
+
+		<div class="clearfix">
+			<div class="form-inline">
+
+				<div class="pull-left" data-template>
 
 					<!-- Build different HTML based on the type -->
 					[? if type == 'select' ?]
-						<select data-column="[[column]]" id="grid-filters-[[column]]">
+						<select class="input-small" id="grid-filters-[[column]]" data-column="[[column]]">
 							<option value="">
-								-- Please Select --
+								-- [[label]] --
 							</option>
 
 							<!-- Need to work out how to embed each <option> inside the <optgroup> data-template... -->
@@ -30,19 +31,29 @@
 								</option>
 							</optgroup>
 						</select>
+
+						<button class="btn add-filter">
+								Add
+							</button>
 					[? else ?]
-						<input type="text" data-column="[[column]]" id="grid-filters-[[column]]">
+						<div class="input-append">
+							<input type="text" class="input-small" id="grid-filters-[[column]]" data-column="[[column]]" placeholder="[[label]]">
+
+							<button class="btn add-filter">
+								Add
+							</button>
+						</div>
+						&nbsp;
 					[? endif ?]
 
-					<!-- "Add Filter" button -->
-					<button class="btn add-filter">
-						Add Filter
-					</button>
-
 				</div>
-			</li>
-		</ul>
+
+			</div>
+		</div>
+
 	</div>
+
+	<br>
 
 	<ul class="nav nav-tabs grid-applied-filters">
 		<li data-template>
@@ -61,7 +72,7 @@
 
 		<ul class="nav nav-tabs grid-pagination">
 			<li data-template>
-				<a href="#" data-page="[[page]]" class="goto-page">
+				<a href="#" data-page="[[page]]" data-toggle="tab" class="goto-page">
 					Page #[[page]]
 				</a>
 			</li>

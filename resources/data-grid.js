@@ -235,6 +235,13 @@
 		observeAppliedFilters: function() {
 			var me = this;
 
+			// Shortcut to trigger click
+			$('body').on('keyup', me.$filters.selector + ' :input', function(e) {
+				if (e.keyCode == 13) {
+					$(this).siblings('.add-global-filter, .add-filter').first().trigger('click');
+				}
+			});
+
 			// Adding global filters
 			$('body').on('click', me.$filters.selector + ' .add-global-filter', function() {
 				var $input = $(this).siblings(':input').first();
@@ -345,9 +352,16 @@
 			// Loop through the pages and add a new index
 			// to the pagination data array
 			for (i = 1; i <= pagination.total_pages; i++) {
-				this.pagination.navigation.push({
-					page: i
-				});
+				var paginationData = {
+					page: i,
+					active: false
+				};
+
+				if (this.pagination.page == i) {
+					paginationData.active = true;
+				}
+
+				this.pagination.navigation.push(paginationData);
 			}
 		},
 
@@ -363,7 +377,8 @@
 		observePagination: function() {
 			var me = this;
 
-			$('body').on('click', this.$pagination.selector + ' .goto-page', function() {
+			$('body').on('click', this.$pagination.selector + ' .goto-page', function(e) {
+				e.preventDefault();
 				var $link = $(this),
 				   pageId = $link.data('page');
 
