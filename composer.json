@@ -1,12 +1,17 @@
 {
 	"name": "cartalyst/data-grid",
 	"description": "HTML markup templating on the client side, simple API on the server side. Incredibly simple and easy to use.",
-	"keywords": ["data grid", "laravel4"],
+	"keywords": ["data grid", "laravel"],
 	"license": "BSD License (3-clause)",
 	"authors": [
 		{
 			"name": "Cartalyst LLC",
 			"email": "help@cartalyst.com"
+		},
+		{
+			"name": "Dan Syme",
+			"email": "dan.syme@cartalyst.com",
+			"role": "Creator & Designer"
 		},
 		{
 			"name": "Ben Corlett",
@@ -17,11 +22,6 @@
 			"name": "Bruno Gaspar",
 			"email": "bruno.gaspar@cartalyst.com",
 			"role": "Developer"
-		},
-		{
-			"name": "Dan Syme",
-			"email": "dan.syme@cartalyst.com",
-			"role": "Creator & Designer"
 		}
 	],
 	"require": {
