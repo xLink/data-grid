@@ -345,10 +345,10 @@
 
 			// Let's retrieve the new JSON payload from the server with our
 			// fetch parameters that we've built.
-			$.getJSON(this.source, this.buildFetchParameters(), function(data) {
+			$.getJSON(this.source, this.buildFetchParameters(), function(response) {
 
-				me.loadResults(data.results);
-				me.loadPagination(data.pagination);
+				me.loadResults(response.results);
+				me.loadPagination(response.pages_count);
 				me.renderResults();
 				me.renderPagination();
 
@@ -362,14 +362,14 @@
 			this.results = results;
 		},
 
-		loadPagination: function(pagination) {
+		loadPagination: function(pagesCount) {
 
 			// Reset our pagination data
 			this.pagination.navigation = [];
 
 			// Loop through the pages and add a new index
 			// to the pagination data array
-			for (i = 1; i <= pagination.total_pages; i++) {
+			for (i = 1; i <= pagesCount; i++) {
 				var paginationData = {
 					page: i,
 					active: false

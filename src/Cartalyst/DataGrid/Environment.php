@@ -19,6 +19,9 @@
  */
 
 use Cartalyst\DataGrid\RequestProviders\ProviderInterface as RequestProviderInterface;
+use Closure;
+use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class Environment {
 
@@ -30,38 +33,49 @@ class Environment {
 	protected $requestProvider;
 
 	/**
+	 * Array of data source mappings for data types,
+	 * where the key is the applicable class and the
+	 * value is a closure which determines if the class
+	 * is applicable for the data type.
+	 *
+	 * @var array
+	 */
+	protected $dataHandlerMappings = array();
+
+	/**
 	 * Create a new pagination environment.
 	 *
 	 * @param  Cartalyst\DataGrid\RequestProviders\ProviderInterface  $requestProvider
 	 * @return void
 	 */
-	public function __construct(RequestProviderInterface $requestProvider)
+	public function __construct(RequestProviderInterface $requestProvider, array $dataHandlerMappings = array())
 	{
 		$this->requestProvider = $requestProvider;
+		$this->dataHandlerMappings = $dataHandlerMappings;
 	}
 
 	/**
 	 * Show a new data grid instance.
 	 *
-	 * @param  mixed  $query
+	 * @param  mixed  $dataHandler
 	 * @param  array  $columns
 	 * @return Cartalyst\DataGrid\DataGrid
 	 */
-	public function make($query, array $columns)
+	public function make($dataHandler, array $columns)
 	{
-		return $this->createDataGrid($query, $columns)->setupDataGridContext();
+		return $this->createDataGrid($dataHandler, $columns)->setupDataGridContext();
 	}
 
 	/**
 	 * Creates a new instance of the data grid.
 	 *
-	 * @param  mixed  $query
+	 * @param  mixed  $dataHandler
 	 * @param  array  $columns
 	 * @return Cartalyst\DataGrid\DataGrid
 	 */
-	public function createDataGrid($query, array $columns)
+	public function createDataGrid($dataHandler, array $columns)
 	{
-		return new DataGrid($this, $query, $columns);
+		return new DataGrid($this, $dataHandler, $columns);
 	}
 
 	/**
@@ -83,6 +97,28 @@ class Environment {
 	public function setRequestProvider(RequestProviderInterface $requestProvider)
 	{
 		$this->requestProvider = $requestProvider;
+	}
+
+	/**
+	 * Returns the data handler mappings.
+	 *
+	 * @return array
+	 */
+	public function getDataHandlerMappings()
+	{
+		return $this->dataHandlerMappings;
+	}
+
+	/**
+	 * Adds a data handler mapping.
+	 *
+	 * @param  string   $class
+	 * @param  Closure  $test
+	 * @return void
+	 */
+	public function addDataHandlerMapping($class, Closure $test)
+	{
+		$this->dataHandlerMappings[$class] = $test;
 	}
 
 }
