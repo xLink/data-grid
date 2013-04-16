@@ -19,6 +19,8 @@
  */
 
 use Cartalyst\DataGrid\RequestProviders\ProviderInterface as RequestProviderInterface;
+use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class Environment {
 
@@ -28,6 +30,28 @@ class Environment {
 	 * @var Symfony\Component\HttpFoundation\Request
 	 */
 	protected $requestProvider;
+
+	/**
+	 * Array of data source mappings for data types,
+	 * where the key is the applicable class and the
+	 * value is a closure which determines if the class
+	 * is applicable for the data type.
+	 *
+	 * @var array
+	 */
+	protected $dataHandlerMappings = array(
+
+		'Cartalyst\DataGrid\DataHandlers\EloquentDataHandler' => function($data)
+		{
+			return ($data instanceof QueryBuilder or $data instanceof EloquentQueryBuilder);
+		},
+
+		'Cartalyst\DataGrid\DataHandlers\ArrayDataHandler' => function($data)
+		{
+			return is_array($data);
+		},
+
+	);
 
 	/**
 	 * Create a new pagination environment.
@@ -43,25 +67,25 @@ class Environment {
 	/**
 	 * Show a new data grid instance.
 	 *
-	 * @param  mixed  $dataSource
+	 * @param  mixed  $dataHandler
 	 * @param  array  $columns
 	 * @return Cartalyst\DataGrid\DataGrid
 	 */
-	public function make($dataSource, array $columns)
+	public function make($dataHandler, array $columns)
 	{
-		return $this->createDataGrid($dataSource, $columns)->setupDataGridContext();
+		return $this->createDataGrid($dataHandler, $columns)->setupDataGridContext();
 	}
 
 	/**
 	 * Creates a new instance of the data grid.
 	 *
-	 * @param  mixed  $dataSource
+	 * @param  mixed  $dataHandler
 	 * @param  array  $columns
 	 * @return Cartalyst\DataGrid\DataGrid
 	 */
-	public function createDataGrid($dataSource, array $columns)
+	public function createDataGrid($dataHandler, array $columns)
 	{
-		return new DataGrid($this, $dataSource, $columns);
+		return new DataGrid($this, $dataHandler, $columns);
 	}
 
 	/**
@@ -83,6 +107,11 @@ class Environment {
 	public function setRequestProvider(RequestProviderInterface $requestProvider)
 	{
 		$this->requestProvider = $requestProvider;
+	}
+
+	public function getDataHandlerMappings()
+	{
+		return $this->dataHandlerMappings;
 	}
 
 }
