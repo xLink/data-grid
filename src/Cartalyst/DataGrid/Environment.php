@@ -19,6 +19,7 @@
  */
 
 use Cartalyst\DataGrid\RequestProviders\ProviderInterface as RequestProviderInterface;
+use Closure;
 use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
@@ -98,9 +99,26 @@ class Environment {
 		$this->requestProvider = $requestProvider;
 	}
 
+	/**
+	 * Returns the data handler mappings.
+	 *
+	 * @return array
+	 */
 	public function getDataHandlerMappings()
 	{
 		return $this->dataHandlerMappings;
+	}
+
+	/**
+	 * Adds a data handler mapping.
+	 *
+	 * @param  string   $class
+	 * @param  Closure  $test
+	 * @return void
+	 */
+	public function addDataHandlerMapping($class, Closure $test)
+	{
+		$this->dataHandlerMappings[$class] = $test;
 	}
 
 }

@@ -18,6 +18,7 @@
  * @link       http://cartalyst.com
  */
 
+use Cartalyst\DataGrid\DataHandlers\DataHandlerInterface;
 use Illuminate\Support\Contracts\ArrayableInterface;
 use Illuminate\Support\Contracts\JsonableInterface;
 
@@ -84,24 +85,36 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	 */
 	public function setupDataGridContext()
 	{
-		$this->dataHandler = $this->createDataHandler($data);
+		$this->dataHandler = $this->createDataHandler();
 
 		return $this;
 	}
 
-	public function createDataHandler($data)
+	/**
+	 * Creates a data handler instance from the given data type by
+	 * matching it to a mapping that's registered with the
+	 * environment instance.
+	 *
+	 * @return Cartalyst\Datagrid\DataHandlers\DataHandlerInterface
+	 */
+	public function createDataHandler()
 	{
 		foreach ($this->env->getDataHandlerMappings() as $class => $test)
 		{
-			if ($test($data) === true)
+			if ($test($this->data) === true)
 			{
 				return new $class($this);
 			}
 		}
 
-		throw new \RuntimeException('Could not determine an appropriate data source for data of type ['.gettype($data).'].');
+		throw new \RuntimeException('Could not determine an appropriate data source for data of type ['.gettype($this->data).'].');
 	}
 
+	/**
+	 * Return the environment use in the data grid.
+	 *
+	 * @return Cartalyst\DataGrid\Environment
+	 */
 	public function getEnvironment()
 	{
 		return $this->environment;
@@ -117,9 +130,35 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 		return $this->data;
 	}
 
+	/**
+	 * Returns the columns associated with the data grid.
+	 *
+	 * @return array
+	 */
 	public function getColumns()
 	{
 		return $this->columns;
+	}
+
+	/**
+	 * Returns the data handler.
+	 *
+	 * @return Cartalyst\DataGrid\DataHandlers\DataHandlerInterface
+	 */
+	public function getDataHandler()
+	{
+		return $this->getDataHandler();
+	}
+
+	/**
+	 * Sets the data handler.
+	 *
+	 * @param  Cartalyst\DataGrid\DataHandlers\DataHandlerInterface  $dataHandler
+	 * @return void
+	 */
+	public function setDataHandler(DataHandlerInterface $dataHandler)
+	{
+		$this->dataHandler = $dataHandler;
 	}
 
 	/**

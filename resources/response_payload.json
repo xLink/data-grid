@@ -19,16 +19,11 @@
 			"activated": 0,
 		}
 	],
-	"count": {
-		"total": 100,
-		"filtered": 30
-	},
-	"paging": {
-		"page": 1,
-		"division": 10,
-	},
-	"sort": {
-		"column": "last_name",
-		"direction": "asc"
-	}
+	"total_count": 100,
+	"filtered_count": 30,
+
+	"page": 1,
+	"pages_count": 3,
+	"next_page": 2,
+	"previous_page": null
 }

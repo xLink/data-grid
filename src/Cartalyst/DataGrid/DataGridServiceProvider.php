@@ -54,10 +54,10 @@ class DataGridServiceProvider extends ServiceProvider {
 					return ($data instanceof QueryBuilder or $data instanceof EloquentQueryBuilder);
 				},
 
-				'Cartalyst\DataGrid\DataHandlers\ArrayDataHandler' => function($data)
-				{
-					return is_array($data);
-				},
+				// 'Cartalyst\DataGrid\DataHandlers\ArrayDataHandler' => function($data)
+				// {
+				// 	return is_array($data);
+				// },
 
 			);
 
