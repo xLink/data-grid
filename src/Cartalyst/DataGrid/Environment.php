@@ -43,25 +43,25 @@ class Environment {
 	/**
 	 * Show a new data grid instance.
 	 *
-	 * @param  mixed  $query
+	 * @param  mixed  $dataSource
 	 * @param  array  $columns
 	 * @return Cartalyst\DataGrid\DataGrid
 	 */
-	public function make($query, array $columns)
+	public function make($dataSource, array $columns)
 	{
-		return $this->createDataGrid($query, $columns)->setupDataGridContext();
+		return $this->createDataGrid($dataSource, $columns)->setupDataGridContext();
 	}
 
 	/**
 	 * Creates a new instance of the data grid.
 	 *
-	 * @param  mixed  $query
+	 * @param  mixed  $dataSource
 	 * @param  array  $columns
 	 * @return Cartalyst\DataGrid\DataGrid
 	 */
-	public function createDataGrid($query, array $columns)
+	public function createDataGrid($dataSource, array $columns)
 	{
-		return new DataGrid($this, $query, $columns);
+		return new DataGrid($this, $dataSource, $columns);
 	}
 
 	/**

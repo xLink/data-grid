@@ -21,12 +21,50 @@
 interface ProviderInterface {
 
 	/**
-	 * Get input from the request provider
+	 * Get an array of filters. Filters which
+	 * have a string for the key are treated as
+	 * filters for an attribute whereas others
+	 * are treated as global filters.
 	 *
-	 * @param  string  $key
-	 * @param  mixed   $default
+	 * @return array
+	 */
+	public function getFilters();
+
+	/**
+	 * Get the column by which we sort our
+	 * datatable.
+	 *
 	 * @return string
 	 */
-	public function input($key, $default = null);
+	public function getSort();
+
+	/**
+	 * Get the direction which we apply
+	 * sort.
+	 *
+	 * @return string
+	 */
+	public function getDirection();
+
+	/**
+	 * Get the page which we are on.
+	 *
+	 * @return int
+	 */
+	public function getPage();
+
+	/**
+	 * Get the number of requested pages.
+	 *
+	 * @return int
+	 */
+	public function getRequestedPages();
+
+	/**
+	 * Get the minimum results per page.
+	 *
+	 * @return int
+	 */
+	public function getMinimumPerPage();
 
 }
