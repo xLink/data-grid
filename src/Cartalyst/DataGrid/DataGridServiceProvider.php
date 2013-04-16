@@ -19,6 +19,8 @@
  */
 
 use Cartalyst\DataGrid\RequestProviders\IlluminateProvider;
+use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\ServiceProvider;
 
 class DataGridServiceProvider extends ServiceProvider {

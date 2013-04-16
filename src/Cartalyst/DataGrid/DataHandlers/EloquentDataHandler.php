@@ -21,6 +21,7 @@
 use Cartalyst\DataGrid\DataGrid;
 use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Contracts\ArrayableInterface;
 
 class EloquentDataHandler implements DataHandlerInterface {
 
@@ -356,11 +357,15 @@ class EloquentDataHandler implements DataHandlerInterface {
 	 */
 	public function prepareSort()
 	{
-		$column = $this->request->getSort() ?: reset($this->dataGrid->getColumns());
+		if ( ! $column = $this->request->getSort())
+		{
+			$columns = $this->dataGrid->getColumns();
+			$column = reset($columns);
+		}
 
 		// If our column is an alias, we'll use the actual value instead of the
 		// alias for sorting.
-		if (($key = array_search($column, $this->dataGrid->getColumns())) !== false)
+		if ( ! is_numeric($key = array_search($column, $this->dataGrid->getColumns())))
 		{
 			$column = $key;
 		}

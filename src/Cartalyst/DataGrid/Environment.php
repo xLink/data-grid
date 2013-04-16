@@ -51,7 +51,7 @@ class Environment {
 	public function __construct(RequestProviderInterface $requestProvider, array $dataHandlerMappings = array())
 	{
 		$this->requestProvider = $requestProvider;
-		$this->datahandlerMappings = $dataHandlerMappings;
+		$this->dataHandlerMappings = $dataHandlerMappings;
 	}
 
 	/**

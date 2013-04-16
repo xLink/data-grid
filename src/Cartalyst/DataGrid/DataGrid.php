@@ -86,6 +86,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	public function setupDataGridContext()
 	{
 		$this->dataHandler = $this->createDataHandler();
+		$this->dataHandler->setupDataHandlerContext();
 
 		return $this;
 	}
@@ -117,7 +118,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	 */
 	public function getEnvironment()
 	{
-		return $this->environment;
+		return $this->env;
 	}
 
 	/**
