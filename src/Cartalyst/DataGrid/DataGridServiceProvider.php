@@ -47,7 +47,21 @@ class DataGridServiceProvider extends ServiceProvider {
 	{
 		$this->app['datagrid'] = $this->app->share(function($app)
 		{
-			return new Environment($app['datagrid.request']);
+			$dataHandlerMappings = array(
+
+				'Cartalyst\DataGrid\DataHandlers\EloquentDataHandler' => function($data)
+				{
+					return ($data instanceof QueryBuilder or $data instanceof EloquentQueryBuilder);
+				},
+
+				'Cartalyst\DataGrid\DataHandlers\ArrayDataHandler' => function($data)
+				{
+					return is_array($data);
+				},
+
+			);
+
+			return new Environment($app['datagrid.request'], $dataHandlerMappings);
 		});
 	}
 

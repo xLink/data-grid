@@ -39,19 +39,7 @@ class Environment {
 	 *
 	 * @var array
 	 */
-	protected $dataHandlerMappings = array(
-
-		'Cartalyst\DataGrid\DataHandlers\EloquentDataHandler' => function($data)
-		{
-			return ($data instanceof QueryBuilder or $data instanceof EloquentQueryBuilder);
-		},
-
-		'Cartalyst\DataGrid\DataHandlers\ArrayDataHandler' => function($data)
-		{
-			return is_array($data);
-		},
-
-	);
+	protected $dataHandlerMappings = array();
 
 	/**
 	 * Create a new pagination environment.
@@ -59,9 +47,10 @@ class Environment {
 	 * @param  Cartalyst\DataGrid\RequestProviders\ProviderInterface  $requestProvider
 	 * @return void
 	 */
-	public function __construct(RequestProviderInterface $requestProvider)
+	public function __construct(RequestProviderInterface $requestProvider, array $dataHandlerMappings = array())
 	{
 		$this->requestProvider = $requestProvider;
+		$this->datahandlerMappings = $dataHandlerMappings;
 	}
 
 	/**

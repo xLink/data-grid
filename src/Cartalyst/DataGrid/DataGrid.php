@@ -58,41 +58,6 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	protected $columns = array();
 
 	/**
-	 * The response to be served when the data grid
-	 * is cast to an array or string. This is manipulated
-	 * through methods defined in this class.
-	 *
-	 * @var array
-	 */
-	protected $response = array(
-
-		// An array of results to be returned.
-		'results' => array(),
-
-		// The counts provided
-		'counts' => array(
-			'total'    => 0,
-			'filtered' => 0,
-		),
-
-		// Pagination
-		'pagination' => array(
-			'page'             => 1,
-			'requested_pages'  => 10,
-			'minimum_per_page' => 10,
-			'total_pages'      => 1,
-			'previous_page'    => false,
-			'next_page'        => false,
-		),
-
-		// Sorting
-		'sort' => array(
-			'column'    => null,
-			'direction' => 'asc',
-		),
-	);
-
-	/**
 	 * Creates a new data grid object.
 	 *
 	 * @param  Cartalyst\DataGrid\Environment  $env
@@ -152,6 +117,11 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 		return $this->data;
 	}
 
+	public function getColumns()
+	{
+		return $this->columns;
+	}
+
 	/**
 	 * Get the instance as an array.
 	 *
@@ -159,7 +129,17 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	 */
 	public function toArray()
 	{
+		$handler = $this->dataHandler;
 
+		return array(
+			'total_count'    => $handler->getTotalCount(),
+			'filtered_count' => $handler->getFilteredCount(),
+			'page'           => $handler->getPage(),
+			'pages_count'    => $handler->getPagesCount(),
+			'previous_page'  => $handler->getPreviousPage(),
+			'next_page'      => $handler->getNextPage(),
+			'results'        => $handler->getResults(),
+		);
 	}
 
 	/**

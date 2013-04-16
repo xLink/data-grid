@@ -38,13 +38,61 @@ class EloquentDataHandler implements DataHandlerInterface {
 	 */
 	protected $data;
 
+	/**
+	 * The request provider.
+	 *
+	 * @var Cartalyst\DataGrid\RequestProviders\ProviderInterface
+	 */
+	protected $request;
+
+	/**
+	 * Cached total (unfiltered) count of results.
+	 *
+	 * @var int
+	 */
 	protected $totalCount = 0;
 
-	protected $filteredCount;
+	/**
+	 * Cached filtered count of results.
+	 *
+	 * @var int
+	 */
+	protected $filteredCount = 0;
+
+	/**
+	 * Cached current page.
+	 *
+	 * @var int
+	 */
 	protected $page = 1;
+
+	/**
+	 * Cached number of pages.
+	 *
+	 * @var int
+	 */
 	protected $pagesCount = 1;
+
+	/**
+	 * Cached previous page.
+	 *
+	 * @var int|null
+	 */
 	protected $previousPage;
+
+	/**
+	 * Cached next page.
+	 *
+	 * @var int|null
+	 */
 	protected $nextPage;
+
+	/**
+	 * Cached results.
+	 *
+	 * @var array
+	 */
+	protected $results = array();
 
 	/**
 	 * Create a new data source.
@@ -52,7 +100,7 @@ class EloquentDataHandler implements DataHandlerInterface {
 	 * @param  Cartalyst\DataGrid\DataGrid  $dataGrid
 	 * @return void
 	 */
-	public function __construct(DataGrid $dataGrid, $data)
+	public function __construct(DataGrid $dataGrid)
 	{
 		$data = $dataGrid->getData();
 
@@ -76,23 +124,23 @@ class EloquentDataHandler implements DataHandlerInterface {
 	public function setupDataHandlerContext()
 	{
 		// Before we apply any filters, we need to setup the total count.
-		$this->setupTotalCount();
+		$this->prepareTotalCount();
 
 		// We'll now setup what columns we will select
-		$this->setupSelect();
+		$this->prepareSelect();
 
 		// Apply all the filters requested
-		$this->setupFilters();
+		$this->prepareFilters();
 
 		// Setup the requested sorting
-		$this->setupSort();
+		$this->prepareSort();
 
 		// Setup filtered count
-		$this->setupFilteredCount();
+		$this->prepareFilteredCount();
 
 		// And we'll setup pagination, pagination
 		// is rather unique in the data grid.
-		$this->setupPagination();
+		$this->preparePagination();
 
 		// Hydrate our results
 		$this->hydrate();
@@ -171,7 +219,13 @@ class EloquentDataHandler implements DataHandlerInterface {
 		return $this->results;
 	}
 
-	public function setupTotalCount()
+	/**
+	 * Prepares the total count of results before
+	 * we apply filters.
+	 *
+	 * @return void
+	 */
+	public function prepareTotalCount()
 	{
 		$this->totalCount = (int) $this->data->count();
 	}
@@ -182,7 +236,7 @@ class EloquentDataHandler implements DataHandlerInterface {
 	 *
 	 * @return void
 	 */
-	public function setupSelect()
+	public function prepareSelect()
 	{
 		// Fallback array to select
 		$toSelect = array();
@@ -194,7 +248,7 @@ class EloquentDataHandler implements DataHandlerInterface {
 		// is no alias and we're dealing directly with
 		// the column name. Aliases are used quite often
 		// for joined tables.
-		foreach ($this->columns as $key => $value)
+		foreach ($this->dataGrid->getColumns() as $key => $value)
 		{
 			if (is_numeric($key))
 			{
@@ -215,9 +269,9 @@ class EloquentDataHandler implements DataHandlerInterface {
 	 *
 	 * @return void
 	 */
-	public function setupFilters()
+	public function prepareFilters()
 	{
-		foreach ((array) $this->getInput('filters', array()) as $filter)
+		foreach ($this->request->getFilters() as $filter)
 		{
 			// If the filter is an array where the key matches one of our
 			// columns, we're filtering that column.
@@ -226,7 +280,7 @@ class EloquentDataHandler implements DataHandlerInterface {
 				$filterValue  = reset($filter);
 				$filterColumn = key($filter);
 
-				if (($index = array_search($filterColumn, $this->columns)) !== false)
+				if (($index = array_search($filterColumn, $this->dataGrid->getColumns())) !== false)
 				{
 					if (is_numeric($index))
 					{
@@ -266,13 +320,13 @@ class EloquentDataHandler implements DataHandlerInterface {
 	 * filter is applied in a "or where" fashion, where
 	 * the value can be matched across any column.
 	 *
-	 * @param  Illuminate\Database\Eloquent\Builder  $nestedQuery
+	 * @param  Illuminate\Database\Query\Builder  $nestedQuery
 	 * @param  string  $filter
 	 * @return void
 	 */
 	public function globalFilter(QueryBuilder $nestedQuery, $filter)
 	{
-		foreach ($this->columns as $key => $value)
+		foreach ($this->dataGrid->getColumns() as $key => $value)
 		{
 			if (is_numeric($key))
 			{
@@ -290,7 +344,7 @@ class EloquentDataHandler implements DataHandlerInterface {
 	 *
 	 * @return void
 	 */
-	public function setupFilteredCount()
+	public function prepareFilteredCount()
 	{
 		$this->filteredCount = (int) $this->data->count();
 	}
@@ -300,9 +354,13 @@ class EloquentDataHandler implements DataHandlerInterface {
 	 *
 	 * @return void
 	 */
-	public function setupSort()
+	public function prepareSort()
 	{
-		if ( ! is_numeric($key = array_search($column = $this->getInput('sort', reset($this->columns)), $this->columns)))
+		$column = $this->request->getSort() ?: reset($this->dataGrid->getColumns());
+
+		// If our column is an alias, we'll use the actual value instead of the
+		// alias for sorting.
+		if (($key = array_search($column, $this->dataGrid->getColumns())) !== false)
 		{
 			$column = $key;
 		}
@@ -334,47 +392,40 @@ class EloquentDataHandler implements DataHandlerInterface {
 	 *
 	 * @return void
 	 */
-	public function setupPagination()
+	public function preparePagination()
 	{
 		// If our filtered results are zero, let's not set any pagination
-		if (($filteredResultsCount = $this->filteredCount) == 0)
+		if ($this->filteredCount == 0)
 		{
 			return;
 		}
 
-		$this->page = $page = (int) $this->getInput('page', 1);
+		$this->page = $this->request->getPage();
 
-		if ($page < 1)
-		{
-			throw new \InvalidArgumentException("Invalid page [$page] given. Page must be greater than or equal to [1].");
-		}
-
-		list($pagesCount, $perPage) = $this->calculatePagination(
-			$filteredResultsCount,
-			$requestedPages = (int) $this->getInput('requested_pages', 10),
-			$minimumPerPage = (int) $this->getInput('minimum_per_page', 10)
+		list($this->pagesCount, $perPage) = $this->calculatePagination(
+			$this->filteredCount,
+			$requestedPages = $this->request->getRequestedPages(),
+			$minimumPerPage = $this->request->getMinimumPerPage()
 		);
 
-		$this->pagesCount = $pagesCount;
-
 		// Now we will generate the previous and next page links
-		if (($this->page = $page) > 1)
+		if (($this->page = $this->page) > 1)
 		{
-			if (($page * $perPage) <= $this->filteredCount)
+			if (($this->page * $perPage) <= $this->filteredCount)
 			{
-				$this->previousPage = $page - 1;
+				$this->previousPage = $this->page - 1;
 			}
 			else
 			{
-				$this->previousPage = $pagesCount;
+				$this->previousPage = $this->pagesCount;
 			}
 		}
-		if (($page * $perPage) < $this->filteredCount)
+		if (($this->page * $perPage) < $this->filteredCount)
 		{
-			$this->nextPage = $page + 1;
+			$this->nextPage = $this->page + 1;
 		}
 
-		$this->data->forPage($page, $perPage);
+		$this->data->forPage($this->page, $perPage);
 	}
 
 	/**
@@ -432,7 +483,7 @@ class EloquentDataHandler implements DataHandlerInterface {
 		}
 
 		// Now we return our results in an array form
-		$this->response['results'] = array_map(function($result)
+		$this->results = array_map(function($result)
 		{
 			// The same goes for any result returned,
 			// we'll see if we can call toArray() on it
@@ -446,6 +497,11 @@ class EloquentDataHandler implements DataHandlerInterface {
 			return (array) $result;
 
 		}, (array) $results);
+	}
+
+	public function setFilteredCount($filteredCount)
+	{
+		$this->filteredCount = $filteredCount;
 	}
 
 }
