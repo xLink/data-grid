@@ -104,7 +104,12 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 		{
 			if ($test($this->data) === true)
 			{
-				return new $class($this);
+				// By calling the setter method we can be sure
+				// the resolved class implements the correct
+				// interface.
+				$instance = new $class($this);
+				$this->setDataHandler($instance);
+				return $instance;
 			}
 		}
 

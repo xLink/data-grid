@@ -19,8 +19,6 @@
  */
 
 use Cartalyst\DataGrid\RequestProviders\IlluminateProvider;
-use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\ServiceProvider;
 
 class DataGridServiceProvider extends ServiceProvider {
@@ -32,6 +30,8 @@ class DataGridServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
+		$this->package('cartalyst/data-grid', 'cartalyst/data-grid');
+
 		$this->registerIlluminateRequestProvider();
 
 		$this->registerDataGrid();
@@ -49,19 +49,7 @@ class DataGridServiceProvider extends ServiceProvider {
 	{
 		$this->app['datagrid'] = $this->app->share(function($app)
 		{
-			$dataHandlerMappings = array(
-
-				'Cartalyst\DataGrid\DataHandlers\EloquentDataHandler' => function($data)
-				{
-					return ($data instanceof QueryBuilder or $data instanceof EloquentQueryBuilder);
-				},
-
-				// 'Cartalyst\DataGrid\DataHandlers\ArrayDataHandler' => function($data)
-				// {
-				// 	return is_array($data);
-				// },
-
-			);
+			$dataHandlerMappings = $app['config']['cartalyst/data-grid::handlers'];
 
 			return new Environment($app['datagrid.request'], $dataHandlerMappings);
 		});
