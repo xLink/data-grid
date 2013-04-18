@@ -114,4 +114,16 @@ class IlluminateProvider implements ProviderInterface {
 		return ($minimumPerPage > 0) ? $minimumPerPage : 10;
 	}
 
+	/**
+	 * Retrieve an input item from the request.
+	 *
+	 * @param  string  $key
+	 * @param  mixed   $default
+	 * @return string
+	 */
+	public function input($key = null, $default = null)
+	{
+		return $this->request->input($key, $default);
+	}
+
 }
