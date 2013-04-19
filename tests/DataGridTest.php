@@ -19,6 +19,7 @@
  */
 
 use Mockery as m;
+use Cartalyst\DataGrid\DataHandlers\DataHandlerInterface;
 use Cartalyst\DataGrid\DataGrid;
 
 class DataGridTest extends PHPUnit_Framework_TestCase {
@@ -100,8 +101,71 @@ class DataGridTest extends PHPUnit_Framework_TestCase {
 
 }
 
-class DataHandlerStub {
+class DataHandlerStub implements DataHandlerInterface {
 
+	/**
+	 * Create a new data source.
+	 *
+	 * @param  Cartalyst\DataGrid\DataGrid  $dataGrid
+	 * @return void
+	 */
 	public function __construct(DataGrid $dataGrid) {}
+
+	/**
+	 * Sets up the data source context.
+	 *
+	 * @return Cartalyst\DataGrid\DataHandler\DataHandlerInterface
+	 */
+	public function setupDataHandlerContext() {}
+
+	/**
+	 * Get the total (unfiltered) count
+	 * of results.
+	 *
+	 * @return int
+	 */
+	public function getTotalCount() {}
+
+	/**
+	 * Get the filtered count of results.
+	 *
+	 * @return int
+	 */
+	public function getFilteredCount() {}
+
+	/**
+	 * Get the current page we are on.
+	 *
+	 * @return int
+	 */
+	public function getPage() {}
+
+	/**
+	 * Get the number of pages.
+	 *
+	 * @return int
+	 */
+	public function getPagesCount() {}
+
+	/**
+	 * Get the previous page.
+	 *
+	 * @return int|null
+	 */
+	public function getPreviousPage() {}
+
+	/**
+	 * Get the next page.
+	 *
+	 * @return int|null
+	 */
+	public function getNextPage() {}
+
+	/**
+	 * Get the results.
+	 *
+	 * @return int
+	 */
+	public function getResults() {}
 
 }
