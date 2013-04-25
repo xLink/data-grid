@@ -31,7 +31,7 @@ class DataGridTest extends PHPUnit_Framework_TestCase {
 	 *
 	 * @return void
 	 */
-	public function setUp()
+	public static function setUpBeforeClass()
 	{
 		require_once __DIR__.'/stubs/DataHandlerStub.php';
 	}
