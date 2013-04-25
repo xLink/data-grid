@@ -1,4 +1,4 @@
-<?php
+<?php namespace Cartalyst\DataGrid\Tests;
 /**
  * Part of the Data Grid package.
  *
@@ -20,6 +20,8 @@
 
 use Mockery as m;
 use Cartalyst\DataGrid\DataHandlers\EloquentDataHandler as Handler;
+use PHPUnit_Framework_TestCase;
+use stdClass;
 
 class EloquentDataHandlerTest extends PHPUnit_Framework_TestCase {
 
@@ -263,8 +265,8 @@ class EloquentDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$handler = new Handler($dataGrid = $this->getMockDataGrid());
 
 		$results = array(
-			$result1 = new StdClass,
-			$result2 = new StdClass,
+			$result1 = new stdClass,
+			$result2 = new stdClass,
 		);
 
 		$result1->foo   = 'bar';
