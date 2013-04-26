@@ -214,6 +214,10 @@
 				self._fetch();
 			});
 
+			this.$body.on('click', '[data-reset]'+this.key, function(e){
+				self._reset();
+			});
+
 			//Pagination
 			this.$pagi.on('click', '[data-page]', function(e){
 				var pageId;
@@ -353,7 +357,7 @@
 					if( (self._buildPagination(response.pages_count).length === 1 && self.opt.pagination.type === 'pages') || self.pagination > response.pages_count){
 						self.templates.pagination.clear();
 					}else{
-						self.templates.pagination.render(self._buildPagination(response.pages_count));
+						self.templates.pagination.render(self._buildPagination(response.pages_count, response.total_count));
 					}
 				})
 				.error(function(jqXHR, textStatus, errorThrown) {
@@ -402,7 +406,7 @@
 
 		},
 
-		_buildPagination: function(total){
+		_buildPagination: function(pages_count, total_count){
 
 			var self = this,
 				pagiNav = [],
@@ -410,10 +414,12 @@
 
 			if(this.opt.pagination.type === 'pages' ){
 
-				for(var i = 1; i <= total; i++){
+				for(var i = 1; i <= pages_count; i++){
 
 					pagiData = {
 						page: i,
+						pageStart: i === 1 ? 1 : (self.opt.pagination.throttle * (i - 1)) + 1,
+						pageLimit: i === 1 ? self.opt.pagination.throttle : self.opt.pagination.throttle * i,
 						active: self.pagination === i ? true : false
 					};
 
@@ -475,6 +481,18 @@
 
 			});
 
+			this.templates.results.clear();
+			this._fetch();
+		},
+
+		_reset: function(){
+			this.appliedFilters = [];
+			this.pagination = 1;
+			this.sort = {
+				column: this.opt.sort.column,
+				direction: this.opt.sort.direction
+			};
+			this.templates.appliedFilters.clear();
 			this.templates.results.clear();
 			this._fetch();
 		},
