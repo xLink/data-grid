@@ -22,12 +22,11 @@
 
 	var defaults = {
 		source: undefined,
-		sort: {
-			column: undefined,
-			direction: 'asc'
-		},
-		pagination: {
-
+        sort: {
+            column: undefined,
+            direction: 'asc'
+        },
+        pagination: {
 			// This is the number of pages that we'd ideally like to get back,
 			// pending the data satisfies the threshold & throttle.
 			dividend: 10,
@@ -40,16 +39,15 @@
 
 			// This is the maximum number of results on a page. Any more
 			// than this will add new pages.
-			throttle: 25,
-
-			type: 'scroll'
-		},
-		tempoOptions: {
-			var_braces: '\\[\\[\\]\\]',
-			tag_braces: '\\[\\?\\?\\]'
-		},
-		loader: undefined,
-		callback: undefined
+			throttle: 100,
+            type: 'pages'
+        },
+        tempoOptions: {
+            var_braces: '\\[\\[\\]\\]',
+            tag_braces: '\\[\\?\\?\\]'
+        },
+        loader: undefined,
+        callback: undefined
 	};
 
 
@@ -69,9 +67,12 @@
 		//Get Our Source
 		this.source = this.$results.data('source') || this.opt.source;
 
+		//Helpers
 		this.appliedFilters = [];
 		this.templates = {};
 		this.killScroll = false;
+		this.pagination = 1;
+		this.isActive = false;
 		this.sort = {
 			column: this.opt.sort.column,
 			direction: this.opt.sort.direction
@@ -93,13 +94,13 @@
 			this._checkDeps();
 
 			//Find Our Templates
-			this._prepTemplates();
+            this._prepTemplates();
 
-			//Event Listners
-			this._events();
+            //Event Listners
+            this._events();
 
-			//Go Go Gadget
-			this._fetch();
+            //Go Go Gadget
+            this._fetch();
 
 
 		},
@@ -151,18 +152,59 @@
 			});
 
 			//Search
-			this.$body.on('submit', '[data-search]'+this.key, function(e){
-				e.preventDefault();
-				var values = $(this).serializeArray();
+			var timeout;
+			this.$body.find('[data-search]'+this.key).on('submit keyup', function(e){
 
-				if(values[0].value === 'all'){
-					self._setFilters(values[1].value);
-				}else{
-					self._setFilters(values[1].value+':'+values[0].value);
+				var $input = $(this).find('input'),
+					$column = $(this).find('select'),
+					values = $(this).serializeArray();
+
+				if(e.type === 'submit'){
+
+					self.isActive = true;
+
+					clearTimeout(timeout);
+
+					if(values[0].value === 'all'){
+						self._setFilters(values[1].value);
+					}else{
+						self._setFilters(values[1].value+':'+values[0].value);
+					}
+
+					self.templates.results.clear();
+					self._fetch();
+
+					$input.val('');
+					$column.prop('selectedIndex',0);
+
+					return false;
+
 				}
 
-				self.templates.results.clear();
-				self._fetch();
+				if(e.type === 'keyup'){
+
+					if(self.isActive){ return; }
+
+					clearTimeout(timeout);
+
+					timeout = setTimeout(function(){
+
+						if($column.val() === 'all'){
+							self._setFilters($input.val());
+						}else{
+							self._setFilters($input.val()+':'+$column.val());
+						}
+
+						self.templates.results.clear();
+						self._fetch();
+
+						$input.val('');
+						$column.prop('selectedIndex',0);
+
+					}, 800);
+
+				}
+
 			});
 
 			//Remove Filter
@@ -217,7 +259,6 @@
 				});
 
 			}
-
 
 		},
 
@@ -294,24 +335,30 @@
 
 			this._loader();
 
-			$.getJSON( this.source, this._buildFetchData(), function(response){
+				$.ajax({
+					url : this.source,
+					dataType: 'json',
+					data: this._buildFetchData()
+				})
+				.done(function(response){
+					self._loader();
 
-				self._loader();
-				self.killScroll = false;
-				self.totalPages = response.pages_count;
+					self.killScroll = false;
+					self.isActive = false;
 
-				self.templates.results.append(response.results);
+					self.totalPages = response.pages_count;
 
-				if( (self._buildPagination(response.pages_count).length === 1 && self.opt.pagination.type === 'pages') || self.pagination > response.pages_count){
-					self.templates.pagination.clear();
-				}else{
-					self.templates.pagination.render(self._buildPagination(response.pages_count));
-				}
+					self.templates.results.append(response.results);
 
-			})
-			.error(function(jqXHR, textStatus, errorThrown) {
-				console.log(jqXHR.status + ' ' + errorThrown);
-			});
+					if( (self._buildPagination(response.pages_count).length === 1 && self.opt.pagination.type === 'pages') || self.pagination > response.pages_count){
+						self.templates.pagination.clear();
+					}else{
+						self.templates.pagination.render(self._buildPagination(response.pages_count));
+					}
+				})
+				.error(function(jqXHR, textStatus, errorThrown) {
+					console.log(jqXHR.status + ' ' + errorThrown);
+				});
 
 			this._callback();
 
@@ -351,7 +398,7 @@
 				params.direction = this.sort.direction;
 			}
 
-			return params;
+			return $.param(params);
 
 		},
 
@@ -434,9 +481,9 @@
 
 		_callback: function(){
 
-			if(this.opt.callback !== undefined && $.isFunction(this.opt.callback)){
-				this.opt.callback(this.appliedFilters, this.sort, this.pagination);
-			}
+            if(this.opt.callback !== undefined && $.isFunction(this.opt.callback)){
+                this.opt.callback(this.appliedFilters, this.sort, this.pagination);
+            }
 
 		}
 
