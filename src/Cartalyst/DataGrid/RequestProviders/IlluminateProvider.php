@@ -91,27 +91,39 @@ class IlluminateProvider implements ProviderInterface {
 	}
 
 	/**
-	 * Get the number of requested pages.
+	 * Get the dividend (ideal number of pages).
 	 *
 	 * @return int
 	 */
-	public function getRequestedPages()
+	public function getDividend()
 	{
-		$requestedPages = (int) $this->request->input('requested_pages', 10);
+		$dividend = (int) $this->request->input('dividend', 10);
 
-		return ($requestedPages > 0) ? $requestedPages : 10;
+		return ($dividend > 0) ? $dividend : 10;
 	}
 
 	/**
-	 * Get the minimum results per page.
+	 * Get the threshold (minimum results per page).
 	 *
 	 * @return int
 	 */
-	public function getMinimumPerPage()
+	public function getThreshold()
 	{
-		$minimumPerPage = (int) $this->request->input('minimum_per_page', 10);
+		$threshold = (int) $this->request->input('threshold', 10);
 
-		return ($minimumPerPage > 0) ? $minimumPerPage : 10;
+		return ($threshold > 0) ? $threshold : 10;
+	}
+
+	/**
+	 * Get the throttle (maximum results per page).
+	 *
+	 * @return int
+	 */
+	public function getThrottle()
+	{
+		$threshold = (int) $this->request->input('throttle', 200);
+
+		return ($threshold > 0) ? $threshold : 200;
 	}
 
 	/**

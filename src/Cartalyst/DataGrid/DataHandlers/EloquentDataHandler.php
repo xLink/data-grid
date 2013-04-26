@@ -407,14 +407,10 @@ class EloquentDataHandler implements DataHandlerInterface {
 
 		$this->page = $this->request->getPage();
 
-		list($this->pagesCount, $perPage) = $this->calculatePagination(
-			$this->filteredCount,
-			$requestedPages = $this->request->getRequestedPages(),
-			$minimumPerPage = $this->request->getMinimumPerPage()
-		);
+		list($this->pagesCount, $perPage) = $this->dataGrid->calculatePagination($this->filteredCount);
 
 		// Now we will generate the previous and next page links
-		if (($this->page = $this->page) > 1)
+		if ($this->page > 1)
 		{
 			if (($this->page * $perPage) <= $this->filteredCount)
 			{
@@ -431,44 +427,6 @@ class EloquentDataHandler implements DataHandlerInterface {
 		}
 
 		$this->data->forPage($this->page, $perPage);
-	}
-
-	/**
-	 * Calulate how many results should be returned
-	 * per page, based off the requested number of
-	 * pages in the pagination vs the minimum results
-	 * per page as well as how many pages are to be used.
-	 *
-	 * If the requested number of pages leaves more items
-	 * per page than the minimum per page, we will return
-	 * the items from the requested page. For example, if
-	 * there are 200 items, with 10 requested pages, we'll
-	 * return 20 items per page.
-	 *
-	 * Otherwise, we'll fall back to the minimum results
-	 * per page.
-	 *
-	 * We will return an array, the number of pages as well
-	 * as the number per page.
-	 *
-	 * @param  int  $resultsCount
-	 * @param  int  $requestedPages
-	 * @param  int  $minimumPerPage
-	 * @return array
-	 */
-	public function calculatePagination($resultsCount, $requestedPages = 10, $minimumPerPage = 10)
-	{
-		if ($requestedPages == 0)
-		{
-			throw new \InvalidArgumentException("Cannot divide by zero (requested pages was zero).");
-		}
-
-		if (($actualPerPage = ceil($resultsCount / $requestedPages)) < $minimumPerPage)
-		{
-			$actualPerPage = $minimumPerPage;
-		}
-
-		return array((int) ceil($resultsCount / $actualPerPage), (int) $actualPerPage);
 	}
 
 	/**

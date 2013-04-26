@@ -54,17 +54,24 @@ interface ProviderInterface {
 	public function getPage();
 
 	/**
-	 * Get the number of requested pages.
+	 * Get the dividend (ideal number of pages).
 	 *
 	 * @return int
 	 */
-	public function getRequestedPages();
+	public function getDividend();
 
 	/**
-	 * Get the minimum results per page.
+	 * Get the threshold (minimum results per page).
 	 *
 	 * @return int
 	 */
-	public function getMinimumPerPage();
+	public function getThreshold();
+
+	/**
+	 * Get the throttle (maximum results per page).
+	 *
+	 * @return int
+	 */
+	public function getThrottle();
 
 }

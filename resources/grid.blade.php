@@ -18,123 +18,111 @@
  * @link       http://cartalyst.com
  */
 ?>
-<div id="grid" data-source="http://example.com/grid/source" data-results=".grid-results" data-filters=".grid-filters" data-applied-filters=".grid-applied-filters" data-pagination=".grid-pagination">
+<script>
+jQuery(document).ready(function($){
+	var dg = $.datagrid('main', '#grid', '#pagination', '#applied', {
+		loader: '#loader',
+		callback: function(filters, sort, pagination){
+			console.log(filters);
+		}
+	});
 
-	<div class="grid-filters">
 
-		<div class="clearfix">
-			<div class="form-inline">
+	$("#foo").on('click', function(e){
 
-				<div class="pull-left">
-					<div class="input-append">
-						<input type="text" placeholder="Filter All">
-						<button class="btn add-global-filter">
-							Add
-						</button>
-					</div>
-					&nbsp;
-				</div>
+		dg._trigger({ sort:'name:asc', filter:'pizza'});
 
-				<div class="pull-left" data-template>
+	});
 
-					<!-- Build different HTML based on the type -->
-					[? if type == 'select' ?]
-						<select class="input-small" id="grid-filters-[[column]]" data-column="[[column]]">
-							<option>
-								-- [[label]] --
-							</option>
+});
+</script>
 
-							<!-- Need to work out how to embed each <option> inside the <optgroup> data-template... -->
-							<option data-template-for="mappings" value="[[value]]">
-								[[label]]
-							</option>
-						</select>
+<div id="loader">Loading Data...</div>
 
-						<button class="btn add-filter">
-							Add
-						</button>
-					[? else ?]
-						<div class="input-append">
-							<input type="text" class="input-small" id="grid-filters-[[column]]" data-column="[[column]]" placeholder="[[label]]">
+<hr>
 
-							<button class="btn add-filter">
-								Add
-							</button>
-						</div>
-						&nbsp;
-					[? endif ?]
+<a href="#" id="foo">Custom Trigger Filter by Pizza, order by name asc</a>
 
-				</div>
 
-			</div>
-		</div>
+<a href="#" data-filter="bar:name, burger" data-key="main">Bars By Name and Burger</a>
 
-	</div>
+<a href="#" data-filter="pizza" data-key="main">Filter By Pizza</a>
 
-	<br>
+<a href="#" data-sort="name" data-key="main">Sort By Name</a>
 
-	<ul class="nav nav-tabs grid-applied-filters">
-		<li data-template>
-			<a href="#" class="remove-filter">
-				[? if type == 'global' ?]
-					<strong>[[value]]</strong>
+
+<form method="post" action="" accept-charset="utf-8" data-search data-key="main">
+	<select name="column">
+		<option value="all">All</option>
+		<option value="first_name">First Name</option>
+		<option value="last_name">Last Name</option>
+	</select>
+	<input name="filter" type="text" placeholder="Filter All">
+	<button class="btn add-global-filter">
+		Add
+	</button>
+</form>
+
+<hr>
+
+
+<ul class="nav nav-tabs" id="applied" data-key="main">
+	<li data-template>
+		<a href="#">
+			[? if column == undefined ?]
+				[[ value ]]
+			[? else ?]
+				[[ value ]] in [[ column ]]
+			[? endif ?]
+		</a>
+	</li>
+</ul>
+
+<ul id="pagination" data-key="main">
+	<li data-template data-page="[[ page ]]">[[ page ]]</li>
+</ul>
+
+<table id="grid" data-source="{{ URL::toAdmin('users/grid') }}" data-key="main" class="table table-bordered table-striped">
+	<thead>
+		<tr>
+			<th class="sortable">@lang('platform/users::users/table.id')</th>
+			<th class="sortable">@lang('platform/users::users/table.first_name')</th>
+			<th class="sortable">@lang('platform/users::users/table.last_name')</th>
+			<th class="sortable">@lang('platform/users::users/table.email')</th>
+			<th class="sortable">@lang('platform/users::users/table.activated')</th>
+			<th class="sortable">@lang('platform/users::users/table.registered')</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr data-template>
+			<td>[[ id ]]</td>
+			<td>[? if first_name ?] [[ first_name ]] [? else ?] - [? endif ?]</td>
+			<td>[? if last_name ?] [[ last_name ]] [? else ?] - [? endif ?]</td>
+			<td><a href="mailto:[[email]]">[[email]]</a></td>
+			<td>
+				[? if activated == 1 ?]
+					@lang('general.yes')
 				[? else ?]
-					<small><em>([[column]])</em></small> <strong>[[value]]</strong>
+					@lang('general.no')
 				[? endif ?]
-				<span class="close" style="float: none;">&times;</span>
-			</a>
-		</li>
-	</ul>
+			</td>
+			<td>[[ created_at ]]</td>
+			<td>
+				<div class="btn-group">
+					<a href="{{ URL::toAdmin('users/edit/[[id]]') }}" class="btn btn-small">
+						@lang('button.edit')
+					</a>
 
-	<div class="tabbable tabs-right">
+					[? if id != {{ Sentry::getId() }} ?]
+						<a href="{{ URL::toAdmin('users/delete/[[id]]') }}" class="btn btn-small btn-danger">
+							@lang('button.delete')
+						</a>
+					[? endif ?]
+				</div>
+			</td>
+		</tr>
+	</tbody>
+</table>
 
-		<ul class="nav nav-tabs grid-pagination">
-			<li data-template class="[? if active ?] active [? endif ?]">
-				<a href="#" data-page="[[page]]" data-toggle="tab" class="goto-page">
-					Page #[[page]]
-				</a>
-			</li>
-		</ul>
-
-		<div class="tab-content">
-
-			<table class="table table-striped table-bordered grid-results">
-				<thead>
-					<tr>
-						<th data-column="id">ID</th>
-						<th data-column="first_name">First Name</th>
-						<th data-column="last_name">Last Name</th>
-						<th data-column="activated">Activated</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr data-template>
-						<td data-column="id">[[id]]</td>
-						<td data-column="first_name">[[first_name]]</td>
-						<td data-column="last_name">[[last_name]]</td>
-						<td data-type="select" data-column="activated" data-mappings="Yes:1|No:0">
-							[? if activated == 1 ?]
-								Yes
-							[? else ?]
-								No
-							[? endif ?]
-						</td>
-						<td data-static>
-							<a href="{{ URL::to(ADMIN_URI.'/users/edit') }}/[[id]]">
-								Edit
-								[? if first_name ?]
-									[[first_name]]
-								[? else ?]
-									Un-named #[[id]]
-								[? endif ?]
-							</a>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-
-		</div>
-	</div>
-
-</div>
+<hr>

@@ -117,6 +117,59 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	}
 
 	/**
+	 * Calculates the pagination for the data grid. We'll try
+	 * divide calculate the results per page by dividing the
+	 * results count by the requested dividend. If that
+	 * result is outside the threshold and the throttle,
+	 * we'll adjust it to sit inside the threshold and
+	 * throttle. It's rather intelligent.
+	 *
+	 * We return an array with two values, the first one
+	 * being the number of pages, the second one being
+	 * the number of results per page.
+	 *
+	 * @param  int  $resultsCount
+	 * @return array
+	 */
+	public function calculatePagination($resultsCount)
+	{
+		$dividend  = $this->env->getRequestProvider()->getDividend();
+		$threshold = $this->env->getRequestProvider()->getThreshold();
+		$throttle  = $this->env->getRequestProvider()->getThrottle();
+
+		if ($dividend < 1)
+		{
+			throw new \InvalidArgumentException("Invalid dividend of [$dividend], must be [1] or more.");
+		}
+
+		if ($threshold < 1)
+		{
+			throw new \InvalidArgumentException("Invalid threshold of [$threshold], must be [1] or more.");
+		}
+
+		if ($throttle < $threshold)
+		{
+			throw new \InvalidArgumentException("Invalid throttle of [$throttle], must be greater than the threshold, which is [$threshold].");
+		}
+
+		// Firstly, we'll calculate the "per page" property
+		// based off the dividend.
+		$perPage = (int) ceil($resultsCount / $dividend);
+
+		// Now, we'll ensure that "per page" is between the
+		// threshold and the dividend.
+		if ($perPage < $threshold) $perPage = $threshold;
+		if ($perPage > $throttle) $perPage = $throttle;
+
+		// To work out the number of pages, we'll just
+		// divide the results count by the number of
+		// results per page. Simple!
+		$pagesCount = ceil($resultsCount / $perPage);
+
+		return array($pagesCount, $perPage);
+	}
+
+	/**
 	 * Return the environment use in the data grid.
 	 *
 	 * @return Cartalyst\DataGrid\Environment
