@@ -91,6 +91,18 @@ class IlluminateProvider implements ProviderInterface {
 	}
 
 	/**
+	 * Get the threshold (number of results before pagination begins).
+	 *
+	 * @return int
+	 */
+	public function getThreshold()
+	{
+		$threshold = (int) $this->request->input('threshold', 100);
+
+		return ($threshold > 0) ? $threshold : 100;
+	}
+
+	/**
 	 * Get the dividend (ideal number of pages).
 	 *
 	 * @return int
@@ -103,27 +115,17 @@ class IlluminateProvider implements ProviderInterface {
 	}
 
 	/**
-	 * Get the threshold (minimum results per page).
-	 *
-	 * @return int
-	 */
-	public function getThreshold()
-	{
-		$threshold = (int) $this->request->input('threshold', 10);
-
-		return ($threshold > 0) ? $threshold : 10;
-	}
-
-	/**
-	 * Get the throttle (maximum results per page).
+	 * Get the dividend (ideal number of pages, once the results
+	 * count is greater than the threshold and each page has
+	 * less results than the throttle).
 	 *
 	 * @return int
 	 */
 	public function getThrottle()
 	{
-		$threshold = (int) $this->request->input('throttle', 200);
+		$threshold = (int) $this->request->input('throttle', 1000);
 
-		return ($threshold > 0) ? $threshold : 200;
+		return ($threshold > 0) ? $threshold : 1000;
 	}
 
 	/**

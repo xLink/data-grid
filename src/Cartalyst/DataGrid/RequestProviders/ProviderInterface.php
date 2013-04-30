@@ -54,18 +54,20 @@ interface ProviderInterface {
 	public function getPage();
 
 	/**
-	 * Get the dividend (ideal number of pages).
-	 *
-	 * @return int
-	 */
-	public function getDividend();
-
-	/**
-	 * Get the threshold (minimum results per page).
+	 * Get the threshold (number of results before pagination begins).
 	 *
 	 * @return int
 	 */
 	public function getThreshold();
+
+	/**
+	 * Get the dividend (ideal number of pages, once the results
+	 * count is greater than the threshold and each page has
+	 * less results than the throttle).
+	 *
+	 * @return int
+	 */
+	public function getDividend();
 
 	/**
 	 * Get the throttle (maximum results per page).
