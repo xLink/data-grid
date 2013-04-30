@@ -26,22 +26,10 @@
             column: undefined,
             direction: 'asc'
         },
-        pagination: {
-			// This is the number of pages that we'd ideally like to get back,
-			// pending the data satisfies the threshold & throttle.
-			dividend: 10,
-
-			// This is the minimum results that can be shown on a page. If
-			// there are less than this number on each page, the number
-			// of pages is decreased until there is at least this number
-			// on each page.
-			threshold: 10,
-
-			// This is the maximum number of results on a page. Any more
-			// than this will add new pages.
-			throttle: 100,
-            type: 'pages'
-        },
+		dividend: 10,
+		threshold: 20,
+		throttle: 500,
+		type: 'infiniteload',
         tempoOptions: {
             var_braces: '\\[\\[\\]\\]',
             tag_braces: '\\[\\?\\?\\]'
@@ -73,6 +61,7 @@
 		this.killScroll = false;
 		this.pagination = 1;
 		this.isActive = false;
+		this.orgThrottle = this.opt.throttle;
 		this.sort = {
 			column: this.opt.sort.column,
 			direction: this.opt.sort.direction
@@ -222,7 +211,9 @@
 			this.$pagi.on('click', '[data-page]', function(e){
 				var pageId;
 
-				if(self.opt.pagination.type === 'pages'){
+				e.preventDefault();
+
+				if(self.opt.type === 'pages'){
 
 					pageId = $(this).data('page');
 
@@ -231,38 +222,26 @@
 
 				}
 
+				if(self.opt.type === 'infiniteload'){
+
+					pageId = $(this).data('page');
+					$(this).data('page', ++pageId);
+				}
+
 				self._goToPage(pageId);
 				self._fetch();
 
 			});
 
-			if( self.opt.pagination.type === 'scroll'){
+			//Update Throttle
+			this.$pagi.on('click', '[data-throttle]', function(e){
 
-				$(window).scroll(function(){
+				self.opt.throttle += self.orgThrottle;
+				self.templates.pagination.clear();
+				self.templates.results.clear();
+				self._fetch();
 
-					if( $(window).scrollTop()+200 >= ($(document).height() - $(window).height()) ){
-
-						if(self.killScroll === false){
-
-							self.killScroll = true;
-
-							var pagi = self.$pagi.find('[data-page]');
-							var pageId = pagi.data('page');
-
-							pagi.data('page', ++pageId);
-
-							if(pageId < self.totalPages){
-								self._goToPage(pageId);
-								self._fetch();
-							}
-
-						}
-
-					}
-
-				});
-
-			}
+			});
 
 		},
 
@@ -352,13 +331,14 @@
 
 					self.totalPages = response.pages_count;
 
-					self.templates.results.append(response.results);
-
-					if( (self._buildPagination(response.pages_count).length === 1 && self.opt.pagination.type === 'pages') || self.pagination > response.pages_count){
-						self.templates.pagination.clear();
+					if(self.opt.type === 'pages'){
+						self.templates.results.render(response.results);
 					}else{
-						self.templates.pagination.render(self._buildPagination(response.pages_count, response.total_count));
+						self.templates.results.append(response.results);
 					}
+
+					self.templates.pagination.render(self._buildPagination(response.pages_count, response.total_count));
+
 				})
 				.error(function(jqXHR, textStatus, errorThrown) {
 					console.log(jqXHR.status + ' ' + errorThrown);
@@ -374,9 +354,9 @@
 
 			var params = {
 				page: this.pagination,
-				dividend: this.opt.pagination.dividend,
-				threshold: this.opt.pagination.threshold,
-				throttle: this.opt.pagination.throttle,
+				// dividend: this.opt.dividend,
+				// threshold: this.opt.threshold,
+				// throttle: this.opt.throttle,
 				filters: [],
 				sort: '',
 				direction: ''
@@ -412,16 +392,32 @@
 				pagiNav = [],
 				pagiData;
 
-			if(this.opt.pagination.type === 'pages' ){
+			if(this.opt.type === 'pages'){
 
-				for(var i = 1; i <= pages_count; i++){
+				var newPerPage = Math.ceil(self.opt.throttle / self.opt.dividend);
 
-					pagiData = {
-						page: i,
-						pageStart: i === 1 ? 1 : (self.opt.pagination.throttle * (i - 1)) + 1,
-						pageLimit: i === 1 ? self.opt.pagination.throttle : self.opt.pagination.throttle * i,
-						active: self.pagination === i ? true : false
-					};
+				for(var i = 1; i <= (total_count > self.opt.throttle ? self.opt.dividend + 1 : self.opt.dividend); i++){
+
+					if(i <= self.opt.dividend){
+
+						pagiData = {
+							page: i,
+							pageStart: i === 1 ? 1 : (newPerPage * (i - 1) + 1),
+							pageLimit: i === 1 ? newPerPage : (total_count < self.opt.throttle && i === self.opt.dividend) ? total_count : newPerPage * i,
+							active: self.pagination === i ? true : false,
+							throttle: false
+						};
+
+					}else{
+
+						if(total_count > self.opt.throttle){
+							pagiData = {
+								throttle: true,
+								label: 'More'
+							};
+						}
+
+					}
 
 					pagiNav.push(pagiData);
 
@@ -430,11 +426,13 @@
 			}
 
 
-			if(this.opt.pagination.type ==='scroll'){
+			if(this.opt.type === 'infiniteload'){
 
+				//Do Stuff
 				pagiData = {
-					page: (typeof self.pagination === 'undefined') ? 1 : self.pagination,
-					active: true
+					page: self.pagination,
+					active: true,
+					infiniteload: true
 				};
 
 				pagiNav.push(pagiData);
