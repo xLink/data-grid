@@ -28,7 +28,7 @@
         },
 		dividend: 10,
 		threshold: 20,
-		throttle: 500,
+		throttle: 0,
 		type: 'pages',
         tempoOptions: {
             var_braces: '\\[\\[\\]\\]',
@@ -38,7 +38,7 @@
         callback: undefined
 	};
 
-
+	// DataGrid plugin constructor
 	function DataGrid(key, results, pagination, filters, options){
 
 		this.opt = $.extend({}, defaults, options);
@@ -58,10 +58,9 @@
 		//Helpers
 		this.appliedFilters = [];
 		this.templates = {};
-		this.killScroll = false;
 		this.pagination = 1;
 		this.isActive = false;
-		this.orgThrottle = this.opt.throttle;
+		this.orgThrottle = this.opt.throttle;  //Helper for correct counting
 		this.sort = {
 			column: this.opt.sort.column,
 			direction: this.opt.sort.direction
@@ -75,10 +74,6 @@
 
 		_init: function(){
 
-			if(window.console && window.console.log){
-				console.log('%c Data-Grid initialized...', 'background: #222; color: #bada55');
-			}
-
 			//Check Dependencies
 			this._checkDeps();
 
@@ -88,7 +83,7 @@
             //Event Listners
             this._events();
 
-            //Go Go Gadget
+            //Initanal Fetch
             this._fetch();
 
 
@@ -104,7 +99,7 @@
 				$.error('$.datagrid requires a results container');
 			}
 
-			if(!this.$pagi.length){ //might not need this check
+			if(!this.$pagi.length){
 				$.error('$.datagrid requires a pagination container');
 			}
 
@@ -116,6 +111,7 @@
 
 		_prepTemplates: function(){
 
+			//initialize Tempo
 			this.templates.results = Tempo.prepare(this.$results, this.opt.tempoOptions);
 			this.templates.pagination = Tempo.prepare(this.$pagi, this.opt.tempoOptions);
 			this.templates.appliedFilters = Tempo.prepare(this.$filters, this.opt.tempoOptions);
@@ -135,7 +131,7 @@
 
 			//Filters
 			this.$body.on('click', '[data-filter]'+this.key, function(e){
-				self._setFilters($(this).data('filter'));
+				self._setFilters($(this).data('filter'), $(this).data('label'));
 				self.templates.results.clear();
 				self._fetch();
 			});
@@ -203,6 +199,7 @@
 				self._fetch();
 			});
 
+			//Reset Grid
 			this.$body.on('click', '[data-reset]'+this.key, function(e){
 				self._reset();
 			});
@@ -245,10 +242,10 @@
 
 		},
 
-		_setFilters: function(filter){
+		// Set an applied filter
+		_setFilters: function(filter, label){
 
 			var self = this;
-
 
 			//lets make sure its a word
 			// and not just spaces
@@ -260,7 +257,7 @@
 
 				var filteredItems = val.split(':');
 
-				$.each(self.appliedFilters, function(i, f){
+				$.map(self.appliedFilters, function(f){
 
 					if(f.value === filteredItems[0]){
 
@@ -271,11 +268,29 @@
 
 				});
 
+				//Check if we need to rename something
+				$.each(label.split(', '), function(j, l){
+
+					var labelMap = l.split(':');
+
+					if(filteredItems[1] === labelMap[0]){
+						filteredItems[2] = labelMap[1];
+					}
+
+					if(filteredItems[0] === labelMap[0]){
+						filteredItems[3] = labelMap[1];
+					}
+
+
+				});
+
 				if(filteredItems.length > 0){
 
 					self.appliedFilters.push({
 						value: filteredItems[0],
-						column: filteredItems[1]
+						column: filteredItems[1],
+						columnLabel: typeof filteredItems[2] === 'undefined' ? filteredItems[1] : filteredItems[2],
+						valueLabel: typeof filteredItems[3] === 'undefined' ? filteredItems[0] : filteredItems[3]
 					});
 
 					self.templates.appliedFilters.render(self.appliedFilters);
@@ -287,7 +302,8 @@
 		},
 
 		_removeFilter: function(idx){
-
+			//remove a filter
+			
 			this.templates.results.clear();
 			this.appliedFilters.splice(idx, 1);
 
@@ -295,6 +311,7 @@
 
 		_setSorting: function(column){
 
+			//set an applied sorting
 			var self = this;
 			var sortable = column.split(':');
 			var direction = typeof sortable[1] !== 'undefined' ? sortable[1] : 'asc';
@@ -313,6 +330,7 @@
 		},
 
 		_fetch: function(){
+			//fetch our results from our controller
 
 			var self = this;
 
@@ -326,9 +344,7 @@
 				.done(function(response){
 					self._loader();
 
-					self.killScroll = false;
 					self.isActive = false;
-
 					self.totalPages = response.pages_count;
 
 					if(self.opt.type === 'pages'){
@@ -348,6 +364,7 @@
 
 		},
 
+		//build the url params to pass to the route
 		_buildFetchData: function(){
 
 			var self = this;
@@ -386,49 +403,77 @@
 
 		},
 
+		//build the pagination based on type
 		_buildPagination: function(pages_count, total_count){
 
 			var self = this,
 				pagiNav = [],
-				pagiData;
+				pagiData,
+				newPerPage,
+				i;
 
 			if(this.opt.type === 'pages'){
 
-				var newPerPage = Math.ceil(self.opt.throttle / self.opt.dividend);
+				//pagination if a throttle is set
+				if(this.opt.throttle > 0){
 
-				for(var i = 1; i <= (total_count > self.opt.throttle ? self.opt.dividend + 1 : self.opt.dividend); i++){
+					newPerPage = Math.ceil(this.opt.throttle / this.opt.dividend);
 
-					if(i <= self.opt.dividend){
+					for(i = 1; i <= (total_count > this.opt.throttle ? this.opt.dividend + 1 : this.opt.dividend); i++){
+
+						if(i <= self.opt.dividend){
+
+							pagiData = {
+								page: i,
+								pageStart: i === 1 ? 1 : (newPerPage * (i - 1) + 1),
+								pageLimit: i === 1 ? newPerPage : (total_count < self.opt.throttle && i === self.opt.dividend) ? total_count : newPerPage * i,
+								active: self.pagination === i ? true : false,
+								throttle: false
+							};
+
+						}else{
+
+							if(total_count > self.opt.throttle){
+								pagiData = {
+									throttle: true,
+									label: 'More'
+								};
+							}
+
+						}
+
+						pagiNav.push(pagiData);
+
+					}
+
+
+				}else{
+
+					//normal pagination
+					newPerPage = Math.ceil(total_count / pages_count);
+
+					for(i = 1; i <= pages_count; i++){
 
 						pagiData = {
 							page: i,
 							pageStart: i === 1 ? 1 : (newPerPage * (i - 1) + 1),
-							pageLimit: i === 1 ? newPerPage : (total_count < self.opt.throttle && i === self.opt.dividend) ? total_count : newPerPage * i,
-							active: self.pagination === i ? true : false,
-							throttle: false
+							pageLimit: i === 1 ? newPerPage : (total_count < (newPerPage * i)) ? total_count : newPerPage * i,
+							active: self.pagination === i ? true : false
 						};
 
-					}else{
-
-						if(total_count > self.opt.throttle){
-							pagiData = {
-								throttle: true,
-								label: 'More'
-							};
-						}
+						pagiNav.push(pagiData);
 
 					}
 
-					pagiNav.push(pagiData);
-
 				}
+
 
 			}
 
 
+			//load more pagination
 			if(this.opt.type === 'infiniteload'){
 
-				//Do Stuff
 				pagiData = {
 					page: self.pagination,
 					active: true,
@@ -445,6 +490,7 @@
 		},
 
 		_goToPage: function(idx){
+			//set our pagination helper to new page
 
 			if(isNaN(idx = parseInt(idx, 10))){
 				idx = 1;
@@ -455,6 +501,7 @@
 		},
 
 		_loader: function(){
+			//show a loader while fetching data
 
 			if($(this.opt.loader).is(':visible')){
 				$(this.opt.loader).fadeOut();
@@ -465,6 +512,9 @@
 		},
 
 		_trigger: function(params){
+			//for custom events outside the normal
+			// data-filter, data-sort
+
 			var self = this;
 
 			$.each(params, function(k, v){
@@ -484,6 +534,8 @@
 		},
 
 		_reset: function(){
+			//reset the grid back to first load
+
 			this.appliedFilters = [];
 			this.pagination = 1;
 			this.sort = {
@@ -496,6 +548,7 @@
 		},
 
 		_callback: function(){
+			//ran everything a fetch is completed
 
             if(this.opt.callback !== undefined && $.isFunction(this.opt.callback)){
                 this.opt.callback(this.appliedFilters, this.sort, this.pagination);
