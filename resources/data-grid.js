@@ -29,7 +29,7 @@
 		dividend: 10,
 		threshold: 20,
 		throttle: 500,
-		type: 'infiniteload',
+		type: 'pages',
         tempoOptions: {
             var_braces: '\\[\\[\\]\\]',
             tag_braces: '\\[\\?\\?\\]'
