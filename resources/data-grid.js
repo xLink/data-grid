@@ -28,7 +28,7 @@
         },
 		dividend: 10,
 		threshold: 20,
-		throttle: 0,
+		throttle: 500,
 		type: 'pages',
         tempoOptions: {
             var_braces: '\\[\\[\\]\\]',
@@ -303,7 +303,7 @@
 
 		_removeFilter: function(idx){
 			//remove a filter
-			
+
 			this.templates.results.clear();
 			this.appliedFilters.splice(idx, 1);
 
@@ -312,7 +312,6 @@
 		_setSorting: function(column){
 
 			//set an applied sorting
-			var self = this;
 			var sortable = column.split(':');
 			var direction = typeof sortable[1] !== 'undefined' ? sortable[1] : 'asc';
 
@@ -366,8 +365,6 @@
 
 		//build the url params to pass to the route
 		_buildFetchData: function(){
-
-			var self = this;
 
 			var params = {
 				page: this.pagination,
