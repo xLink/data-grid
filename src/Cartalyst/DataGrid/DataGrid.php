@@ -152,14 +152,26 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 			throw new \InvalidArgumentException("Invalid throttle of [$throttle], must be greater than the threshold, which is [$threshold].");
 		}
 
+		// If our results count is less than the threshold,
+		// we're always returning one page with all of the items
+		// on it. This will effectively remove pagination.
+		if ($resultsCount < $threshold)
+		{
+			return array(1, $resultsCount);
+		}
+
 		// Firstly, we'll calculate the "per page" property
 		// based off the dividend.
 		$perPage = (int) ceil($resultsCount / $dividend);
 
-		// Now, we'll ensure that "per page" is between the
-		// threshold and the dividend.
-		if ($perPage < $threshold) $perPage = $threshold;
-		if ($perPage > $throttle) $perPage = $throttle;
+		// Now, if the results per page (based off the divident)
+		// will show mean there is more results on a page than
+		// the throttle, we'll reduce the results per page to be
+		// that of the throttle.
+		if ($perPage > $throttle)
+		{
+			$perPage = $throttle;
+		}
 
 		// To work out the number of pages, we'll just
 		// divide the results count by the number of
