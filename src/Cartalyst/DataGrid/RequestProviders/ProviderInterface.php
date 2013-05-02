@@ -70,7 +70,9 @@ interface ProviderInterface {
 	public function getDividend();
 
 	/**
-	 * Get the throttle (maximum results per page).
+	 * Get the throttle, which is the maximum results set. If the
+	 * results total is greater than this (before we apply the
+	 * dividend, we'll reduce the results set).
 	 *
 	 * @return int
 	 */
