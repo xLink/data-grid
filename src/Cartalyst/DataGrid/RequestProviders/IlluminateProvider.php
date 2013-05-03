@@ -115,9 +115,9 @@ class IlluminateProvider implements ProviderInterface {
 	}
 
 	/**
-	 * Get the dividend (ideal number of pages, once the results
-	 * count is greater than the threshold and each page has
-	 * less results than the throttle).
+	 * Get the throttle, which is the maximum results set. If the
+	 * results total is greater than this (before we apply the
+	 * dividend, we'll reduce the results set).
 	 *
 	 * @return int
 	 */

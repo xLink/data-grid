@@ -164,13 +164,15 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 		// based off the dividend.
 		$perPage = (int) ceil($resultsCount / $dividend);
 
-		// Now, if the results per page (based off the divident)
-		// will show mean there is more results on a page than
-		// the throttle, we'll reduce the results per page to be
-		// that of the throttle.
-		if ($perPage > $throttle)
+		// Now, we'll calculate the maximum per page, which is the throttle
+		// divided by the dividend.
+		$maximumPerPage = floor($throttle / $dividend);
+
+		// Now, if the results per page is greater than the
+		// maximum per page, reduce it down accordingly
+		if ($perPage > $maximumPerPage)
 		{
-			$perPage = $throttle;
+			$perPage = $maximumPerPage;
 		}
 
 		// To work out the number of pages, we'll just
