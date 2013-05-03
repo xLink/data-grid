@@ -184,12 +184,14 @@
 					$input.val('');
 					$column.prop('selectedIndex',0);
 
+					//DEMO ONLY
+					$('.options li').text('All');
+
 					return false;
 
 				}
 
 				if(e.type === 'keyup'){
-
 
 					if(self.isActive){ return; }
 
@@ -197,7 +199,7 @@
 
 					timeout = setTimeout(function(){
 
-						if($input.val().length === 0){
+						if($input.val().length === 0 || $input.val().length){
 
 							$.each(self.appliedFilters, function(i, f){
 
@@ -275,6 +277,30 @@
 				self.opt.throttle += self.orgThrottle;
 				self.templates.pagination.clear();
 				self.templates.results.clear();
+				self._fetch();
+
+			});
+
+			//Demo Only Events
+			$('[data-opt]'+this.key).on('change', function(){
+				var opt = $(this).data('opt'),
+					val = $(this).val();
+
+				switch(opt){
+					case 'dividend':
+						self.opt.dividend = val;
+					break;
+					case 'throttle':
+						self.opt.throttle = val;
+					break;
+					case 'threshold':
+						self.opt.threshold = val;
+					break;
+				}
+
+				self.templates.pagination.clear();
+				self.templates.results.clear();
+				self._goToPage(1);
 				self._fetch();
 
 			});
