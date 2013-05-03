@@ -86,7 +86,6 @@
             //Initanal Fetch
             this._fetch();
 
-
 		},
 
 		_checkDeps: function(){
@@ -124,6 +123,16 @@
 
 			//Sorting
 			this.$body.on('click', '[data-sort]'+this.key, function(e){
+
+				//Visual Sort Helpers
+				$('[data-sort]'+self.key).not($(this)).removeClass('asc desc');
+
+				if($(this).hasClass('asc')){
+					$(this).removeClass('asc').addClass('desc');
+				}else{
+					$(this).removeClass('desc').addClass('asc');
+				}
+
 				self._setSorting($(this).data('sort'));
 				self.templates.results.clear();
 				self._fetch();
@@ -131,8 +140,9 @@
 
 			//Filters
 			this.$body.on('click', '[data-filter]'+this.key, function(e){
-				self._setFilters($(this).data('filter'), $(this).data('label'));
+				self._setFilters($(this).data('filter'), $(this).data('label'), false);
 				self.templates.results.clear();
+				self._goToPage(1);
 				self._fetch();
 			});
 
@@ -140,23 +150,35 @@
 			var timeout;
 			this.$body.find('[data-search]'+this.key).on('submit keyup', function(e){
 
+				e.preventDefault();
+
 				var $input = $(this).find('input'),
-					$column = $(this).find('select'),
-					values = $(this).serializeArray();
+					$column = $(this).find('select');
 
 				if(e.type === 'submit'){
+
+					//lets make sure its a word
+					// and not just spaces
+					if(!$.trim($input.val()).length){ return; }
+
+					$.map(self.appliedFilters, function(f){
+
+						if(f.value === $input.val()){
+							f.type = 'normal';
+						}
+
+					});
+
+					self.templates.appliedFilters.render(self.appliedFilters);
 
 					self.isActive = true;
 
 					clearTimeout(timeout);
 
-					if(values[0].value === 'all'){
-						self._setFilters(values[1].value);
-					}else{
-						self._setFilters(values[1].value+':'+values[0].value);
-					}
+					self._setFilters($column.val()+':'+$input.val(), '', false);
 
 					self.templates.results.clear();
+					self._goToPage(1);
 					self._fetch();
 
 					$input.val('');
@@ -168,34 +190,51 @@
 
 				if(e.type === 'keyup'){
 
+
 					if(self.isActive){ return; }
 
 					clearTimeout(timeout);
 
 					timeout = setTimeout(function(){
 
-						if($column.val() === 'all'){
-							self._setFilters($input.val());
-						}else{
-							self._setFilters($input.val()+':'+$column.val());
+						if($input.val().length === 0){
+
+							$.each(self.appliedFilters, function(i, f){
+
+								if(f.type === 'live'){
+									self.appliedFilters.splice($.inArray(f.type, self.appliedFilters), 1);
+								}
+
+							});
+
+							self._fetch();
 						}
 
+						if(!$.trim($input.val()).length){ return; }
+
+						self._setFilters($column.val()+':'+$input.val(), '', true);
 						self.templates.results.clear();
+						self._goToPage(1);
 						self._fetch();
 
-						$input.val('');
-						$column.prop('selectedIndex',0);
-
 					}, 800);
-
 				}
 
 			});
 
 			//Remove Filter
 			this.$filters.on('click', 'li', function(e){
+
 				self._removeFilter($(this).index());
-				self.templates.appliedFilters.render(self.appliedFilters);
+
+				$.each(self.appliedFilters, function(i, val){
+
+					if(val.type === 'normal'){
+						self.templates.appliedFilters.append(val);
+					}
+
+				});
+
 				self._fetch();
 			});
 
@@ -243,23 +282,21 @@
 		},
 
 		// Set an applied filter
-		_setFilters: function(filter, label){
+		_setFilters: function(filter, label, live){
 
 			var self = this;
 
-			//lets make sure its a word
-			// and not just spaces
-			if(!$.trim(filter).length){ return; }
+			//when addeding a filter reset
+			this.opt.throttle = this.orgThrottle;
 
-
-			//Apply Filter and make sure its not already set
 			$.each(filter.split(', '), function(i, val){
 
 				var filteredItems = val.split(':');
 
-				$.map(self.appliedFilters, function(f){
+				//check if filter is already applied
+				$.each(self.appliedFilters, function(i, f){
 
-					if(f.value === filteredItems[0]){
+					if(f.value === filteredItems[1]){
 
 						filteredItems.splice($.inArray(f.value, filteredItems), 1);
 						filteredItems.splice($.inArray(f.column, filteredItems), 1);
@@ -268,33 +305,41 @@
 
 				});
 
-				//Check if we need to rename something
-				$.each(label.split(', '), function(j, l){
+				//Lets check if we need a new label
+				if(typeof label !== 'undefined'){
 
-					var labelMap = l.split(':');
+					$.each(label.split(', '), function(j, l){
 
-					if(filteredItems[1] === labelMap[0]){
-						filteredItems[2] = labelMap[1];
-					}
+						var labeledItems = l.split(':');
 
-					if(filteredItems[0] === labelMap[0]){
-						filteredItems[3] = labelMap[1];
-					}
+						if(filteredItems[0] === labeledItems[0]){
+							filteredItems[3] = labeledItems[1];
+						}
 
+						if(filteredItems[1] === labeledItems[0]){
+							filteredItems[2] = labeledItems[1];
+						}
 
-				});
+					});
+
+				}
 
 				if(filteredItems.length > 0){
 
 					self.appliedFilters.push({
-						value: filteredItems[0],
-						column: filteredItems[1],
-						columnLabel: typeof filteredItems[2] === 'undefined' ? filteredItems[1] : filteredItems[2],
-						valueLabel: typeof filteredItems[3] === 'undefined' ? filteredItems[0] : filteredItems[3]
+						column: filteredItems[0] === 'all' ? undefined : filteredItems[0],
+						columnLabel: typeof filteredItems[2] === 'undefined' ? filteredItems[0] : filteredItems[2],
+						value: filteredItems[1],
+						valueLabel: typeof filteredItems[3] === 'undefined' ? filteredItems[1] : filteredItems[3],
+						type: !live ? 'normal' : 'live'
 					});
 
-					self.templates.appliedFilters.render(self.appliedFilters);
+					if(!live){
+						self.templates.appliedFilters.render(self.appliedFilters);
+					}
+
 				}
+
 
 			});
 
@@ -303,7 +348,7 @@
 
 		_removeFilter: function(idx){
 			//remove a filter
-
+			this.templates.appliedFilters.clear();
 			this.templates.results.clear();
 			this.appliedFilters.splice(idx, 1);
 
@@ -344,7 +389,9 @@
 					self._loader();
 
 					self.isActive = false;
-					self.totalPages = response.pages_count;
+
+					self.totalCount = response.total_count; //For Callback
+					self.filteredCount = response.filtered_count; //For Callback
 
 					if(self.opt.type === 'pages'){
 						self.templates.results.render(response.results);
@@ -352,14 +399,14 @@
 						self.templates.results.append(response.results);
 					}
 
-					self.templates.pagination.render(self._buildPagination(response.pages_count, response.total_count));
+					self.templates.pagination.render(self._buildPagination(response.pages_count, response.total_count, response.filtered_count));
+
+					self._callback();
 
 				})
 				.error(function(jqXHR, textStatus, errorThrown) {
 					console.log(jqXHR.status + ' ' + errorThrown);
 				});
-
-			this._callback();
 
 		},
 
@@ -368,9 +415,9 @@
 
 			var params = {
 				page: this.pagination,
-				// dividend: this.opt.dividend,
-				// threshold: this.opt.threshold,
-				// throttle: this.opt.throttle,
+				dividend: this.opt.dividend,
+				threshold: this.opt.threshold,
+				throttle: this.opt.throttle,
 				filters: [],
 				sort: '',
 				direction: ''
@@ -401,7 +448,7 @@
 		},
 
 		//build the pagination based on type
-		_buildPagination: function(pages_count, total_count){
+		_buildPagination: function(pages_count, total_count, filtered_count){
 
 			var self = this,
 				pagiNav = [],
@@ -409,45 +456,46 @@
 				newPerPage,
 				i;
 
+
 			if(this.opt.type === 'pages'){
 
 				//pagination if a throttle is set
-				if(this.opt.throttle > 0){
+				if( (total_count > this.opt.throttle) && (filtered_count > this.opt.throttle) ){
 
 					newPerPage = Math.ceil(this.opt.throttle / this.opt.dividend);
 
-					for(i = 1; i <= (total_count > this.opt.throttle ? this.opt.dividend + 1 : this.opt.dividend); i++){
+					for(i = 1; i <= this.opt.dividend; i++){
 
-						if(i <= self.opt.dividend){
-
-							pagiData = {
-								page: i,
-								pageStart: i === 1 ? 1 : (newPerPage * (i - 1) + 1),
-								pageLimit: i === 1 ? newPerPage : (total_count < self.opt.throttle && i === self.opt.dividend) ? total_count : newPerPage * i,
-								active: self.pagination === i ? true : false,
-								throttle: false
-							};
-
-						}else{
-
-							if(total_count > self.opt.throttle){
-								pagiData = {
-									throttle: true,
-									label: 'More'
-								};
-							}
-
-						}
+						pagiData = {
+							page: i,
+							pageStart: i === 1 ? 1 : (newPerPage * (i - 1) + 1),
+							pageLimit: i === 1 ? newPerPage : (total_count < self.opt.throttle && i === self.opt.dividend) ? total_count : newPerPage * i,
+							active: self.pagination === i ? true : false,
+							throttle: false
+						};
 
 						pagiNav.push(pagiData);
 
 					}
 
+					//if final not final page
+					if(total_count > self.opt.throttle){
+						pagiData = {
+							throttle: true,
+							label: 'More'
+						};
+
+						pagiNav.push(pagiData);
+					}
+
 
 				}else{
 
-					//normal pagination
-					newPerPage = Math.ceil(total_count / pages_count);
+					if(filtered_count !== total_count){
+						newPerPage = Math.ceil(filtered_count / pages_count);
+					}else{
+						newPerPage = Math.ceil(total_count / pages_count);
+					}
 
 					for(i = 1; i <= pages_count; i++){
 
@@ -548,7 +596,7 @@
 			//ran everything a fetch is completed
 
             if(this.opt.callback !== undefined && $.isFunction(this.opt.callback)){
-                this.opt.callback(this.appliedFilters, this.sort, this.pagination);
+                this.opt.callback(this.totalCount, this.filteredCount, this.appliedFilters);
             }
 
 		}
