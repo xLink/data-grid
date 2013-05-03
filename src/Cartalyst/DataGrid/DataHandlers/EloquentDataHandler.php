@@ -387,7 +387,6 @@ class EloquentDataHandler implements DataHandlerInterface {
 		// sort order to the front, so we will use the API.
 		else
 		{
-			$data->orderBy(\DB::raw('LENGTH('.$column.')'), $direction);
 			$data->orderBy($column, $direction);
 		}
 	}
