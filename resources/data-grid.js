@@ -427,6 +427,10 @@
 
 					self.templates.pagination.render(self._buildPagination(response.pages_count, response.total_count, response.filtered_count));
 
+					if(response.pages_count <= 1 && self.opt.type === 'infiniteload'){
+						self.templates.pagination.clear();
+					}
+
 					self._callback();
 
 				})
@@ -541,6 +545,7 @@
 
 			}
 
+			console.log(pages_count);
 
 			//load more pagination
 			if(this.opt.type === 'infiniteload'){
