@@ -18,6 +18,7 @@
  * @link       http://cartalyst.com
  */
 
+use Cartalyst\DataGrid\RequestProviders\NativeProvider;
 use Cartalyst\DataGrid\RequestProviders\ProviderInterface as RequestProviderInterface;
 use Closure;
 use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
@@ -48,9 +49,9 @@ class Environment {
 	 * @param  Cartalyst\DataGrid\RequestProviders\ProviderInterface  $requestProvider
 	 * @return void
 	 */
-	public function __construct(RequestProviderInterface $requestProvider, array $dataHandlerMappings = array())
+	public function __construct(RequestProviderInterface $requestProvider = null, array $dataHandlerMappings = array())
 	{
-		$this->requestProvider = $requestProvider;
+		$this->requestProvider = $requestProvider ?: new NativeProvider;
 		$this->dataHandlerMappings = $dataHandlerMappings;
 	}
 

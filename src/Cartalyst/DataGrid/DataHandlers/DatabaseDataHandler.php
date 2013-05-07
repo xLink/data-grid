@@ -20,10 +20,11 @@
 
 use Cartalyst\DataGrid\DataGrid;
 use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Contracts\ArrayableInterface;
 
-class EloquentDataHandler implements DataHandlerInterface {
+class DatabaseDataHandler implements DataHandlerInterface {
 
 	/**
 	 * The shared data grid instance.
@@ -104,6 +105,13 @@ class EloquentDataHandler implements DataHandlerInterface {
 	public function __construct(DataGrid $dataGrid)
 	{
 		$data = $dataGrid->getData();
+
+		// If the data is an instance of an Eloquent model,
+		// we'll grab a new query from it.
+		if ($data instanceof Model)
+		{
+			$data = $data->newQuery();
+		}
 
 		// We accept different data types for our data grid,
 		// let's just check now that

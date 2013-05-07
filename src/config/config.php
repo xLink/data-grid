@@ -19,9 +19,10 @@ return array(
 	*/
 	'handlers' => array(
 
-		'Cartalyst\DataGrid\DataHandlers\EloquentDataHandler' => function($data)
+		'Cartalyst\DataGrid\DataHandlers\DatabaseDataHandler' => function($data)
 		{
 			return (
+				$data instanceof Illuminate\Database\Eloquent\Model or
 				$data instanceof Illuminate\Database\Eloquent\Builder or
 				$data instanceof Illuminate\Database\Query\Builder
 			);
