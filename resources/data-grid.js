@@ -16,552 +16,626 @@
  * @copyright  (c) 2011 - 2013, Cartalyst LLC
  * @link       http://cartalyst.com
  */
-(function($) {
+ ;(function($, window, document, undefined){
 
-	/**
-	 * DataGrid constructor.
-	 *
-	 * @return void
-	 */
-	var DataGrid = function(element, options) {
+	'use strict';
 
-		// Just double check me we're running
-		// the function as an object constructor
-		// and not in the global namespace.
-		if (this === window) {
-			return new DataGrid(element, options);
-		}
+	var defaults = {
+		source: undefined,
+        sort: {
+            column: undefined,
+            direction: 'asc'
+        },
+		dividend: 10,
+		threshold: 20,
+		throttle: 500,
+		type: 'pages',
+        tempoOptions: {
+            var_braces: '\\[\\[\\]\\]',
+            tag_braces: '\\[\\?\\?\\]'
+        },
+        loader: undefined,
+        callback: undefined
+	};
 
-		if (typeof Tempo === 'undefined') {
-			$.error('$.dataGrid requires TempoJS v2.0.0 or later to run.');
-		}
+	// DataGrid plugin constructor
+	function DataGrid(key, results, pagination, filters, options){
 
-		// We'll now define the default options the
-		// data grid will have.
-		this.options = {
+		this.opt = $.extend({}, defaults, options);
 
-			// The source is required for every data grid.
-			// It must be a full URI to the resource which
-			// returns the correct JSON for the data grid
-			source: undefined,
+		//Binding Key
+		this.key = '[data-key='+key+']';
 
-			// You may choose to setup the default sort for
-			// the grid. It is recommnded that you do choose
-			// this.
-			sort: {
-				column: undefined,
-				direction: 'asc'
-			},
+		//Common Selectors
+		this.$results = $(results + this.key);
+		this.$pagi = $(pagination + this.key);
+		this.$filters = $(filters + this.key);
+		this.$body = $(document.body);
 
-			// Here we can specify some options we would
-			// like to customize how our pagination works.
-			// Pagination in this DataGrid is dynamic, it
-			// will attempt to divide the results up to
-			// match the requested pages, however not letting
-			// the results slip below the minimum results
-			// per page. Adjust at will.
-			pagination: {
-				requestedPages: 10,
-				minimumPerPage: 10
-			},
+		//Get Our Source
+		this.source = this.$results.data('source') || this.opt.source;
 
-			// Options used for initializing TempoJS
-			tempoOptions: {
-				var_braces : '\\[\\[\\]\\]',
-				tag_braces : '\\[\\?\\?\\]'
-			},
-
-			// Delay for live search
-			liveSearchDelay: 1000
-		}
-
-		// Merge the options passed through the jQuery
-		// plugin
-		$.extend(true, this.options, options);
-
-		// Now we have our options setup, we'll begin setting
-		// some instance properties on our object
-		this.$element       = element;
-		this.source         = this.$element.data('source') || this.options.source;
-		this.templates      = {};
-		this.filters        = [];
+		//Helpers
 		this.appliedFilters = [];
-		this.results        = [];
-		this.pagination     = {
-			page: 1,
-			navigation: []
+		this.templates = {};
+		this.pagination = 1;
+		this.isActive = false;
+		this.orgThrottle = this.opt.throttle;  //Helper for correct counting
+		this.sort = {
+			column: this.opt.sort.column,
+			direction: this.opt.sort.direction
 		};
-		this.sort           = {
-			column: this.options.sort.column,
-			direction: this.options.sort.direction
-		};
-		this.liveSearch     = '';
 
-		// Our results DOM object must be found
-		// first before we attempt to move on as
-		// other methods utiize properties in it.
-		this.findResultsObject();
+		this._init();
 
-		// Great, it's now time to setup our filters & sorting. This will
-		// inspect our results table to find all applicable HTML
-		// entities. We'll cache our filter data on this object
-		// for later use
-		this.setupFiltersAndSorting();
-
-		// We'll now prepare our templates which registers
-		// the various compoenents using TempoJS
-		this.prepareTemplates();
-
-		// We will now render our initial filters for the
-		// data grid
-		this.renderFilters();
-
-		// Observe DOM
-		this.observeAppliedFilters();
-		this.observeSorting();
-		this.observePagination();
-		this.observeLiveSearch();
-
-		// All systems go - let's fetch our first lot of
-		// data
-		this.fetch();
 	}
 
-	// All of the methods which remain the same between
-	// instnaces of DataGrid
 	DataGrid.prototype = {
 
-		// Always set our constructor property
-		constructor: DataGrid,
+		_init: function(){
 
-		findResultsObject: function() {
-			var resultsSelector, $results;
+			//Check Dependencies
+			this._checkDeps();
 
-			// Let's check our results
-			if ( ! (resultsSelector = this.$element.data('results'))) {
-				$.error('$.dataGrid requires you specify the results DOM object through [data-results=".selector-of-results"], none given.');
-			}
+			//Find Our Templates
+            this._prepTemplates();
 
-			if ( ! ($results = $(resultsSelector)).length) {
-				$.error('Results DOM object with selector [' + resultsSelector + '] does not exist.');
-			}
+            //Event Listners
+            this._events();
 
-			// And now we prepare our DOM object for use with TempoJS
-			this.$results = $results;
+            //Initanal Fetch
+            this._fetch();
+
 		},
 
-		prepareTemplates: function() {
-			this.prepareResultsTemplate();
-			this.prepareFiltersTemplate();
-			this.prepareAppliedFiltersTemplate();
-			this.preparedPaginationTemplate();
+		_checkDeps: function(){
+
+			if (typeof Tempo === 'undefined') {
+				$.error('$.datagrid requires TempoJS v2.0.0 or later to run.');
+			}
+
+			if(!this.$results.length){
+				$.error('$.datagrid requires a results container');
+			}
+
+			if(!this.$pagi.length){
+				$.error('$.datagrid requires a pagination container');
+			}
+
+			if(!this.$filters.length){
+				$.error('$.datagrid requires an applied filters container');
+			}
+
 		},
 
-		prepareResultsTemplate: function() {
-			this.templates.results = Tempo.prepare(this.$results[0], this.options.tempoOptions);
+		_prepTemplates: function(){
+
+			//initialize Tempo
+			this.templates.results = Tempo.prepare(this.$results, this.opt.tempoOptions);
+			this.templates.pagination = Tempo.prepare(this.$pagi, this.opt.tempoOptions);
+			this.templates.appliedFilters = Tempo.prepare(this.$filters, this.opt.tempoOptions);
+
 		},
 
-		prepareFiltersTemplate: function() {
-			var filtersSelector, $filters;
+		_events: function(){
 
-			// Let's check our filters
-			if ( ! (filtersSelector = this.$element.data('filters'))) {
-				$.error('$.dataGrid requires you specify the filters DOM object through [data-filters=".selector-of-filters"], none given.');
-			}
+			var self = this;
 
-			if ( ! ($filters = $(filtersSelector)).length) {
-				$.error('Filters DOM object with selector [' + filtersSelector + '] does not exist.');
-			}
+			//Sorting
+			this.$body.on('click', '[data-sort]'+this.key, function(e){
 
-			// And now we prepare our DOM object for use with TempoJS
-			this.$filters = $filters;
-			this.templates.filters = Tempo.prepare(this.$filters[0], this.options.tempoOptions);
-		},
+				//Visual Sort Helpers
+				$('[data-sort]'+self.key).not($(this)).removeClass('asc desc');
 
-		prepareAppliedFiltersTemplate: function() {
-			var appliedFiltersSelector, $appliedFilters;
-
-			// Let's check our applied filters
-			if ( ! (appliedFiltersSelector = this.$element.data('applied-filters'))) {
-				$.error('$.dataGrid requires you specify the appliedFilters DOM object through [data-applied-filters=".selector-of-applied-filters"], none given.');
-			}
-
-			if ( ! ($appliedFilters = $(appliedFiltersSelector)).length) {
-				$.error('Applied Filters DOM object with selector [' + appliedFiltersSelector + '] does not exist.');
-			}
-
-			// And now we prepare our DOM object for use with TempoJS
-			this.$appliedFilters = $appliedFilters;
-			this.templates.appliedFilters = Tempo.prepare(this.$appliedFilters[0], this.options.tempoOptions);
-		},
-
-		preparedPaginationTemplate: function() {
-			var paginationSelector, $pagination;
-
-			// Let's check our pagination
-			if ( ! (paginationSelector = this.$element.data('pagination'))) {
-				$.error('$.dataGrid requires you specify the pagination DOM object through [data-pagination=".selector-of-pagination"], none given.');
-			}
-
-			if ( ! ($pagination = $(paginationSelector)).length) {
-				$.error('Pagination DOM object with selector [' + paginationSelector + '] does not exist.');
-			}
-
-			// And now we prepare our DOM object for use with TempoJS
-			this.$pagination = $pagination;
-			this.templates.pagination = Tempo.prepare(this.$pagination[0], this.options.tempoOptions);
-		},
-
-		setupFiltersAndSorting: function() {
-			var me = this,
-			$cells = this.$results.find('[data-template] td');
-
-			$cells.each(function(index) {
-				var $cell = $(this),
-				    column = $cell.data('column'),
-				 mappings = [];
-
-				// Sometimes a cell will have a 'data-static' attribute.
-				// This is fine as they may not want me column to be
-				// filtereable. If so, we'll just skip over the cell
-				if (typeof($cell.data('static')) !== 'undefined') {
-					return;
+				if($(this).hasClass('asc')){
+					$(this).removeClass('asc').addClass('desc');
+				}else{
+					$(this).removeClass('desc').addClass('asc');
 				}
 
-				// Find the header cell with the same 'data-column' attribute.
-				var $header = me.$results.find('thead [data-column="' + column + '"]');
+				self._setSorting($(this).data('sort'));
+				self.templates.results.clear();
+				self._fetch();
+			});
 
-				switch (type = $cell.data('type') ? $cell.data('type') : 'text') {
-					case 'select':
-						mappings = me.parseMappings($cell.data('mappings'));
-						break;
+			//Filters
+			this.$body.on('click', '[data-filter]'+this.key, function(e){
+				self._setFilters($(this).data('filter'), $(this).data('label'), false);
+				self.templates.results.clear();
+				self._goToPage(1);
+				self._fetch();
+			});
+
+			//Search
+			var timeout;
+			this.$body.find('[data-search]'+this.key).on('submit keyup', function(e){
+
+				e.preventDefault();
+
+				var $input = $(this).find('input'),
+					$column = $(this).find('select');
+
+				if(e.type === 'submit'){
+
+					//lets make sure its a word
+					// and not just spaces
+					if(!$.trim($input.val()).length){ return; }
+
+					$.map(self.appliedFilters, function(f){
+
+						if(f.value === $input.val()){
+							f.type = 'normal';
+						}
+
+					});
+
+					self.templates.appliedFilters.render(self.appliedFilters);
+
+					self.isActive = true;
+
+					clearTimeout(timeout);
+
+					self._setFilters($column.val()+':'+$input.val(), '', false);
+
+					self.templates.results.clear();
+					self._goToPage(1);
+					self._fetch();
+
+					$input.val('');
+					$column.prop('selectedIndex',0);
+
+					//DEMO ONLY
+					$('.options li').text('All');
+
+					return false;
+
 				}
 
-				me.filters.push({
-					'type': type,
-					'column': column,
-					'label': $header.text(),
-					'mappings': mappings
+				if(e.type === 'keyup'){
+
+					if(self.isActive){ return; }
+
+					clearTimeout(timeout);
+
+					timeout = setTimeout(function(){
+
+						if($input.val().length === 0 || $input.val().length){
+
+							$.each(self.appliedFilters, function(i, f){
+
+								if(f.type === 'live'){
+									self.appliedFilters.splice($.inArray(f.type, self.appliedFilters), 1);
+								}
+
+							});
+
+							self._fetch();
+						}
+
+						if(!$.trim($input.val()).length){ return; }
+
+						self._setFilters($column.val()+':'+$input.val(), '', true);
+						self.templates.results.clear();
+						self._goToPage(1);
+						self._fetch();
+
+					}, 800);
+				}
+
+			});
+
+			//Remove Filter
+			this.$filters.on('click', 'li', function(e){
+
+				self._removeFilter($(this).index());
+
+				$.each(self.appliedFilters, function(i, val){
+
+					if(val.type === 'normal'){
+						self.templates.appliedFilters.append(val);
+					}
+
 				});
-			});
-		},
 
-		renderFilters: function() {
-			this.templates.filters.render(this.filters);
-		},
-
-		observeAppliedFilters: function() {
-			var me = this;
-
-			// Shortcut to trigger click
-			$('body').on('keyup', me.$filters.selector + ' :input', function(e) {
-				if (e.keyCode == 13) {
-					$(this).siblings('.add-global-filter, .add-filter').first().trigger('click');
-				}
+				self._fetch();
 			});
 
-			// Adding global filters
-			$('body').on('click', me.$filters.selector + ' .add-global-filter', function() {
-				var $input = $(this).siblings(':input').first();
+			//Reset Grid
+			this.$body.on('click', '[data-reset]'+this.key, function(e){
+				self._reset();
+			});
 
-				me.applyFilter($input, 'global');
-				me.renderAppliedFilters();
+			//Pagination
+			this.$pagi.on('click', '[data-page]', function(e){
+				var pageId;
 
-				// If our input is also the live search
-				// box, we'll need to clear the live search
-				// property out
-				if ($input.hasClass('live-search')) {
-					me.clearLiveSearch();
+				e.preventDefault();
+
+				if(self.opt.type === 'pages'){
+
+					pageId = $(this).data('page');
+
+					self.templates.pagination.clear();
+					self.templates.results.clear();
+
 				}
 
-				me.fetch();
+				if(self.opt.type === 'infiniteload'){
+
+					pageId = $(this).data('page');
+					$(this).data('page', ++pageId);
+				}
+
+				self._goToPage(pageId);
+				self._fetch();
+
 			});
 
-			// Adding normal filters
-			$('body').on('click', me.$filters.selector + ' .add-filter', function() {
-				me.applyFilter($(this).siblings(':input').first(), 'normal');
-				me.renderAppliedFilters();
-				me.fetch();
+			//Update Throttle
+			this.$pagi.on('click', '[data-throttle]', function(e){
+
+				self.opt.throttle += self.orgThrottle;
+				self.templates.pagination.clear();
+				self.templates.results.clear();
+				self._fetch();
+
 			});
 
-			// Removing filters
-			$('body').on('click', me.$appliedFilters.selector + ' .remove-filter', function() {
-				var index = $(this).closest('[data-template]').index();
-				me.removeFilter(index);
-				me.renderAppliedFilters();
-				me.fetch();
+			//Demo Only Events
+			$('[data-opt]'+this.key).on('change', function(){
+				var opt = $(this).data('opt'),
+					val = $(this).val();
+
+				switch(opt){
+					case 'dividend':
+						self.opt.dividend = val;
+					break;
+					case 'throttle':
+						self.opt.throttle = val;
+					break;
+					case 'threshold':
+						self.opt.threshold = val;
+					break;
+				}
+
+				self.templates.pagination.clear();
+				self.templates.results.clear();
+				self._goToPage(1);
+				self._fetch();
+
 			});
+
 		},
 
-		applyFilter: function(input, type) {
-			var value, column, filter = {};
+		// Set an applied filter
+		_setFilters: function(filter, label, live){
 
-			// Default the filter type
-			if (typeof type === 'undefined') {
-				type = 'global';
-			}
+			var self = this;
 
-			// If the apply filter was triggered
-			// however no value was present on the
-			// filter input, we'll just stop here
-			if ( ! (value = input.val())) {
-				return;
-			}
+			//when addeding a filter reset
+			this.opt.throttle = this.orgThrottle;
 
-			if (type == 'normal' && ! (column = input.data('column'))) {
-				$.error('$.dataGrid requires each filter specify it\'s result column through [data-column="the_result_column"], none given.');
-			}
+			$.each(filter.split(', '), function(i, val){
 
-			// Now we build our new filter object for the
-			// filters array
-			if ((filter['type'] = type) == 'normal') {
-				filter['column'] = column;
-			}
-			filter['value'] = value;
+				var filteredItems = val.split(':');
 
-			// Add the filter to the list of filters
-			this.appliedFilters.push(filter);
+				//check if filter is already applied
+				$.each(self.appliedFilters, function(i, f){
 
-			// Empty out the input's
-			// value to default
-			input.val('');
+					if(f.value === filteredItems[1]){
 
-			// We always go back to page 1 when we
-			// apply a filter as it will more than likely
-			// reduce the data set
-			this.goToPage(1);
-		},
+						filteredItems.splice($.inArray(f.value, filteredItems), 1);
+						filteredItems.splice($.inArray(f.column, filteredItems), 1);
 
-		removeFilter: function(index) {
-			this.appliedFilters.splice(index, 1);
-		},
+					}
 
-		renderAppliedFilters: function() {
-			this.templates.appliedFilters.render(this.appliedFilters);
-		},
+				});
 
-		fetch: function() {
-			var me = this;
+				//Lets check if we need a new label
+				if(typeof label !== 'undefined'){
 
-			// Let's retrieve the new JSON payload from the server with our
-			// fetch parameters that we've built.
-			$.getJSON(this.source, this.buildFetchParameters(), function(response) {
+					$.each(label.split(', '), function(j, l){
 
-				me.loadResults(response.results);
-				me.loadPagination(response.pages_count);
-				me.renderResults();
-				me.renderPagination();
+						var labeledItems = l.split(':');
 
-			// Handle JSON errors
-			}).error(function(jqXHR, textStatus, errorThrown) {
-				console.log(jqXHR.status + ' ' + errorThrown);
+						if(filteredItems[0] === labeledItems[0]){
+							filteredItems[3] = labeledItems[1];
+						}
+
+						if(filteredItems[1] === labeledItems[0]){
+							filteredItems[2] = labeledItems[1];
+						}
+
+					});
+
+				}
+
+				if(filteredItems.length > 0){
+
+					self.appliedFilters.push({
+						column: filteredItems[0] === 'all' ? undefined : filteredItems[0],
+						columnLabel: typeof filteredItems[2] === 'undefined' ? filteredItems[0] : filteredItems[2],
+						value: filteredItems[1],
+						valueLabel: typeof filteredItems[3] === 'undefined' ? filteredItems[1] : filteredItems[3],
+						type: !live ? 'normal' : 'live'
+					});
+
+					if(!live){
+						self.templates.appliedFilters.render(self.appliedFilters);
+					}
+
+				}
+
+
 			});
+
+
 		},
 
-		loadResults: function(results) {
-			this.results = results;
+		_removeFilter: function(idx){
+			//remove a filter
+			this.templates.appliedFilters.clear();
+			this.templates.results.clear();
+			this.appliedFilters.splice(idx, 1);
+
 		},
 
-		loadPagination: function(pagesCount) {
+		_setSorting: function(column){
 
-			// Reset our pagination data
-			this.pagination.navigation = [];
+			//set an applied sorting
+			var sortable = column.split(':');
+			var direction = typeof sortable[1] !== 'undefined' ? sortable[1] : 'asc';
 
-			// Loop through the pages and add a new index
-			// to the pagination data array
-			for (i = 1; i <= pagesCount; i++) {
-				var paginationData = {
-					page: i,
-					active: false
+			if(sortable[0] === this.sort.column){
+
+				this.sort.direction = (this.sort.direction === 'asc') ? 'desc' : 'asc';
+
+			}else{
+
+				this.sort.column = sortable[0];
+				this.sort.direction = direction;
+
+			}
+
+		},
+
+		_fetch: function(){
+			//fetch our results from our controller
+
+			var self = this;
+
+			this._loader();
+
+				$.ajax({
+					url : this.source,
+					dataType: 'json',
+					data: this._buildFetchData()
+				})
+				.done(function(response){
+					self._loader();
+
+					self.isActive = false;
+
+					self.totalCount = response.total_count; //For Callback
+					self.filteredCount = response.filtered_count; //For Callback
+
+					if(self.opt.type === 'pages'){
+						self.templates.results.render(response.results);
+					}else{
+						self.templates.results.append(response.results);
+					}
+
+					self.templates.pagination.render(self._buildPagination(response.pages_count, response.total_count, response.filtered_count));
+
+					if(response.pages_count <= 1 && self.opt.type === 'infiniteload'){
+						self.templates.pagination.clear();
+					}
+
+					self._callback();
+
+				})
+				.error(function(jqXHR, textStatus, errorThrown) {
+					console.log(jqXHR.status + ' ' + errorThrown);
+				});
+
+		},
+
+		//build the url params to pass to the route
+		_buildFetchData: function(){
+
+			var params = {
+				page: this.pagination,
+				dividend: this.opt.dividend,
+				threshold: this.opt.threshold,
+				throttle: this.opt.throttle,
+				filters: [],
+				sort: '',
+				direction: ''
+			};
+
+			$.map(this.appliedFilters, function(n){
+
+				if(typeof n.column === 'undefined'){
+					params.filters.push(n.value);
+				}else{
+
+					var newFilter = {};
+					newFilter[n.column] = n.value;
+					params.filters.push(newFilter);
+
+				}
+
+			});
+
+			//if we are sorting
+			if(typeof this.sort.column !== 'undefined'){
+				params.sort = this.sort.column;
+				params.direction = this.sort.direction;
+			}
+
+			return $.param(params);
+
+		},
+
+		//build the pagination based on type
+		_buildPagination: function(pages_count, total_count, filtered_count){
+
+			var self = this,
+				pagiNav = [],
+				pagiData,
+				newPerPage,
+				i;
+
+
+			if(this.opt.type === 'pages'){
+
+				//pagination if a throttle is set
+				if( (total_count > this.opt.throttle) && (filtered_count > this.opt.throttle) ){
+
+					newPerPage = Math.ceil(this.opt.throttle / this.opt.dividend);
+
+					for(i = 1; i <= this.opt.dividend; i++){
+
+						pagiData = {
+							page: i,
+							pageStart: i === 1 ? 1 : (newPerPage * (i - 1) + 1),
+							pageLimit: i === 1 ? newPerPage : (total_count < self.opt.throttle && i === self.opt.dividend) ? total_count : newPerPage * i,
+							active: self.pagination === i ? true : false,
+							throttle: false
+						};
+
+						pagiNav.push(pagiData);
+
+					}
+
+					//if final not final page
+					if(total_count > self.opt.throttle){
+						pagiData = {
+							throttle: true,
+							label: 'More'
+						};
+
+						pagiNav.push(pagiData);
+					}
+
+
+				}else{
+
+					if(filtered_count !== total_count){
+						newPerPage = Math.ceil(filtered_count / pages_count);
+					}else{
+						newPerPage = Math.ceil(total_count / pages_count);
+					}
+
+					for(i = 1; i <= pages_count; i++){
+
+						pagiData = {
+							page: i,
+							pageStart: i === 1 ? 1 : (newPerPage * (i - 1) + 1),
+							pageLimit: i === 1 ? newPerPage : (total_count < (newPerPage * i)) ? total_count : newPerPage * i,
+							active: self.pagination === i ? true : false
+						};
+
+						pagiNav.push(pagiData);
+
+					}
+
+				}
+
+
+			}
+
+			console.log(pages_count);
+
+			//load more pagination
+			if(this.opt.type === 'infiniteload'){
+
+				pagiData = {
+					page: self.pagination,
+					active: true,
+					infiniteload: true
 				};
 
-				if (this.pagination.page == i) {
-					paginationData.active = true;
-				}
+				pagiNav.push(pagiData);
 
-				this.pagination.navigation.push(paginationData);
 			}
+
+
+			return pagiNav;
+
 		},
 
-		renderResults: function() {
+		_goToPage: function(idx){
+			//set our pagination helper to new page
+
+			if(isNaN(idx = parseInt(idx, 10))){
+				idx = 1;
+			}
+
+			this.pagination = idx;
+
+		},
+
+		_loader: function(){
+			//show a loader while fetching data
+
+			if($(this.opt.loader).is(':visible')){
+				$(this.opt.loader).fadeOut();
+			}else{
+				$(this.opt.loader).fadeIn();
+			}
+
+		},
+
+		_trigger: function(params){
+			//for custom events outside the normal
+			// data-filter, data-sort
+
+			var self = this;
+
+			$.each(params, function(k, v){
+
+				if(k === 'sort'){
+					self._setSorting(v);
+				}
+
+				if(k === 'filter'){
+					self._setFilters(v);
+				}
+
+			});
+
 			this.templates.results.clear();
-			this.templates.results.render(this.results);
+			this._fetch();
 		},
 
-		renderPagination: function() {
-			this.templates.pagination.render(this.pagination.navigation);
+		_reset: function(){
+			//reset the grid back to first load
+
+			this.appliedFilters = [];
+			this.pagination = 1;
+			this.sort = {
+				column: this.opt.sort.column,
+				direction: this.opt.sort.direction
+			};
+			this.templates.appliedFilters.clear();
+			this.templates.results.clear();
+			this._fetch();
 		},
 
-		observePagination: function() {
-			var me = this;
+		_callback: function(){
+			//ran everything a fetch is completed
 
-			$('body').on('click', this.$pagination.selector + ' .goto-page', function(e) {
-				e.preventDefault();
-				var $link = $(this),
-				   pageId = $link.data('page');
+            if(this.opt.callback !== undefined && $.isFunction(this.opt.callback)){
+                this.opt.callback(this.totalCount, this.filteredCount, this.appliedFilters);
+            }
 
-				me.goToPage(pageId);
-				me.fetch();
-			});
-		},
-
-		observeSorting: function() {
-			var me = this;
-
-			this.$results.find('thead [data-column]').click(function() {
-				var $cell = $(this),
-				    column = $cell.data('column');
-
-				me.setSort(column);
-				me.fetch();
-			});
-		},
-
-		observeLiveSearch: function() {
-			var me = this, liveSearch;
-
-			this.$element.find('.live-search').keyup(function(e) {
-				var $input = $(this);
-
-				// Clear any previous timeouts we had for live search
-				// so that propogation does not occur.
-				if (typeof liveSearch !== 'undefined') {
-					clearTimeout(liveSearch);
-				}
-
-				// Create a new live search timeout to be executed
-				// after the configured live search delay.
-				liveSearch = setTimeout(function() {
-					me.setLiveSearch($input.val());
-					me.fetch();
-				}, me.options.liveSearchDelay);
-
-			});
-		},
-
-		/*
-		|--------------------------------------------------------------------------
-		| Utilities
-		|--------------------------------------------------------------------------
-		|
-		| The methods below are various utilities used throughout the DataGrid
-		| object.
-		|
-		*/
-
-		/**
-		 * Parses a mappings string and returns an array of objects with
-		 * the mappings provided.
-		 *
-		 * Input format:
-		 *     "Two Items:2|One Item:1|Zero Items:0"
-		 *
-		 * Output format:
-		 *     [{"label":"Two Items","value":"2"}...]
-		 *
-		 * @param  string  mappingsString
-		 * @return array
-		 */
-		parseMappings: function(mappingsString) {
-			var mappings = [];
-
-			$.each(mappingsString.split('|'), function(index, mapping) {
-				var mappingParts = mapping.split(':');
-				mappings.push({
-					label: mappingParts[0],
-					value: mappingParts[1]
-				});
-			});
-
-			return mappings;
-		},
-
-		buildFetchParameters: function() {
-			var me = this,
-			parameters = {
-				page: this.pagination.page,
-				requested_pages: this.options.pagination.requestedPages,
-				minimum_per_page: this.options.pagination.minimumPerPage,
-				filters: [],
-			},
-			sort, direction;
-
-			// Loop through filters and build up
-			// array of filter parameters
-			$.each(this.appliedFilters, function(index, filter) {
-				if (filter.type === 'global') {
-					parameters.filters.push(filter.value);
-				} else {
-					var newFilter = {};
-					newFilter[filter.column] = filter.value;
-					parameters.filters.push(newFilter);
-				}
-			});
-
-			// Check we have specified a sort. If so, let's pass
-			// it to our query
-			if (typeof (sort = this.sort.column) !== 'undefined') {
-				parameters['sort']      = sort;
-				parameters['direction'] = this.sort.direction;
-			}
-
-			// Look at the live search value. If there is a value
-			// we'll create a filter based off it.
-			if (this.liveSearch.length) {
-				parameters.filters.push(this.liveSearch);
-			}
-
-			return parameters;
-		},
-
-		goToPage: function(page) {
-			var parsedPage;
-
-			// Validate our parsed page
-			if (isNaN(parsedPage = parseInt(page))) {
-				parsedPage = 1;
-			}
-
-			this.pagination.page = parsedPage;
-		},
-
-		setSort: function(column, direction) {
-
-			// Automatic toggling of sort if the
-			// direction is not specified
-			if (typeof direction === 'undefined') {
-
-				// If we're referring to the same column
-				// again, reverse the direction
-				if (column == this.sort.column) {
-					this.sort.direction = (this.sort.direction == 'asc') ? 'desc' : 'asc';
-
-				// Otherwise we'll change the column and set
-				// the sort to ascending
-				} else {
-					this.sort.column    = column;
-					this.sort.direction = 'asc';
-				}
-
-			// Otherwise they've provided the column and direction
-			} else {
-				this.sort.column    = column;
-				this.sort.direction = direction;
-			}
-		},
-
-		setLiveSearch: function(search) {
-			this.liveSearch = search;
-		},
-
-		clearLiveSearch: function() {
-			this.liveSearch = '';
 		}
 
 	};
 
-	$.fn.dataGrid = function(options) {
-		return new DataGrid(this, options);
-	}
+	$.datagrid = function(key, results, pagination, filters, options){
+		return new DataGrid(key, results, pagination, filters, options);
+	};
 
-})(jQuery);
+})(jQuery, window, document);

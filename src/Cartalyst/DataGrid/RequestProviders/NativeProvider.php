@@ -18,7 +18,7 @@
  * @link       http://cartalyst.com
  */
 
-interface ProviderInterface {
+class NativeProvider implements ProviderInterface {
 
 	/**
 	 * Get an array of filters. Filters which
@@ -28,7 +28,10 @@ interface ProviderInterface {
 	 *
 	 * @return array
 	 */
-	public function getFilters();
+	public function getFilters()
+	{
+		if ( ! isset($_GET['filters'])) return array();
+	}
 
 	/**
 	 * Get the column by which we sort our
@@ -36,7 +39,12 @@ interface ProviderInterface {
 	 *
 	 * @return string
 	 */
-	public function getSort();
+	public function getSort()
+	{
+		if ( ! isset($_GET['sort'])) return;
+
+		return $_GET['sort'];
+	}
 
 	/**
 	 * Get the direction which we apply
@@ -44,21 +52,42 @@ interface ProviderInterface {
 	 *
 	 * @return string
 	 */
-	public function getDirection();
+	public function getDirection()
+	{
+		if ( ! isset($_GET['direction'])) return 'asc';
+
+		$direction = $_GET['direction'];
+
+		return in_array($direction, array('asc', 'desc')) ? $direction : 'asc';
+	}
 
 	/**
 	 * Get the page which we are on.
 	 *
 	 * @return int
 	 */
-	public function getPage();
+	public function getPage()
+	{
+		if ( ! isset($_GET['page'])) return 1;
+
+		$page = (int) $_GET['page'];
+
+		return ($page > 0) ? $page : 1;
+	}
 
 	/**
 	 * Get the threshold (number of results before pagination begins).
 	 *
 	 * @return int
 	 */
-	public function getThreshold();
+	public function getThreshold()
+	{
+		if ( ! isset($_GET['threshold'])) return 100;
+
+		$threshold = (int) $_GET['threshold'];
+
+		return ($threshold > 0) ? $threshold : 100;
+	}
 
 	/**
 	 * Get the dividend (ideal number of pages, once the results
@@ -67,7 +96,14 @@ interface ProviderInterface {
 	 *
 	 * @return int
 	 */
-	public function getDividend();
+	public function getDividend()
+	{
+		if ( ! isset($_GET['dividend'])) return 10;
+
+		$dividend = (int) $_GET['dividend'];
+
+		return ($dividend > 0) ? $dividend : 10;
+	}
 
 	/**
 	 * Get the throttle, which is the maximum results set. If the
@@ -76,6 +112,13 @@ interface ProviderInterface {
 	 *
 	 * @return int
 	 */
-	public function getThrottle();
+	public function getThrottle()
+	{
+		if ( ! isset($_GET['throttle'])) return 1000;
+
+		$throttle = (int) $_GET['throttle'];
+
+		return ($throttle > 0) ? $throttle : 1000;
+	}
 
 }

@@ -1,4 +1,4 @@
-<?php
+<?php namespace Cartalyst\DataGrid\Tests;
 /**
  * Part of the Data Grid package.
  *
@@ -20,6 +20,7 @@
 
 use Mockery as m;
 use Cartalyst\DataGrid\RequestProviders\IlluminateProvider as Provider;
+use PHPUnit_Framework_TestCase;
 
 class IlluminateRequestProviderTest extends PHPUnit_Framework_TestCase {
 
