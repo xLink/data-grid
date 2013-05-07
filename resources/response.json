@@ -4,24 +4,30 @@
 			"id": 1,
 			"first_name": "Ben",
 			"last_name": "Corlett",
-			"activated": 1,
+			"activated": true,
 		},
 		{
 			"id": 2,
 			"first_name": "Bruno",
 			"last_name": "Gaspar",
-			"activated": 1,
+			"activated": true,
 		}
 		{
 			"id": 3,
 			"first_name": "Dan",
 			"last_name": "Syme",
-			"activated": 0,
+			"activated": false,
+		},
+		{
+			"id": 4,
+			"first_name": "Jared",
+			"last_name": "West",
+			"activated": true,
 		}
 	],
 
-	"total_count": 100,
-	"filtered_count": 30,
+	"total_count": 20,
+	"filtered_count": 4,
 
 	"page": 1,
 	"pages_count": 3,
