@@ -14,12 +14,12 @@ return array(
 	| specific data set.
 	|
 	| Supported: Any class which implements:
-	|            Cartalyst\DataGrid\DataHandlers\DataHandlerInterface
+	|            Cartalyst\DataGrid\DataHandlers\HandlerInterface
 	|
 	*/
 	'handlers' => array(
 
-		'Cartalyst\DataGrid\DataHandlers\DatabaseDataHandler' => function($data)
+		'Cartalyst\DataGrid\DataHandlers\DatabaseHandler' => function($data)
 		{
 			return (
 				$data instanceof Illuminate\Database\Eloquent\Model or
@@ -28,9 +28,12 @@ return array(
 			);
 		},
 
-		'Cartalyst\DataGrid\DataHandlers\ArrayDataHandler' => function($data)
+		'Cartalyst\DataGrid\DataHandlers\CollectionHandler' => function($data)
 		{
-			return is_array($data);
+			return (
+				$data instanceof Illuminate\Support\Collection or
+				is_array($data)
+			);
 		},
 
 	),

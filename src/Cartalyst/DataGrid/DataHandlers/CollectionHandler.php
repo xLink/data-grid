@@ -1,4 +1,4 @@
-<?php namespace Cartalyst\DataGrid\DataHandlers;
+<?php namespace Cartalyst\DataGrid\Handlers;
 /**
  * Part of the Data Grid package.
  *
@@ -20,22 +20,17 @@
 
 use Cartalyst\DataGrid\DataGrid;
 
-interface DataHandlerInterface {
-
-	/**
-	 * Create a new data source.
-	 *
-	 * @param  Cartalyst\DataGrid\DataGrid  $dataGrid
-	 * @return void
-	 */
-	public function __construct(DataGrid $dataGrid);
+class CollectionHandler extends BaseHandler implements HandlerInterface {
 
 	/**
 	 * Sets up the data source context.
 	 *
-	 * @return Cartalyst\DataGrid\DataHandler\DataHandlerInterface
+	 * @return Cartalyst\DataGrid\Handler\HandlerInterface
 	 */
-	public function setupDataHandlerContext();
+	public function setupDataHandlerContext()
+	{
+
+	}
 
 	/**
 	 * Get the total (unfiltered) count
@@ -43,48 +38,69 @@ interface DataHandlerInterface {
 	 *
 	 * @return int
 	 */
-	public function getTotalCount();
+	public function getTotalCount()
+	{
+
+	}
 
 	/**
 	 * Get the filtered count of results.
 	 *
 	 * @return int
 	 */
-	public function getFilteredCount();
+	public function getFilteredCount()
+	{
+
+	}
 
 	/**
 	 * Get the current page we are on.
 	 *
 	 * @return int
 	 */
-	public function getPage();
+	public function getPage()
+	{
+
+	}
 
 	/**
 	 * Get the number of pages.
 	 *
 	 * @return int
 	 */
-	public function getPagesCount();
+	public function getPagesCount()
+	{
+
+	}
 
 	/**
 	 * Get the previous page.
 	 *
 	 * @return int|null
 	 */
-	public function getPreviousPage();
+	public function getPreviousPage()
+	{
+
+	}
 
 	/**
 	 * Get the next page.
 	 *
 	 * @return int|null
 	 */
-	public function getNextPage();
+	public function getNextPage()
+	{
+
+	}
 
 	/**
 	 * Get the results.
 	 *
 	 * @return int
 	 */
-	public function getResults();
+	public function getResults()
+	{
+
+	}
 
 }

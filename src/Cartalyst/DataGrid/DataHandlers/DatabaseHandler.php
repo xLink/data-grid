@@ -1,4 +1,4 @@
-<?php namespace Cartalyst\DataGrid\DataHandlers;
+<?php namespace Cartalyst\DataGrid\Handlers;
 /**
  * Part of the Data Grid package.
  *
@@ -24,88 +24,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Contracts\ArrayableInterface;
 
-class DatabaseDataHandler implements DataHandlerInterface {
+class DatabaseHandler extends BaseHandler implements HandlerInterface {
 
 	/**
-	 * The shared data grid instance.
+	 * Validate the data store.
 	 *
-	 * @var Cartalyst\DataGrid\DataGrid
+	 * @param  mixed  $data
+	 * @return mixed  $data
+	 * @throws Exception
 	 */
-	protected $dataGrid;
-
-	/**
-	 * The data we use.
-	 *
-	 * @var mixed
-	 */
-	protected $data;
-
-	/**
-	 * The request provider.
-	 *
-	 * @var Cartalyst\DataGrid\RequestProviders\ProviderInterface
-	 */
-	protected $request;
-
-	/**
-	 * Cached total (unfiltered) count of results.
-	 *
-	 * @var int
-	 */
-	protected $totalCount = 0;
-
-	/**
-	 * Cached filtered count of results.
-	 *
-	 * @var int
-	 */
-	protected $filteredCount = 0;
-
-	/**
-	 * Cached current page.
-	 *
-	 * @var int
-	 */
-	protected $page = 1;
-
-	/**
-	 * Cached number of pages.
-	 *
-	 * @var int
-	 */
-	protected $pagesCount = 1;
-
-	/**
-	 * Cached previous page.
-	 *
-	 * @var int|null
-	 */
-	protected $previousPage;
-
-	/**
-	 * Cached next page.
-	 *
-	 * @var int|null
-	 */
-	protected $nextPage;
-
-	/**
-	 * Cached results.
-	 *
-	 * @var array
-	 */
-	protected $results = array();
-
-	/**
-	 * Create a new data source.
-	 *
-	 * @param  Cartalyst\DataGrid\DataGrid  $dataGrid
-	 * @return void
-	 */
-	public function __construct(DataGrid $dataGrid)
+	public function validateData($data)
 	{
-		$data = $dataGrid->getData();
-
 		// If the data is an instance of an Eloquent model,
 		// we'll grab a new query from it.
 		if ($data instanceof Model)
@@ -120,15 +49,13 @@ class DatabaseDataHandler implements DataHandlerInterface {
 			throw new \InvalidArgumentException("Invalid query passed to Eloquent Data Source.");
 		}
 
-		$this->dataGrid = $dataGrid;
-		$this->data     = $data;
-		$this->request  = $this->dataGrid->getEnvironment()->getRequestProvider();
+		return $data;
 	}
 
 	/**
 	 * Sets up the data source context.
 	 *
-	 * @return Cartalyst\DataGrid\DataHandler\DataHandlerInterface
+	 * @return Cartalyst\DataGrid\Handler\HandlerInterface
 	 */
 	public function setupDataHandlerContext()
 	{
@@ -468,11 +395,6 @@ class DatabaseDataHandler implements DataHandlerInterface {
 			return (array) $result;
 
 		}, (array) $results);
-	}
-
-	public function setFilteredCount($filteredCount)
-	{
-		$this->filteredCount = $filteredCount;
 	}
 
 }

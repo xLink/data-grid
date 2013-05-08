@@ -18,7 +18,7 @@
  * @link       http://cartalyst.com
  */
 
-use Cartalyst\DataGrid\DataHandlers\DataHandlerInterface;
+use Cartalyst\DataGrid\DataHandlers\HandlerInterface as DataHandlerInterface;
 use Illuminate\Support\Contracts\ArrayableInterface;
 use Illuminate\Support\Contracts\JsonableInterface;
 
@@ -44,7 +44,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	 * The data source, responsible for returning
 	 * appropriate information from the data provided.
 	 *
-	 * @var Cartalyst\DataGrid\DataHandler\DataHandlerInterface
+	 * @var Cartalyst\DataGrid\DataHandler\HandlerInterface
 	 */
 	protected $dataHandler;
 
@@ -96,7 +96,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	 * matching it to a mapping that's registered with the
 	 * environment instance.
 	 *
-	 * @return Cartalyst\Datagrid\DataHandlers\DataHandlerInterface
+	 * @return Cartalyst\Datagrid\DataHandlers\HandlerInterface
 	 */
 	public function createDataHandler()
 	{
@@ -216,7 +216,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	/**
 	 * Returns the data handler.
 	 *
-	 * @return Cartalyst\DataGrid\DataHandlers\DataHandlerInterface
+	 * @return Cartalyst\DataGrid\DataHandlers\HandlerInterface
 	 */
 	public function getDataHandler()
 	{
@@ -226,7 +226,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	/**
 	 * Sets the data handler.
 	 *
-	 * @param  Cartalyst\DataGrid\DataHandlers\DataHandlerInterface  $dataHandler
+	 * @param  Cartalyst\DataGrid\DataHandlers\HandlerInterface  $dataHandler
 	 * @return void
 	 */
 	public function setDataHandler(DataHandlerInterface $dataHandler)
