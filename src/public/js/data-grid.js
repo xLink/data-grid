@@ -16,54 +16,53 @@
  * @copyright  (c) 2011 - 2013, Cartalyst LLC
  * @link       http://cartalyst.com
  */
-
-;(function($, window, document, undefined) {
+ ;(function($, window, document, undefined){
 
 	'use strict';
 
 	var defaults = {
 		source: undefined,
-		sort: {
-			column: undefined,
-			direction: 'asc'
-		},
 		dividend: 10,
 		threshold: 20,
 		throttle: 500,
 		type: 'pages',
-		tempoOptions: {
-			var_braces: '\\[\\[\\]\\]',
-			tag_braces: '\\[\\?\\?\\]'
-		},
 		loader: undefined,
-		callback: undefined
+		sort: {
+            column: undefined,
+            direction: 'asc'
+        },
+        tempoOptions: {
+            var_braces: '\\[\\[\\]\\]',
+            tag_braces: '\\[\\?\\?\\]'
+        },
+        callback: undefined
 	};
 
 	// DataGrid plugin constructor
-	function DataGrid(key, results, pagination, filters, options) {
+	function DataGrid(key, results, pagination, filters, options){
 
 		this.opt = $.extend({}, defaults, options);
 
-		// Binding Key
-		this.key = '[data-key=' + key + ']';
+		//Binding Key
+		this.key = '[data-key='+key+']';
 
-		// Common Selectors
+		//Common Selectors
 		this.$results = $(results + this.key);
 		this.$pagi = $(pagination + this.key);
 		this.$filters = $(filters + this.key);
 		this.$body = $(document.body);
 
-		// Get Our Source
+		//Get Our Source
 		this.source = this.$results.data('source') || this.opt.source;
 
-		// Helpers
+		//Helpers
 		this.appliedFilters = [];
-		this.templates      = {};
-		this.pagination     = 1;
-		this.isActive       = false;
-		this.orgThrottle    = this.opt.throttle;  // Helper for correct counting
-		this.sort           = {
-			column:    this.opt.sort.column,
+		this.templates = {};
+		this.pagination = 1;
+		this.isActive = false;
+		this.orgThrottle = this.opt.throttle;  //Helper for correct counting
+		this.sort = {
+			column: this.opt.sort.column,
 			direction: this.opt.sort.direction
 		};
 
@@ -73,64 +72,64 @@
 
 	DataGrid.prototype = {
 
-		_init: function() {
+		_init: function(){
 
-			// Check Dependencies
+			//Check Dependencies
 			this._checkDeps();
 
-			// Find Our Templates
-			this._prepTemplates();
+			//Find Our Templates
+            this._prepTemplates();
 
-			// Event Listners
-			this._events();
+            //Event Listners
+            this._events();
 
-			// Initanal Fetch
-			this._fetch();
+            //Initanal Fetch
+            this._fetch();
 
 		},
 
-		_checkDeps: function() {
+		_checkDeps: function(){
 
 			if (typeof Tempo === 'undefined') {
 				$.error('$.datagrid requires TempoJS v2.0.0 or later to run.');
 			}
 
-			if ( ! this.$results.length) {
+			if(!this.$results.length){
 				$.error('$.datagrid requires a results container');
 			}
 
-			if ( ! this.$pagi.length) {
+			if(!this.$pagi.length){
 				$.error('$.datagrid requires a pagination container');
 			}
 
-			if ( ! this.$filters.length) {
+			if(!this.$filters.length){
 				$.error('$.datagrid requires an applied filters container');
 			}
 
 		},
 
-		_prepTemplates: function() {
+		_prepTemplates: function(){
 
-			// Initialize Tempo
-			this.templates.results        = Tempo.prepare(this.$results, this.opt.tempoOptions);
-			this.templates.pagination     = Tempo.prepare(this.$pagi, this.opt.tempoOptions);
+			//initialize Tempo
+			this.templates.results = Tempo.prepare(this.$results, this.opt.tempoOptions);
+			this.templates.pagination = Tempo.prepare(this.$pagi, this.opt.tempoOptions);
 			this.templates.appliedFilters = Tempo.prepare(this.$filters, this.opt.tempoOptions);
 
 		},
 
-		_events: function() {
+		_events: function(){
 
 			var self = this;
 
-			// Sorting
-			this.$body.on('click', '[data-sort]' + this.key, function(e) {
+			//Sorting
+			this.$body.on('click', '[data-sort]'+this.key, function(e){
 
-				// Visual Sort Helpers
+				//Visual Sort Helpers
 				$('[data-sort]'+self.key).not($(this)).removeClass('asc desc');
 
-				if ($(this).hasClass('asc')) {
+				if($(this).hasClass('asc')){
 					$(this).removeClass('asc').addClass('desc');
-				} else {
+				}else{
 					$(this).removeClass('desc').addClass('asc');
 				}
 
@@ -139,33 +138,35 @@
 				self._fetch();
 			});
 
-			// Filters
-			this.$body.on('click', '[data-filter]'+this.key, function(e) {
+			//Filters
+			this.$body.on('click', '[data-filter]'+this.key, function(e){
 				self._setFilters($(this).data('filter'), $(this).data('label'), false);
 				self.templates.results.clear();
 				self._goToPage(1);
 				self._fetch();
 			});
 
-			// Search
+			//Search
 			var timeout;
-			this.$body.find('[data-search]'+this.key).on('submit keyup', function(e) {
+			this.$body.find('[data-search]'+this.key).on('submit keyup', function(e){
 
 				e.preventDefault();
 
 				var $input = $(this).find('input'),
 					$column = $(this).find('select');
 
-				if (e.type === 'submit') {
+				if(e.type === 'submit'){
 
-					// Lets make sure its a word and not just spaces
-					if ( ! $.trim($input.val()).length) return;
+					//lets make sure its a word
+					// and not just spaces
+					if(!$.trim($input.val()).length){ return; }
 
-					$.map(self.appliedFilters, function(f) {
+					$.map(self.appliedFilters, function(f){
 
-						if (f.value === $input.val()) {
+						if(f.value === $input.val()){
 							f.type = 'normal';
 						}
+
 					});
 
 					self.templates.appliedFilters.render(self.appliedFilters);
@@ -183,77 +184,83 @@
 					$input.val('');
 					$column.prop('selectedIndex',0);
 
-					// DEMO ONLY
+					//DEMO ONLY
 					$('.options li').text('All');
 
 					return false;
 
 				}
 
-				if (e.type === 'keyup') {
+				if(e.type === 'keyup'){
 
-					if (self.isActive) return;
+					if(self.isActive){ return; }
 
 					clearTimeout(timeout);
 
-					timeout = setTimeout(function() {
+					timeout = setTimeout(function(){
 
-						if ($input.val().length === 0 || $input.val().length) {
+						if($input.val().length === 0 || $input.val().length){
 
-							$.each(self.appliedFilters, function(i, f) {
-								if (f.type === 'live') {
+							$.each(self.appliedFilters, function(i, f){
+
+								if(f.type === 'live'){
 									self.appliedFilters.splice($.inArray(f.type, self.appliedFilters), 1);
 								}
+
 							});
 
 							self._fetch();
 						}
 
-						if ( ! $.trim($input.val()).length) return;
+						if(!$.trim($input.val()).length){ return; }
 
-						self._setFilters($column.val() + ':' + $input.val(), '', true);
+						self._setFilters($column.val()+':'+$input.val(), '', true);
 						self.templates.results.clear();
 						self._goToPage(1);
 						self._fetch();
+
 					}, 800);
 				}
 
 			});
 
-			// Remove Filter
-			this.$filters.on('click', 'li', function(e) {
+			//Remove Filter
+			this.$filters.on('click', 'li', function(e){
+
 				self._removeFilter($(this).index());
 
-				$.each(self.appliedFilters, function(i, val) {
+				$.each(self.appliedFilters, function(i, val){
 
-					if (val.type === 'normal') {
+					if(val.type === 'normal'){
 						self.templates.appliedFilters.append(val);
 					}
+
 				});
 
 				self._fetch();
 			});
 
-			// Reset Grid
-			this.$body.on('click', '[data-reset]'+this.key, function(e) {
+			//Reset Grid
+			this.$body.on('click', '[data-reset]'+this.key, function(e){
 				self._reset();
 			});
 
-			// Pagination
-			this.$pagi.on('click', '[data-page]', function(e) {
+			//Pagination
+			this.$pagi.on('click', '[data-page]', function(e){
 				var pageId;
 
 				e.preventDefault();
 
-				if (self.opt.type === 'pages') {
+				if(self.opt.type === 'pages'){
 
 					pageId = $(this).data('page');
 
 					self.templates.pagination.clear();
 					self.templates.results.clear();
+
 				}
 
-				if (self.opt.type === 'infiniteload') {
+				if(self.opt.type === 'infiniteload'){
 
 					pageId = $(this).data('page');
 					$(this).data('page', ++pageId);
@@ -261,22 +268,25 @@
 
 				self._goToPage(pageId);
 				self._fetch();
+
 			});
 
-			// Update Throttle
-			this.$pagi.on('click', '[data-throttle]', function(e) {
+			//Update Throttle
+			this.$pagi.on('click', '[data-throttle]', function(e){
+
 				self.opt.throttle += self.orgThrottle;
 				self.templates.pagination.clear();
 				self.templates.results.clear();
 				self._fetch();
+
 			});
 
-			// Demo Only Events
-			$('[data-opt]'+this.key).on('change', function() {
+			//Demo Only Events
+			$('[data-opt]'+this.key).on('change', function(){
 				var opt = $(this).data('opt'),
 					val = $(this).val();
 
-				switch(opt) {
+				switch(opt){
 					case 'dividend':
 						self.opt.dividend = val;
 					break;
@@ -298,45 +308,49 @@
 		},
 
 		// Set an applied filter
-		_setFilters: function(filter, label, live) {
+		_setFilters: function(filter, label, live){
 
 			var self = this;
 
-			// When addeding a filter reset
+			//when addeding a filter reset
 			this.opt.throttle = this.orgThrottle;
 
-			$.each(filter.split(', '), function(i, val) {
+			$.each(filter.split(', '), function(i, val){
 
 				var filteredItems = val.split(':');
 
-				// Check if filter is already applied
-				$.each(self.appliedFilters, function(i, f) {
+				//check if filter is already applied
+				$.each(self.appliedFilters, function(i, f){
 
-					if (f.value === filteredItems[1]) {
+					if(f.value === filteredItems[1]){
 
 						filteredItems.splice($.inArray(f.value, filteredItems), 1);
 						filteredItems.splice($.inArray(f.column, filteredItems), 1);
+
 					}
+
 				});
 
-				// Lets check if we need a new label
-				if (typeof label !== 'undefined') {
+				//Lets check if we need a new label
+				if(typeof label !== 'undefined'){
 
-					$.each(label.split(', '), function(j, l) {
+					$.each(label.split(', '), function(j, l){
 
 						var labeledItems = l.split(':');
 
-						if (filteredItems[0] === labeledItems[0]) {
+						if(filteredItems[0] === labeledItems[0]){
 							filteredItems[3] = labeledItems[1];
 						}
 
-						if (filteredItems[1] === labeledItems[0]) {
+						if(filteredItems[1] === labeledItems[0]){
 							filteredItems[2] = labeledItems[1];
 						}
+
 					});
+
 				}
 
-				if (filteredItems.length > 0) {
+				if(filteredItems.length > 0){
 
 					self.appliedFilters.push({
 						column: filteredItems[0] === 'all' ? undefined : filteredItems[0],
@@ -346,9 +360,10 @@
 						type: !live ? 'normal' : 'live'
 					});
 
-					if ( ! live) {
+					if(!live){
 						self.templates.appliedFilters.render(self.appliedFilters);
 					}
+
 				}
 
 
@@ -357,36 +372,36 @@
 
 		},
 
-		_removeFilter: function(idx) {
-
-			// Remove a filter
+		_removeFilter: function(idx){
+			//remove a filter
 			this.templates.appliedFilters.clear();
 			this.templates.results.clear();
 			this.appliedFilters.splice(idx, 1);
 
 		},
 
-		_setSorting: function(column) {
+		_setSorting: function(column){
 
-			// Set an applied sorting
+			//set an applied sorting
 			var sortable = column.split(':');
 			var direction = typeof sortable[1] !== 'undefined' ? sortable[1] : 'asc';
 
-			if (sortable[0] === this.sort.column) {
+			if(sortable[0] === this.sort.column){
 
 				this.sort.direction = (this.sort.direction === 'asc') ? 'desc' : 'asc';
 
-			} else {
+			}else{
 
 				this.sort.column = sortable[0];
 				this.sort.direction = direction;
 
 			}
+
 		},
 
-		_fetch: function() {
+		_fetch: function(){
+			//fetch our results from our controller
 
-			// Fetch our results from our controller
 			var self = this;
 
 			this._loader();
@@ -396,23 +411,23 @@
 					dataType: 'json',
 					data: this._buildFetchData()
 				})
-				.done(function(response) {
+				.done(function(response){
 					self._loader();
 
 					self.isActive = false;
 
-					self.totalCount = response.total_count; // For Callback
-					self.filteredCount = response.filtered_count; // For Callback
+					self.totalCount = response.total_count; //For Callback
+					self.filteredCount = response.filtered_count; //For Callback
 
-					if (self.opt.type === 'pages') {
+					if(self.opt.type === 'pages'){
 						self.templates.results.render(response.results);
-					} else {
+					}else{
 						self.templates.results.append(response.results);
 					}
 
 					self.templates.pagination.render(self._buildPagination(response.pages_count, response.total_count, response.filtered_count));
 
-					if (response.pages_count <= 1 && self.opt.type === 'infiniteload') {
+					if(response.pages_count <= 1 && self.opt.type === 'infiniteload'){
 						self.templates.pagination.clear();
 					}
 
@@ -425,8 +440,8 @@
 
 		},
 
-		// Build the url params to pass to the route
-		_buildFetchData: function() {
+		//build the url params to pass to the route
+		_buildFetchData: function(){
 
 			var params = {
 				page: this.pagination,
@@ -438,19 +453,22 @@
 				direction: ''
 			};
 
-			$.map(this.appliedFilters, function(n) {
+			$.map(this.appliedFilters, function(n){
 
-				if (typeof n.column === 'undefined') {
+				if(typeof n.column === 'undefined'){
 					params.filters.push(n.value);
-				} else {
+				}else{
+
 					var newFilter = {};
 					newFilter[n.column] = n.value;
 					params.filters.push(newFilter);
+
 				}
+
 			});
 
-			// If we are sorting
-			if (typeof this.sort.column !== 'undefined') {
+			//if we are sorting
+			if(typeof this.sort.column !== 'undefined'){
 				params.sort = this.sort.column;
 				params.direction = this.sort.direction;
 			}
@@ -459,8 +477,8 @@
 
 		},
 
-		// Build the pagination based on type
-		_buildPagination: function(pages_count, total_count, filtered_count) {
+		//build the pagination based on type
+		_buildPagination: function(pages_count, total_count, filtered_count){
 
 			var self = this,
 				pagiNav = [],
@@ -469,14 +487,14 @@
 				i;
 
 
-			if (this.opt.type === 'pages') {
+			if(this.opt.type === 'pages'){
 
-				// Pagination if a throttle is set
-				if ( (total_count > this.opt.throttle) && (filtered_count > this.opt.throttle) ) {
+				//pagination if a throttle is set
+				if( (total_count > this.opt.throttle) && (filtered_count > this.opt.throttle) ){
 
 					newPerPage = Math.ceil(this.opt.throttle / this.opt.dividend);
 
-					for (i = 1; i <= this.opt.dividend; i++) {
+					for(i = 1; i <= this.opt.dividend; i++){
 
 						pagiData = {
 							page: i,
@@ -490,8 +508,8 @@
 
 					}
 
-					// If final not final page
-					if (total_count > self.opt.throttle) {
+					//if final not final page
+					if(total_count > self.opt.throttle){
 						pagiData = {
 							throttle: true,
 							label: 'More'
@@ -500,15 +518,16 @@
 						pagiNav.push(pagiData);
 					}
 
-				} else {
 
-					if (filtered_count !== total_count) {
+				}else{
+
+					if(filtered_count !== total_count){
 						newPerPage = Math.ceil(filtered_count / pages_count);
-					} else {
+					}else{
 						newPerPage = Math.ceil(total_count / pages_count);
 					}
 
-					for (i = 1; i <= pages_count; i++) {
+					for(i = 1; i <= pages_count; i++){
 
 						pagiData = {
 							page: i,
@@ -518,14 +537,16 @@
 						};
 
 						pagiNav.push(pagiData);
+
 					}
+
 				}
+
+
 			}
 
-			console.log(pages_count);
-
-			// Load more pagination
-			if (this.opt.type === 'infiniteload') {
+			//load more pagination
+			if(this.opt.type === 'infiniteload'){
 
 				pagiData = {
 					page: self.pagination,
@@ -542,10 +563,10 @@
 
 		},
 
-		_goToPage: function(idx) {
+		_goToPage: function(idx){
+			//set our pagination helper to new page
 
-			// Set our pagination helper to new page
-			if (isNaN(idx = parseInt(idx, 10))) {
+			if(isNaN(idx = parseInt(idx, 10))){
 				idx = 1;
 			}
 
@@ -553,29 +574,30 @@
 
 		},
 
-		_loader: function() {
+		_loader: function(){
+			//show a loader while fetching data
 
-			// Show a loader while fetching data
-			if ($(this.opt.loader).is(':visible')) {
+			if($(this.opt.loader).is(':visible')){
 				$(this.opt.loader).fadeOut();
-			} else {
+			}else{
 				$(this.opt.loader).fadeIn();
 			}
 
 		},
 
-		_trigger: function(params) {
+		_trigger: function(params){
+			//for custom events outside the normal
+			// data-filter, data-sort
 
-			// For custom events outside the normal (data-filter, data-sort)
 			var self = this;
 
-			$.each(params, function(k, v) {
+			$.each(params, function(k, v){
 
-				if (k === 'sort') {
+				if(k === 'sort'){
 					self._setSorting(v);
 				}
 
-				if (k === 'filter') {
+				if(k === 'filter'){
 					self._setFilters(v);
 				}
 
@@ -585,9 +607,9 @@
 			this._fetch();
 		},
 
-		_reset: function() {
+		_reset: function(){
+			//reset the grid back to first load
 
-			// Reset the grid back to first load
 			this.appliedFilters = [];
 			this.pagination = 1;
 			this.sort = {
@@ -599,18 +621,18 @@
 			this._fetch();
 		},
 
-		_callback: function() {
+		_callback: function(){
+			//ran everything a fetch is completed
 
-			// Ran everything a fetch is completed
-			if (this.opt.callback !== undefined && $.isFunction(this.opt.callback)) {
-				this.opt.callback(this.totalCount, this.filteredCount, this.appliedFilters);
-			}
+            if(this.opt.callback !== undefined && $.isFunction(this.opt.callback)){
+                this.opt.callback(this.totalCount, this.filteredCount, this.appliedFilters);
+            }
 
 		}
 
 	};
 
-	$.datagrid = function(key, results, pagination, filters, options) {
+	$.datagrid = function(key, results, pagination, filters, options){
 		return new DataGrid(key, results, pagination, filters, options);
 	};
 
