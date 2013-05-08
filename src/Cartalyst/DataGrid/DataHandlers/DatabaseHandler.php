@@ -27,6 +27,21 @@ use Illuminate\Support\Contracts\ArrayableInterface;
 class DatabaseHandler extends BaseHandler implements HandlerInterface {
 
 	/**
+	 * Sets up the data source context.
+	 *
+	 * @return Cartalyst\DataGrid\Handler\HandlerInterface
+	 */
+	public function setupDataHandlerContext()
+	{
+		parent::setupDataHandlerContext();
+
+		// Hydrate our results
+		$this->hydrate();
+
+		return $this;
+	}
+
+	/**
 	 * Validate the data store.
 	 *
 	 * @param  mixed  $data
@@ -46,113 +61,10 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 		// let's just check now that
 		if ( ! $data instanceof QueryBuilder and ! $data instanceof EloquentQueryBuilder)
 		{
-			throw new \InvalidArgumentException("Invalid query passed to Eloquent Data Source.");
+			throw new \InvalidArgumentException("Invalid data source passed to database handler. Must be an Eloquent model / query, or a databse query.");
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Sets up the data source context.
-	 *
-	 * @return Cartalyst\DataGrid\Handler\HandlerInterface
-	 */
-	public function setupDataHandlerContext()
-	{
-		// Before we apply any filters, we need to setup the total count.
-		$this->prepareTotalCount();
-
-		// We'll now setup what columns we will select
-		$this->prepareSelect();
-
-		// Apply all the filters requested
-		$this->prepareFilters();
-
-		// Setup the requested sorting
-		$this->prepareSort();
-
-		// Setup filtered count
-		$this->prepareFilteredCount();
-
-		// And we'll setup pagination, pagination
-		// is rather unique in the data grid.
-		$this->preparePagination();
-
-		// Hydrate our results
-		$this->hydrate();
-
-		return $this;
-	}
-
-	/**
-	 * Get the total (unfiltered) count
-	 * of results.
-	 *
-	 * @return int
-	 */
-	public function getTotalCount()
-	{
-		return $this->totalCount;
-	}
-
-	/**
-	 * Get the filtered count of results.
-	 *
-	 * @return int
-	 */
-	public function getFilteredCount()
-	{
-		return $this->filteredCount;
-	}
-
-	/**
-	 * Get the current page we are on.
-	 *
-	 * @return int
-	 */
-	public function getPage()
-	{
-		return $this->page;
-	}
-
-	/**
-	 * Get the number of pages.
-	 *
-	 * @return int
-	 */
-	public function getPagesCount()
-	{
-		return $this->pagesCount;
-	}
-
-	/**
-	 * Get the previous page.
-	 *
-	 * @return int|null
-	 */
-	public function getPreviousPage()
-	{
-		return $this->previousPage;
-	}
-
-	/**
-	 * Get the next page.
-	 *
-	 * @return int|null
-	 */
-	public function getNextPage()
-	{
-		return $this->nextPage;
-	}
-
-	/**
-	 * Get the results.
-	 *
-	 * @return int
-	 */
-	public function getResults()
-	{
-		return $this->results;
 	}
 
 	/**
@@ -292,20 +204,7 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	 */
 	public function prepareSort()
 	{
-		if ( ! $column = $this->request->getSort())
-		{
-			$columns = $this->dataGrid->getColumns();
-			$column = reset($columns);
-		}
-
-		// If our column is an alias, we'll use the actual value instead of the
-		// alias for sorting.
-		if ( ! is_numeric($key = array_search($column, $this->dataGrid->getColumns())))
-		{
-			$column = $key;
-		}
-
-		$direction = $this->request->getDirection();
+		list($column, $direction) = $this->calculateSort();
 
 		$data = ($this->data instanceof EloquentQueryBuilder) ? $this->data->getQuery() : $this->data;
 
@@ -335,31 +234,11 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	public function preparePagination()
 	{
 		// If our filtered results are zero, let's not set any pagination
-		if ($this->filteredCount == 0)
-		{
-			return;
-		}
+		if ($this->filteredCount == 0) return;
 
-		$this->page = $this->request->getPage();
+		list($this->pagesCount, $perPage) = $this->calculatePagination($this->filteredCount);
 
-		list($this->pagesCount, $perPage) = $this->dataGrid->calculatePagination($this->filteredCount);
-
-		// Now we will generate the previous and next page links
-		if ($this->page > 1)
-		{
-			if (($this->page * $perPage) <= $this->filteredCount)
-			{
-				$this->previousPage = $this->page - 1;
-			}
-			else
-			{
-				$this->previousPage = $this->pagesCount;
-			}
-		}
-		if (($this->page * $perPage) < $this->filteredCount)
-		{
-			$this->nextPage = $this->page + 1;
-		}
+		list($this->page, $this->previousPage, $this->nextPage) = $this->calculatePages($perPage);
 
 		$this->data->forPage($this->page, $perPage);
 	}
