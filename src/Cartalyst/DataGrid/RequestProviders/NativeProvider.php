@@ -31,6 +31,8 @@ class NativeProvider implements ProviderInterface {
 	public function getFilters()
 	{
 		if ( ! isset($_GET['filters'])) return array();
+
+		return $_GET['filters'];
 	}
 
 	/**
@@ -76,20 +78,6 @@ class NativeProvider implements ProviderInterface {
 	}
 
 	/**
-	 * Get the threshold (number of results before pagination begins).
-	 *
-	 * @return int
-	 */
-	public function getThreshold()
-	{
-		if ( ! isset($_GET['threshold'])) return 100;
-
-		$threshold = (int) $_GET['threshold'];
-
-		return ($threshold > 0) ? $threshold : 100;
-	}
-
-	/**
 	 * Get the dividend (ideal number of pages, once the results
 	 * count is greater than the threshold and each page has
 	 * less results than the throttle).
@@ -103,6 +91,20 @@ class NativeProvider implements ProviderInterface {
 		$dividend = (int) $_GET['dividend'];
 
 		return ($dividend > 0) ? $dividend : 10;
+	}
+
+	/**
+	 * Get the threshold (number of results before pagination begins).
+	 *
+	 * @return int
+	 */
+	public function getThreshold()
+	{
+		if ( ! isset($_GET['threshold'])) return 100;
+
+		$threshold = (int) $_GET['threshold'];
+
+		return ($threshold > 0) ? $threshold : 100;
 	}
 
 	/**

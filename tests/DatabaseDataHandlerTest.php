@@ -19,11 +19,11 @@
  */
 
 use Mockery as m;
-use Cartalyst\DataGrid\DataHandlers\EloquentDataHandler as Handler;
+use Cartalyst\DataGrid\DataHandlers\DatabaseHandler as Handler;
 use PHPUnit_Framework_TestCase;
 use stdClass;
 
-class EloquentDataHandlerTest extends PHPUnit_Framework_TestCase {
+class DatabaseDataHandlerTest extends PHPUnit_Framework_TestCase {
 
 	/**
 	 * Close mockery.
@@ -127,89 +127,100 @@ class EloquentDataHandlerTest extends PHPUnit_Framework_TestCase {
 	{
 		$handler = new Handler($dataGrid = $this->getMockDataGrid());
 
-		$handler->calculatePagination(10, 0, 10);
+		$handler->calculatePagination(10, 0, 0, 0);
 	}
 
-	public function testCalculatingPagination()
+	public function testCalculatingPagination1()
 	{
 		$handler = new Handler($dataGrid = $this->getMockDataGrid());
 
-		$result = $handler->calculatePagination(100, 10, 10);
+		$result = $handler->calculatePagination(100, 10, 100, 1000);
 		$this->assertCount(2, $result);
 		list($totalPages, $perPage) = $result;
 		$this->assertSame(10, $totalPages);
 		$this->assertSame(10, $perPage);
+	}
 
-		$result = $handler->calculatePagination(120, 10, 10);
-		$this->assertCount(2, $result);
+	public function testCalculatingPagination2()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$result = $handler->calculatePagination(90, 10, 100, 1000);
+		list($totalPages, $perPage) = $result;
+		$this->assertSame(1, $totalPages);
+		$this->assertSame(90, $perPage);
+	}
+
+	public function testCalculatingPagination3()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$result = $handler->calculatePagination(120, 10, 100, 1000);
 		list($totalPages, $perPage) = $result;
 		$this->assertSame(10, $totalPages);
 		$this->assertSame(12, $perPage);
+	}
 
-		$result = $handler->calculatePagination(200, 10, 10);
-		$this->assertCount(2, $result);
+	public function testCalculatingPagination4()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$result = $handler->calculatePagination(1200, 10, 100, 1000);
+		list($totalPages, $perPage) = $result;
+		$this->assertSame(12, $totalPages);
+		$this->assertSame(100, $perPage);
+	}
+
+	public function testCalculatingPagination5()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$result = $handler->calculatePagination(12000, 10, 100, 1000);
+		list($totalPages, $perPage) = $result;
+		$this->assertSame(120, $totalPages);
+		$this->assertSame(100, $perPage);
+	}
+
+	public function testCalculatingPagination6()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$result = $handler->calculatePagination(170, 10, 100, 1000);
 		list($totalPages, $perPage) = $result;
 		$this->assertSame(10, $totalPages);
-		$this->assertSame(20, $perPage);
+		$this->assertSame(17, $perPage);
+	}
 
-		$result = $handler->calculatePagination(1000, 5, 10);
-		$this->assertCount(2, $result);
-		list($totalPages, $perPage) = $result;
-		$this->assertSame(5, $totalPages);
-		$this->assertSame(200, $perPage);
+	public function testCalculatingPagination7()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
 
-		// Where we use the minimum per page
-		$result = $handler->calculatePagination(100, 10, 50);
-		$this->assertCount(2, $result);
-		list($totalPages, $perPage) = $result;
-		$this->assertSame(2, $totalPages);
-		$this->assertSame(50, $perPage);
-
-		// Where the number of pages is greater than the result
-		$result = $handler->calculatePagination(100, 200, 80);
-		$this->assertCount(2, $result);
-		list($totalPages, $perPage) = $result;
-		$this->assertSame(2, $totalPages);
-		$this->assertSame(80, $perPage);
-
-		// Where we just require two pages
-		$result = $handler->calculatePagination(11, 10, 10);
-		$this->assertCount(2, $result);
-		list($totalPages, $perPage) = $result;
-		$this->assertSame(2, $totalPages);
-		$this->assertSame(10, $perPage);
-
-		// Default parameters should be 10
-		$result = $handler->calculatePagination(100);
-		$this->assertCount(2, $result);
+		$result = $handler->calculatePagination(171, 10, 100, 1000);
 		list($totalPages, $perPage) = $result;
 		$this->assertSame(10, $totalPages);
-		$this->assertSame(10, $perPage);
-
-		$result = $handler->calculatePagination(10, 20, 10);
-		$this->assertCount(2, $result);
-		list($totalPages, $perPage) = $result;
-		$this->assertSame(1, $totalPages);
-		$this->assertSame(10, $perPage);
+		$this->assertSame(18, $perPage);
 	}
 
 	public function testSettingUpPaginationLeavesDefaultParametersIfNoFilteredResultsArePresent()
 	{
-		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\EloquentDataHandler[calculatePagination]');
+		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\DatabaseHandler[calculatePagination]');
 
 		$handler->preparePagination();
 	}
 
 	public function testSettingUpPaginationWithOnePage()
 	{
-		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\EloquentDataHandler[calculatePagination]');
+		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\DatabaseHandler[calculatePagination]');
 		$handler->__construct($dataGrid = $this->getMockDataGrid());
 		$handler->setFilteredCount(10);
-		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getPage')->once()->andReturn(1);
-		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getRequestedPages')->once()->andReturn(20);
-		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getMinimumPerPage')->once()->andReturn(10);
 
-		$handler->shouldReceive('calculatePagination')->with(10, 20, 10)->once()->andReturn(array(1, 10));
+		$request = $dataGrid->getEnvironment()->getRequestProvider();
+		$request->shouldReceive('getPage')->once()->andReturn(1);
+		$request->shouldReceive('getDividend')->once()->andReturn(10);
+		$request->shouldReceive('getThreshold')->once()->andReturn(100);
+		$request->shouldReceive('getThrottle')->once()->andReturn(1000);
+
+		$handler->shouldReceive('calculatePagination')->with(10, 10, 100, 1000)->once()->andReturn(array(1, 10));
 
 		$dataGrid->getData()->shouldReceive('forPage')->with(1, 10)->once();
 
@@ -222,14 +233,17 @@ class EloquentDataHandlerTest extends PHPUnit_Framework_TestCase {
 
 	public function testSettingUpPaginationOnPage2Of3()
 	{
-		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\EloquentDataHandler[calculatePagination]');
+		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\DatabaseHandler[calculatePagination]');
 		$handler->__construct($dataGrid = $this->getMockDataGrid());
 		$handler->setFilteredCount(30);
-		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getPage')->once()->andReturn(2);
-		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getRequestedPages')->once()->andReturn(10);
-		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getMinimumPerPage')->once()->andReturn(10);
 
-		$handler->shouldReceive('calculatePagination')->with(30, 10, 10)->once()->andReturn(array(3, 10));
+		$request = $dataGrid->getEnvironment()->getRequestProvider();
+		$request->shouldReceive('getPage')->once()->andReturn(2);
+		$request->shouldReceive('getDividend')->once()->andReturn(10);
+		$request->shouldReceive('getThreshold')->once()->andReturn(100);
+		$request->shouldReceive('getThrottle')->once()->andReturn(1000);
+
+		$handler->shouldReceive('calculatePagination')->with(30, 10, 100, 1000)->once()->andReturn(array(3, 10));
 
 		$dataGrid->getData()->shouldReceive('forPage')->with(2, 10)->once();
 
@@ -242,14 +256,17 @@ class EloquentDataHandlerTest extends PHPUnit_Framework_TestCase {
 
 	public function testSettingUpPaginationOnPage3Of3()
 	{
-		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\EloquentDataHandler[calculatePagination]');
+		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\DatabaseHandler[calculatePagination]');
 		$handler->__construct($dataGrid = $this->getMockDataGrid());
 		$handler->setFilteredCount(30);
-		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getPage')->once()->andReturn(3);
-		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getRequestedPages')->once()->andReturn(10);
-		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getMinimumPerPage')->once()->andReturn(10);
 
-		$handler->shouldReceive('calculatePagination')->with(30, 10, 10)->once()->andReturn(array(3, 10));
+		$request = $dataGrid->getEnvironment()->getRequestProvider();
+		$request->shouldReceive('getPage')->once()->andReturn(3);
+		$request->shouldReceive('getDividend')->once()->andReturn(10);
+		$request->shouldReceive('getThreshold')->once()->andReturn(100);
+		$request->shouldReceive('getThrottle')->once()->andReturn(1000);
+
+		$handler->shouldReceive('calculatePagination')->with(30, 10, 100, 1000)->once()->andReturn(array(3, 10));
 
 		$dataGrid->getData()->shouldReceive('forPage')->with(3, 10)->once();
 

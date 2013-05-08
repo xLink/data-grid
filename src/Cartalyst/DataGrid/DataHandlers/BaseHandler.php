@@ -1,4 +1,4 @@
-<?php namespace Cartalyst\DataGrid\Handlers;
+<?php namespace Cartalyst\DataGrid\DataHandlers;
 /**
  * Part of the Data Grid package.
  *
@@ -162,7 +162,7 @@ abstract class BaseHandler implements HandlerInterface {
 	 */
 	public function getPage()
 	{
-		return $page;
+		return $this->page;
 	}
 
 	/**
@@ -172,7 +172,7 @@ abstract class BaseHandler implements HandlerInterface {
 	 */
 	public function getPagesCount()
 	{
-		return $pagesCount;
+		return $this->pagesCount;
 	}
 
 	/**
@@ -182,7 +182,7 @@ abstract class BaseHandler implements HandlerInterface {
 	 */
 	public function getPreviousPage()
 	{
-		return $previousPage;
+		return $this->previousPage;
 	}
 
 	/**
@@ -192,7 +192,7 @@ abstract class BaseHandler implements HandlerInterface {
 	 */
 	public function getNextPage()
 	{
-		return $nextPage;
+		return $this->nextPage;
 	}
 
 	/**
@@ -203,129 +203,6 @@ abstract class BaseHandler implements HandlerInterface {
 	public function getResults()
 	{
 		return $this->results;
-	}
-
-	/**
-	 * Calculates sort from the request.
-	 *
-	 * @return array
-	 */
-	public function calculateSort()
-	{
-		if ( ! $column = $this->request->getSort())
-		{
-			$columns = $this->dataGrid->getColumns();
-			$column = reset($columns);
-		}
-
-		// If our column is an alias, we'll use the actual value instead of the
-		// alias for sorting.
-		if ( ! is_numeric($key = array_search($column, $this->dataGrid->getColumns())))
-		{
-			$column = $key;
-		}
-
-		return array($column, $this->request->getDirection());
-	}
-
-	/**
-	 * Calculates the pagination for the data grid. We'll try
-	 * divide calculate the results per page by dividing the
-	 * results count by the requested dividend. If that
-	 * result is outside the threshold and the throttle,
-	 * we'll adjust it to sit inside the threshold and
-	 * throttle. It's rather intelligent.
-	 *
-	 * We return an array with two values, the first one
-	 * being the number of pages, the second one being
-	 * the number of results per page.
-	 *
-	 * @param  int  $resultsCount
-	 * @return array
-	 */
-	public function calculatePagination($resultsCount)
-	{
-		$dividend  = $this->request->getDividend();
-		$threshold = $this->request->getThreshold();
-		$throttle  = $this->request->getThrottle();
-
-		if ($dividend < 1)
-		{
-			throw new \InvalidArgumentException("Invalid dividend of [$dividend], must be [1] or more.");
-		}
-
-		if ($threshold < 1)
-		{
-			throw new \InvalidArgumentException("Invalid threshold of [$threshold], must be [1] or more.");
-		}
-
-		if ($throttle < $threshold)
-		{
-			throw new \InvalidArgumentException("Invalid throttle of [$throttle], must be greater than the threshold, which is [$threshold].");
-		}
-
-		// If our results count is less than the threshold,
-		// we're always returning one page with all of the items
-		// on it. This will effectively remove pagination.
-		if ($resultsCount < $threshold)
-		{
-			return array(1, $resultsCount);
-		}
-
-		// Firstly, we'll calculate the "per page" property
-		// based off the dividend.
-		$perPage = (int) ceil($resultsCount / $dividend);
-
-		// Now, we'll calculate the maximum per page, which is the throttle
-		// divided by the dividend.
-		$maximumPerPage = floor($throttle / $dividend);
-
-		// Now, if the results per page is greater than the
-		// maximum per page, reduce it down accordingly
-		if ($perPage > $maximumPerPage)
-		{
-			$perPage = $maximumPerPage;
-		}
-
-		// To work out the number of pages, we'll just
-		// divide the results count by the number of
-		// results per page. Simple!
-		$pagesCount = ceil($resultsCount / $perPage);
-
-		return array($pagesCount, $perPage);
-	}
-
-	/**
-	 * Calculates the page, common logic used in multiple handlers.
-	 *
-	 * Returns the current page,
-	 *
-	 * @param  int  $resultsCount
-	 * @param  int  $perPage
-	 * @return array
-	 */
-	public function calculatePages($resultsCount, $perPage)
-	{
-		$page = $this->request->getPage();
-
-		// Now we will generate the previous and next page links
-		if ($page > 1)
-		{
-			if (($page * $perPage) <= $resultsCount)
-			{
-				$previousPage = $page - 1;
-			}
-			else
-			{
-				$previousPage = $pagesCount;
-			}
-		}
-		if (($page * $perPage) < $resultsCount)
-		{
-			$nextPage = $page + 1;
-		}
-
-		return array($page, $previousPage, $nextPage);
 	}
 
 	/**
@@ -382,5 +259,149 @@ abstract class BaseHandler implements HandlerInterface {
 	 * @return void
 	 */
 	abstract public function preparePagination();
+
+	/**
+	 * Calculates sort from the request.
+	 *
+	 * @param  string  $column
+	 * @param  string  $direction
+	 * @return array
+	 */
+	public function calculateSortColumn($column = null)
+	{
+		if ( ! $column)
+		{
+			$columns = $this->dataGrid->getColumns();
+			$column = reset($columns);
+		}
+
+		// If our column is an alias, we'll use the actual value instead of the
+		// alias for sorting.
+		if ( ! is_numeric($key = array_search($column, $this->dataGrid->getColumns())))
+		{
+			$column = $key;
+		}
+
+		return $column;
+	}
+
+	/**
+	 * Calculates the pagination for the data grid. We'll try
+	 * divide calculate the results per page by dividing the
+	 * results count by the requested dividend. If that
+	 * result is outside the threshold and the throttle,
+	 * we'll adjust it to sit inside the threshold and
+	 * throttle. It's rather intelligent.
+	 *
+	 * We return an array with two values, the first one
+	 * being the number of pages, the second one being
+	 * the number of results per page.
+	 *
+	 * @param  int  $resultsCount
+	 * @return array
+	 */
+	public function calculatePagination($resultsCount, $dividend, $threshold, $throttle)
+	{
+		if ($dividend < 1)
+		{
+			throw new \InvalidArgumentException("Invalid dividend of [$dividend], must be [1] or more.");
+		}
+
+		if ($threshold < 1)
+		{
+			throw new \InvalidArgumentException("Invalid threshold of [$threshold], must be [1] or more.");
+		}
+
+		if ($throttle < $threshold)
+		{
+			throw new \InvalidArgumentException("Invalid throttle of [$throttle], must be greater than the threshold, which is [$threshold].");
+		}
+
+		// If our results count is less than the threshold,
+		// we're always returning one page with all of the items
+		// on it. This will effectively remove pagination.
+		if ($resultsCount < $threshold)
+		{
+			return array(1, $resultsCount);
+		}
+
+		// Firstly, we'll calculate the "per page" property
+		// based off the dividend.
+		$perPage = ceil($resultsCount / $dividend);
+
+		// Now, we'll calculate the maximum per page, which is the throttle
+		// divided by the dividend.
+		$maximumPerPage = floor($throttle / $dividend);
+
+		// Now, if the results per page is greater than the
+		// maximum per page, reduce it down accordingly
+		if ($perPage > $maximumPerPage)
+		{
+			$perPage = $maximumPerPage;
+		}
+
+		// To work out the number of pages, we'll just
+		// divide the results count by the number of
+		// results per page. Simple!
+		$pagesCount = ceil($resultsCount / $perPage);
+
+		return array((int) $pagesCount, (int) $perPage);
+	}
+
+	/**
+	 * Calculates the page, common logic used in multiple handlers.
+	 *
+	 * Returns the current page,
+	 *
+	 * @param  int  $resultsCount
+	 * @param  int  $perPage
+	 * @return array
+	 */
+	public function calculatePages($resultsCount, $page, $perPage)
+	{
+		$previousPage = null;
+		$nextPage     = null;
+
+		// Now we will generate the previous and next page links
+		if ($page > 1)
+		{
+			if (($page * $perPage) <= $resultsCount)
+			{
+				$previousPage = $page - 1;
+			}
+			else
+			{
+				$previousPage = $pagesCount;
+			}
+		}
+		if (($page * $perPage) < $resultsCount)
+		{
+			$nextPage = $page + 1;
+		}
+
+		return array($page, $previousPage, $nextPage);
+	}
+
+	/**
+	 * Get the data source from the handler.
+	 *
+	 * @return mixed
+	 */
+	public function getData()
+	{
+		return $this->data;
+	}
+
+	/**
+	 * Set the filtered count property. Used in testing
+	 * mainly.
+	 *
+	 * @param  int  $filteredCount
+	 * @return void
+	 */
+	public function setFilteredCount($filteredCount)
+	{
+		$this->filteredCount = $filteredCount;
+	}
 
 }

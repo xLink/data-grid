@@ -70,26 +70,37 @@ class IlluminateRequestProviderTest extends PHPUnit_Framework_TestCase {
 		$this->assertSame(1, $provider->getPage());
 	}
 
-	public function testGettingRequestedPages()
+	public function testGettingDividend()
 	{
 		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
-		$request->shouldReceive('input')->with('requested_pages', 10)->once()->andReturn('4');
-		$this->assertSame(4, $provider->getRequestedPages());
+		$request->shouldReceive('input')->with('dividend', 10)->once()->andReturn('4');
+		$this->assertSame(4, $provider->getDividend());
 
 		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
-		$request->shouldReceive('input')->with('requested_pages', 10)->once()->andReturn(0);
-		$this->assertSame(10, $provider->getRequestedPages());
+		$request->shouldReceive('input')->with('dividend', 10)->once()->andReturn(0);
+		$this->assertSame(10, $provider->getDividend());
 	}
 
-	public function testGettingMinimumPerPage()
+	public function testGettingThreshold()
 	{
 		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
-		$request->shouldReceive('input')->with('minimum_per_page', 10)->once()->andReturn('4');
-		$this->assertSame(4, $provider->getMinimumPerPage());
+		$request->shouldReceive('input')->with('threshold', 100)->once()->andReturn('4');
+		$this->assertSame(4, $provider->getThreshold());
 
 		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
-		$request->shouldReceive('input')->with('minimum_per_page', 10)->once()->andReturn(0);
-		$this->assertSame(10, $provider->getMinimumPerPage());
+		$request->shouldReceive('input')->with('threshold', 100)->once()->andReturn(0);
+		$this->assertSame(100, $provider->getThreshold());
+	}
+
+	public function testGettingThrottle()
+	{
+		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
+		$request->shouldReceive('input')->with('throttle', 1000)->once()->andReturn('4');
+		$this->assertSame(4, $provider->getThrottle());
+
+		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
+		$request->shouldReceive('input')->with('throttle', 1000)->once()->andReturn(0);
+		$this->assertSame(1000, $provider->getThrottle());
 	}
 
 }

@@ -91,6 +91,20 @@ class IlluminateProvider implements ProviderInterface {
 	}
 
 	/**
+	 * Get the dividend (ideal number of pages, once the results
+	 * count is greater than the threshold and each page has
+	 * less results than the throttle).
+	 *
+	 * @return int
+	 */
+	public function getDividend()
+	{
+		$dividend = (int) $this->request->input('dividend', 10);
+
+		return ($dividend > 0) ? $dividend : 10;
+	}
+
+	/**
 	 * Get the threshold (number of results before pagination begins).
 	 *
 	 * @return int
@@ -100,18 +114,6 @@ class IlluminateProvider implements ProviderInterface {
 		$threshold = (int) $this->request->input('threshold', 100);
 
 		return ($threshold > 0) ? $threshold : 100;
-	}
-
-	/**
-	 * Get the dividend (ideal number of pages).
-	 *
-	 * @return int
-	 */
-	public function getDividend()
-	{
-		$dividend = (int) $this->request->input('dividend', 10);
-
-		return ($dividend > 0) ? $dividend : 10;
 	}
 
 	/**
@@ -126,18 +128,6 @@ class IlluminateProvider implements ProviderInterface {
 		$threshold = (int) $this->request->input('throttle', 1000);
 
 		return ($threshold > 0) ? $threshold : 1000;
-	}
-
-	/**
-	 * Retrieve an input item from the request.
-	 *
-	 * @param  string  $key
-	 * @param  mixed   $default
-	 * @return string
-	 */
-	public function input($key = null, $default = null)
-	{
-		return $this->request->input($key, $default);
 	}
 
 }

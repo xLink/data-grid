@@ -19,7 +19,7 @@
  */
 
 use Mockery as m;
-use Cartalyst\DataGrid\DataHandlers\DataHandlerInterface;
+use Cartalyst\DataGrid\DataHandlers\HandlerInterface;
 use Cartalyst\DataGrid\DataGrid;
 use DataHandlerStub;
 use PHPUnit_Framework_TestCase;
@@ -98,7 +98,7 @@ class DataGridTest extends PHPUnit_Framework_TestCase {
 
 	protected function getMockHandler()
 	{
-		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\DataHandlerInterface');
+		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\HandlerInterface');
 
 		$handler->shouldReceive('getTotalCount')->andReturn(100);
 		$handler->shouldReceive('getFilteredCount')->andReturn(20);

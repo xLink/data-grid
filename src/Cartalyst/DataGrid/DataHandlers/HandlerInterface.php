@@ -1,4 +1,4 @@
-<?php namespace Cartalyst\DataGrid\Handlers;
+<?php namespace Cartalyst\DataGrid\DataHandlers;
 /**
  * Part of the Data Grid package.
  *

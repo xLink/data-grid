@@ -18,10 +18,10 @@
  * @link       http://cartalyst.com
  */
 
-use Cartalyst\DataGrid\DataHandlers\DataHandlerInterface;
+use Cartalyst\DataGrid\DataHandlers\HandlerInterface;
 use Cartalyst\DataGrid\DataGrid;
 
-class DataHandlerStub implements DataHandlerInterface {
+class DataHandlerStub implements HandlerInterface {
 
 	/**
 	 * Create a new data source.
@@ -34,7 +34,7 @@ class DataHandlerStub implements DataHandlerInterface {
 	/**
 	 * Sets up the data source context.
 	 *
-	 * @return Cartalyst\DataGrid\DataHandler\DataHandlerInterface
+	 * @return Cartalyst\DataGrid\DataHandler\HandlerInterface
 	 */
 	public function setupDataHandlerContext() {}
 

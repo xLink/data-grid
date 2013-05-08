@@ -1,4 +1,4 @@
-<?php namespace Cartalyst\DataGrid\Handlers;
+<?php namespace Cartalyst\DataGrid\DataHandlers;
 /**
  * Part of the Data Grid package.
  *
@@ -204,7 +204,8 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	 */
 	public function prepareSort()
 	{
-		list($column, $direction) = $this->calculateSort();
+		$column    = $this->calculateSortColumn($this->request->getSort());
+		$direction = $this->request->getDirection();
 
 		$data = ($this->data instanceof EloquentQueryBuilder) ? $this->data->getQuery() : $this->data;
 
@@ -236,9 +237,14 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 		// If our filtered results are zero, let's not set any pagination
 		if ($this->filteredCount == 0) return;
 
-		list($this->pagesCount, $perPage) = $this->calculatePagination($this->filteredCount);
+		$dividend  = $this->request->getDividend();
+		$threshold = $this->request->getThreshold();
+		$throttle  = $this->request->getThrottle();
+		$page      = $this->request->getPage();
 
-		list($this->page, $this->previousPage, $this->nextPage) = $this->calculatePages($perPage);
+		list($this->pagesCount, $perPage) = $this->calculatePagination($this->filteredCount, $dividend, $threshold, $throttle);
+
+		list($this->page, $this->previousPage, $this->nextPage) = $this->calculatePages($this->filteredCount, $page, $perPage);
 
 		$this->data->forPage($this->page, $perPage);
 	}

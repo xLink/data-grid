@@ -1,4 +1,4 @@
-<?php namespace Cartalyst\DataGrid\Handlers;
+<?php namespace Cartalyst\DataGrid\DataHandlers;
 /**
  * Part of the Data Grid package.
  *
@@ -88,7 +88,7 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 			// the alias and not the actual key.
 			foreach ($columns as $key => $value)
 			{
-				$modified[is_numeric($key) ? $value : $key] = $item[$value];
+				$modified[$value] = $item[is_numeric($key) ? $value : $key];
 			}
 
 			return $modified;
@@ -106,6 +106,8 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 		$filters = $this->request->getFilters();
 		$columns = $this->dataGrid->getColumns();
 
+		if (count($filters) === 0) return;
+
 		$this->data = $this->data->filter(function($item) use ($filters, $columns)
 		{
 			foreach ($filters as $filter)
@@ -120,16 +122,16 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 					{
 						if (is_numeric($index))
 						{
-							if (str_contains($item[$filterColumn], $filterValue))
+							if (stripos($item[$filterColumn], $filterValue) === false)
 							{
-								return true;
+								return false;
 							}
 						}
 						else
 						{
-							if (str_contains($item[$index], $filterValue))
+							if (stripos($item[$index], $filterValue) === false)
 							{
-								return true;
+								return false;
 							}
 						}
 					}
@@ -138,15 +140,17 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 				{
 					foreach ($item as $key => $value)
 					{
-						if (str_contains($value, $filter))
+						if (stripos($value, $filter) !== false)
 						{
 							return true;
 						}
 					}
+
+					return false;
 				}
 			}
 
-			return false;
+			return true;
 		});
 	}
 
@@ -167,7 +171,8 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 	 */
 	public function prepareSort()
 	{
-		list($column, $direction) = $this->calculateSort();
+		$column    = $this->calculateSortColumn($this->request->getSort());
+		$direction = $this->request->getDirection();
 
 		$this->data = $this->data->sort(function($a, $b) use ($column, $direction)
 		{
@@ -193,9 +198,14 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 		// If our filtered results are zero, let's not set any pagination
 		if ($this->filteredCount == 0) return;
 
-		list($this->pagesCount, $perPage) = $this->calculatePagination($this->filteredCount);
+		$dividend  = $this->request->getDividend();
+		$threshold = $this->request->getThreshold();
+		$throttle  = $this->request->getThrottle();
+		$page      = $this->request->getPage();
 
-		list($this->page, $this->previousPage, $this->nextPage) = $this->calculatePages($perPage);
+		list($this->pagesCount, $perPage) = $this->calculatePagination($this->filteredCount, $dividend, $threshold, $throttle);
+
+		list($this->page, $this->previousPage, $this->nextPage) = $this->calculatePages($this->filteredCount, $page, $perPage);
 
 		// Calculate the offset that's needed to slice our collection
 		$offset = ($this->page - 1) * $perPage;
