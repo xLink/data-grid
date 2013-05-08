@@ -18,7 +18,7 @@
  * @link       http://cartalyst.com
  */
 
-use Cartalyst\DataGrid\DataHandlers\DataHandlerInterface;
+use Cartalyst\DataGrid\DataHandlers\HandlerInterface as DataHandlerInterface;
 use Illuminate\Support\Contracts\ArrayableInterface;
 use Illuminate\Support\Contracts\JsonableInterface;
 
@@ -44,7 +44,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	 * The data source, responsible for returning
 	 * appropriate information from the data provided.
 	 *
-	 * @var Cartalyst\DataGrid\DataHandler\DataHandlerInterface
+	 * @var Cartalyst\DataGrid\DataHandler\HandlerInterface
 	 */
 	protected $dataHandler;
 
@@ -96,7 +96,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	 * matching it to a mapping that's registered with the
 	 * environment instance.
 	 *
-	 * @return Cartalyst\Datagrid\DataHandlers\DataHandlerInterface
+	 * @return Cartalyst\Datagrid\DataHandlers\HandlerInterface
 	 */
 	public function createDataHandler()
 	{
@@ -114,73 +114,6 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 		}
 
 		throw new \RuntimeException('Could not determine an appropriate data source for data of type ['.gettype($this->data).'].');
-	}
-
-	/**
-	 * Calculates the pagination for the data grid. We'll try
-	 * divide calculate the results per page by dividing the
-	 * results count by the requested dividend. If that
-	 * result is outside the threshold and the throttle,
-	 * we'll adjust it to sit inside the threshold and
-	 * throttle. It's rather intelligent.
-	 *
-	 * We return an array with two values, the first one
-	 * being the number of pages, the second one being
-	 * the number of results per page.
-	 *
-	 * @param  int  $resultsCount
-	 * @return array
-	 */
-	public function calculatePagination($resultsCount)
-	{
-		$dividend  = $this->env->getRequestProvider()->getDividend();
-		$threshold = $this->env->getRequestProvider()->getThreshold();
-		$throttle  = $this->env->getRequestProvider()->getThrottle();
-
-		if ($dividend < 1)
-		{
-			throw new \InvalidArgumentException("Invalid dividend of [$dividend], must be [1] or more.");
-		}
-
-		if ($threshold < 1)
-		{
-			throw new \InvalidArgumentException("Invalid threshold of [$threshold], must be [1] or more.");
-		}
-
-		if ($throttle < $threshold)
-		{
-			throw new \InvalidArgumentException("Invalid throttle of [$throttle], must be greater than the threshold, which is [$threshold].");
-		}
-
-		// If our results count is less than the threshold,
-		// we're always returning one page with all of the items
-		// on it. This will effectively remove pagination.
-		if ($resultsCount < $threshold)
-		{
-			return array(1, $resultsCount);
-		}
-
-		// Firstly, we'll calculate the "per page" property
-		// based off the dividend.
-		$perPage = (int) ceil($resultsCount / $dividend);
-
-		// Now, we'll calculate the maximum per page, which is the throttle
-		// divided by the dividend.
-		$maximumPerPage = floor($throttle / $dividend);
-
-		// Now, if the results per page is greater than the
-		// maximum per page, reduce it down accordingly
-		if ($perPage > $maximumPerPage)
-		{
-			$perPage = $maximumPerPage;
-		}
-
-		// To work out the number of pages, we'll just
-		// divide the results count by the number of
-		// results per page. Simple!
-		$pagesCount = ceil($resultsCount / $perPage);
-
-		return array($pagesCount, $perPage);
 	}
 
 	/**
@@ -216,7 +149,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	/**
 	 * Returns the data handler.
 	 *
-	 * @return Cartalyst\DataGrid\DataHandlers\DataHandlerInterface
+	 * @return Cartalyst\DataGrid\DataHandlers\HandlerInterface
 	 */
 	public function getDataHandler()
 	{
@@ -226,7 +159,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	/**
 	 * Sets the data handler.
 	 *
-	 * @param  Cartalyst\DataGrid\DataHandlers\DataHandlerInterface  $dataHandler
+	 * @param  Cartalyst\DataGrid\DataHandlers\HandlerInterface  $dataHandler
 	 * @return void
 	 */
 	public function setDataHandler(DataHandlerInterface $dataHandler)

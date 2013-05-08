@@ -1,4 +1,4 @@
-<?php namespace Cartalyst\DataGrid\DataHandlers;
+<?php namespace Cartalyst\DataGrid\Handlers;
 /**
  * Part of the Data Grid package.
  *
@@ -20,7 +20,7 @@
 
 use Cartalyst\DataGrid\DataGrid;
 
-interface DataHandlerInterface {
+interface HandlerInterface {
 
 	/**
 	 * Create a new data source.
@@ -33,7 +33,7 @@ interface DataHandlerInterface {
 	/**
 	 * Sets up the data source context.
 	 *
-	 * @return Cartalyst\DataGrid\DataHandler\DataHandlerInterface
+	 * @return Cartalyst\DataGrid\Handler\HandlerInterface
 	 */
 	public function setupDataHandlerContext();
 
