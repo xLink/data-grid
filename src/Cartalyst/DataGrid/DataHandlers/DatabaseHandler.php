@@ -21,25 +21,12 @@
 use Cartalyst\DataGrid\DataGrid;
 use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Contracts\ArrayableInterface;
 
 class DatabaseHandler extends BaseHandler implements HandlerInterface {
-
-	/**
-	 * Sets up the data source context.
-	 *
-	 * @return Cartalyst\DataGrid\Handler\HandlerInterface
-	 */
-	public function setupDataHandlerContext()
-	{
-		parent::setupDataHandlerContext();
-
-		// Hydrate our results
-		$this->hydrate();
-
-		return $this;
-	}
 
 	/**
 	 * Validate the data store.
@@ -59,9 +46,12 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 
 		// We accept different data types for our data grid,
 		// let's just check now that
-		if ( ! $data instanceof QueryBuilder and ! $data instanceof EloquentQueryBuilder)
+		if ( ! $data instanceof QueryBuilder and
+			 ! $data instanceof EloquentQueryBuilder and
+			 ! $data instanceof HasMany and
+			 ! $data instanceof BelongsToMany)
 		{
-			throw new \InvalidArgumentException("Invalid data source passed to database handler. Must be an Eloquent model / query, or a databse query.");
+			throw new \InvalidArgumentException("Invalid data source passed to database handler. Must be an Eloquent model / query / valid relationship, or a databse query.");
 		}
 
 		return $data;
@@ -207,7 +197,17 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 		$column    = $this->calculateSortColumn($this->request->getSort());
 		$direction = $this->request->getDirection();
 
-		$data = ($this->data instanceof EloquentQueryBuilder) ? $this->data->getQuery() : $this->data;
+		$data = $this->data;
+
+		if ($data instanceof HasMany or $data instanceof BelongsToMany)
+		{
+			$data = $data->getQuery();
+		}
+
+		if ($data instanceof EloquentQueryBuilder)
+		{
+			$data = $data->getQuery();
+		}
 
 		// We are going to prepend our sort order to the data
 		// as SQL allows for multiple sort. By appending it, a predefined
@@ -250,7 +250,7 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	}
 
 	/**
-	 * Hydrates the results component of the output.
+	 * Hydrates the results.
 	 *
 	 * @return void
 	 */

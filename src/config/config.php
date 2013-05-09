@@ -24,6 +24,8 @@ return array(
 			return (
 				$data instanceof Illuminate\Database\Eloquent\Model or
 				$data instanceof Illuminate\Database\Eloquent\Builder or
+				$data instanceof Illuminate\Database\Eloquent\Relations\HasMany or
+				$data instanceof Illuminate\Database\Eloquent\Relations\BelongsToMany or
 				$data instanceof Illuminate\Database\Query\Builder
 			);
 		},

@@ -213,4 +213,14 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 		$this->data = $this->data->slice($offset, $perPage);
 	}
 
+	/**
+	 * Hydrates the results.
+	 *
+	 * @return void
+	 */
+	public function hydrate()
+	{
+		$this->results = $this->data->all();
+	}
+
 }

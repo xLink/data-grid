@@ -131,6 +131,9 @@ abstract class BaseHandler implements HandlerInterface {
 		// is rather unique in the data grid.
 		$this->preparePagination();
 
+		// Hydrate our results
+		$this->hydrate();
+
 		return $this;
 	}
 
@@ -259,6 +262,13 @@ abstract class BaseHandler implements HandlerInterface {
 	 * @return void
 	 */
 	abstract public function preparePagination();
+
+	/**
+	 * Hydrates the results.
+	 *
+	 * @return void
+	 */
+	abstract public function hydrate();
 
 	/**
 	 * Calculates sort from the request.

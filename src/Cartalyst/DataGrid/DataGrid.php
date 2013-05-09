@@ -113,7 +113,10 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 			}
 		}
 
-		throw new \RuntimeException('Could not determine an appropriate data source for data of type ['.gettype($this->data).'].');
+		$descriptor = gettype($this->data);
+		if (is_object($this->data)) $descriptor = get_class($this->data);
+
+		throw new \RuntimeException("Could not determine an appropriate data source for data of type [$descriptor].");
 	}
 
 	/**
