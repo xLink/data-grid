@@ -168,6 +168,25 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 		}
 	}
 
+	public function testPrepareSortNaturally()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getSort')->once()->andReturn('sortable');
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getDirection')->once()->andReturn('asc');
+
+		$handler->prepareSort();
+
+		$expected = $this->getValidatedData();
+		$this->assertCount(count($expected), $data = $handler->getData());
+		$ordered = array(0, 5, 1, 4, 2, 3);
+
+		foreach (array_values($data->all()) as $index => $item)
+		{
+			$this->assertEquals($expected[$ordered[$index]], $item);
+		}
+	}
+
 	public function testPreparePagination()
 	{
 		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\CollectionHandler[calculatePagination]');
@@ -202,6 +221,7 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$dataGrid->shouldReceive('getColumns')->andReturn(array(
 			'first_name',
 			'gender' => 'sex',
+			'sortable',
 		));
 		return $dataGrid;
 	}
@@ -212,6 +232,7 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$object1->first_name = 'Ben';
 		$object1->last_name  = 'Corlett';
 		$object1->gender     = 'male';
+		$object1->sortable   = 'foo-1';
 
 		return array(
 			$object1,
@@ -220,21 +241,25 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 				'first_name' => 'Bruno',
 				'last_name'  => 'Gaspar',
 				'gender'     => 'male',
+				'sortable'   => 'foo-100',
 			),
 			array(
 				'first_name' => 'Jared',
 				'last_name'  => 'West',
 				'gender'     => 'male',
+				'sortable'   => 'foo-101',
 			),
 			array(
 				'first_name' => 'Clarissa',
 				'last_name'  => 'Syme',
 				'gender'     => 'female',
+				'sortable'   => 'foo-20',
 			),
 			array(
 				'first_name' => 'Jessica',
 				'last_name'  => 'Hick',
 				'gender'     => 'female',
+				'sortable'   => 'foo-3',
 			),
 		);
 	}
@@ -246,31 +271,37 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 				'first_name' => 'Ben',
 				'last_name'  => 'Corlett',
 				'gender'     => 'male',
+				'sortable'   => 'foo-1',
 			),
 			array(
 				'first_name' => 'Dan',
 				'last_name'  => 'Syme',
 				'gender'     => 'male',
+				'sortable'   => 'foo-13',
 			),
 			array(
 				'first_name' => 'Bruno',
 				'last_name'  => 'Gaspar',
 				'gender'     => 'male',
+				'sortable'   => 'foo-100',
 			),
 			array(
 				'first_name' => 'Jared',
 				'last_name'  => 'West',
 				'gender'     => 'male',
+				'sortable'   => 'foo-101',
 			),
 			array(
 				'first_name' => 'Clarissa',
 				'last_name'  => 'Syme',
 				'gender'     => 'female',
+				'sortable'   => 'foo-20',
 			),
 			array(
 				'first_name' => 'Jessica',
 				'last_name'  => 'Hick',
 				'gender'     => 'female',
+				'sortable'   => 'foo-3',
 			),
 		);
 	}
