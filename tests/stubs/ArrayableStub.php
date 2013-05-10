@@ -10,6 +10,7 @@ class ArrayableStub implements ArrayableInterface {
 			'first_name' => 'Dan',
 			'last_name'  => 'Syme',
 			'gender'     => 'male',
+			'sortable'   => 'foo-13',
 		);
 	}
 

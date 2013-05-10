@@ -176,10 +176,7 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 
 		$this->data = $this->data->sort(function($a, $b) use ($column, $direction)
 		{
-			// @todo, see if we can use strnatcmp to naturally
-			// compare strings. However, we'd need to do the same
-			// on the database handler as well for consistency.
-			$result = strcmp($a[$column], $b[$column]);
+			$result = strnatcmp($a[$column], $b[$column]);
 
 			$invert = ($direction == 'desc');
 
