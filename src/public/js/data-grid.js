@@ -39,17 +39,17 @@
 	};
 
 	// DataGrid plugin constructor
-	function DataGrid(key, results, pagination, filters, options) {
+	function DataGrid(grid, results, pagination, filters, options) {
 
 		this.opt = $.extend({}, defaults, options);
 
-		//Binding Key
-		this.key = '[data-key='+key+']';
+		//Binding grid
+		this.grid = '[data-grid='+grid+']';
 
 		//Common Selectors
-		this.$results = $(results + this.key);
-		this.$pagi = $(pagination + this.key);
-		this.$filters = $(filters + this.key);
+		this.$results = $(results + this.grid);
+		this.$pagi = $(pagination + this.grid);
+		this.$filters = $(filters + this.grid);
 		this.$body = $(document.body);
 
 		//Get Our Source
@@ -126,10 +126,10 @@
 			var self = this;
 
 			//Sorting
-			this.$body.on('click', '[data-sort]'+this.key, function(e){
+			this.$body.on('click', '[data-sort]'+this.grid, function(e){
 
 				//Visual Sort Helpers
-				$('[data-sort]'+self.key).not($(this)).removeClass('asc desc');
+				$('[data-sort]'+self.grid).not($(this)).removeClass('asc desc');
 
 				if ($(this).hasClass('asc'))
 				{
@@ -146,7 +146,7 @@
 			});
 
 			//Filters
-			this.$body.on('click', '[data-filter]'+this.key, function(e) {
+			this.$body.on('click', '[data-filter]'+this.grid, function(e) {
 				self._setFilters($(this).data('filter'), $(this).data('label'), false);
 				self.templates.results.clear();
 				self._goToPage(1);
@@ -155,7 +155,7 @@
 
 			//Search
 			var timeout;
-			this.$body.find('[data-search]'+this.key).on('submit keyup', function(e) {
+			this.$body.find('[data-search]'+this.grid).on('submit keyup', function(e) {
 
 				e.preventDefault();
 
@@ -259,7 +259,7 @@
 			});
 
 			//Reset Grid
-			this.$body.on('click', '[data-reset]'+this.key, function(e) {
+			this.$body.on('click', '[data-reset]'+this.grid, function(e) {
 				e.preventDefault();
 				self._reset();
 			});
@@ -660,8 +660,8 @@
 
 	};
 
-	$.datagrid = function(key, results, pagination, filters, options) {
-		return new DataGrid(key, results, pagination, filters, options);
+	$.datagrid = function(grid, results, pagination, filters, options) {
+		return new DataGrid(grid, results, pagination, filters, options);
 	};
 
 })(jQuery, window, document);
