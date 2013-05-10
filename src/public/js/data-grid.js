@@ -184,9 +184,6 @@
 					$input.val('');
 					$column.prop('selectedIndex',0);
 
-					//DEMO ONLY
-					$('.options li').text('All');
-
 					return false;
 
 				}
@@ -242,6 +239,7 @@
 
 			//Reset Grid
 			this.$body.on('click', '[data-reset]'+this.key, function(e){
+				e.preventDefault();
 				self._reset();
 			});
 
@@ -277,30 +275,6 @@
 				self.opt.throttle += self.orgThrottle;
 				self.templates.pagination.clear();
 				self.templates.results.clear();
-				self._fetch();
-
-			});
-
-			//Demo Only Events
-			$('[data-opt]'+this.key).on('change', function(){
-				var opt = $(this).data('opt'),
-					val = $(this).val();
-
-				switch(opt){
-					case 'dividend':
-						self.opt.dividend = val;
-					break;
-					case 'throttle':
-						self.opt.throttle = val;
-					break;
-					case 'threshold':
-						self.opt.threshold = val;
-					break;
-				}
-
-				self.templates.pagination.clear();
-				self.templates.results.clear();
-				self._goToPage(1);
 				self._fetch();
 
 			});
