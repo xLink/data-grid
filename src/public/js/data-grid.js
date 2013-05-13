@@ -280,7 +280,7 @@
 
 				}
 
-				if (self.opt.type === 'infiniteload')
+				if (self.opt.type === 'infinite')
 				{
 
 					pageId = $(this).data('page');
@@ -433,7 +433,7 @@
 
 				self.templates.pagination.render(self._buildPagination(response.pages_count, response.total_count, response.filtered_count));
 
-				if (response.pages_count <= 1 && self.opt.type === 'infiniteload')
+				if (response.pages_count <= 1 && self.opt.type === 'infinite')
 				{
 					self.templates.pagination.clear();
 				}
@@ -565,13 +565,13 @@
 			}
 
 			//load more pagination
-			if (this.opt.type === 'infiniteload')
+			if (this.opt.type === 'infinite')
 			{
 
 				pagiData = {
 					page: self.pagination,
 					active: true,
-					infiniteload: true
+					infinite: true
 				};
 
 				pagiNav.push(pagiData);
