@@ -1,4 +1,29 @@
 <?php
+/**
+ * Part of the Data Grid package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.  It is also available at
+ * the following URL: http://www.opensource.org/licenses/BSD-3-Clause
+ *
+ * @package    Data Grid
+ * @version    1.0.0
+ * @author     Cartalyst LLC
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2011 - 2013, Cartalyst LLC
+ * @link       http://cartalyst.com
+ */
+
+use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Collection;
 
 return array(
 
@@ -22,18 +47,18 @@ return array(
 		'Cartalyst\DataGrid\DataHandlers\DatabaseHandler' => function($data)
 		{
 			return (
-				$data instanceof Illuminate\Database\Eloquent\Model or
-				$data instanceof Illuminate\Database\Eloquent\Builder or
-				$data instanceof Illuminate\Database\Eloquent\Relations\HasMany or
-				$data instanceof Illuminate\Database\Eloquent\Relations\BelongsToMany or
-				$data instanceof Illuminate\Database\Query\Builder
+				$data instanceof EloquentModel or
+				$data instanceof EloquentQueryBuilder or
+				$data instanceof HasMany or
+				$data instanceof BelongsToMany or
+				$data instanceof QueryBuilder
 			);
 		},
 
 		'Cartalyst\DataGrid\DataHandlers\CollectionHandler' => function($data)
 		{
 			return (
-				$data instanceof Illuminate\Support\Collection or
+				$data instanceof Collection or
 				is_array($data)
 			);
 		},
