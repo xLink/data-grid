@@ -23,3 +23,7 @@ Open your `composer.json` file and add the following lines:
 Run a composer update from the command line.
 
 	php composer.phar update
+
+If you haven't yet, make sure to require Composer's autoload file in your app root to autoload the installed packages.
+
+	require 'vendor/autoload.php';
