@@ -23,11 +23,13 @@ Before you can use the Data-Grid package you need to load a new environment firs
 
 From here on out you can start working with the Data-Grid package.
 
-You can register your custom request provider by sending it along when instantiating a new environment. Make sure that your request provider implements `Cartalyst\DataGrid\RequestProviders\ProviderInterface`.
+You can register your custom request provider by sending it along when instantiating a new environment.
 
 	$provider = new CustomProvider;
 
 	$environment = new Cartalyst\DataGrid\Environment($provider);
+
+> **Note:** Make sure that your request provider implements `Cartalyst\DataGrid\RequestProviders\ProviderInterface`.
 
 <a name="registering-data-handlers"></a>
 #### Registering Data Handlers
