@@ -202,18 +202,15 @@
 				if (e.type === 'keyup')
 				{
 
-					if (self.isActive)
-					{
-						return;
-					}
+					if(self.isActive){ return; }
 
 					clearTimeout(timeout);
 
-					timeout = setTimeout(function(){
+ 					timeout = setTimeout(function(){
 
-						if ($input.val().length === 0 || $input.val().length)
-						{
+						if($input.val().length === 0){
 
+							//Remove
 							$.each(self.appliedFilters, function(i, f) {
 
 								if (f.type === 'live')
@@ -224,19 +221,29 @@
 							});
 
 							self._fetch();
+
+						}else{
+
+							if(!$.trim($input.val()).length){ return; }
+
+							$.each(self.appliedFilters, function(i, f) {
+
+								if (f.type === 'live')
+								{
+									self.appliedFilters.splice($.inArray(f.type, self.appliedFilters), 1);
+								}
+
+							});
+
+							self._setFilters($column.val()+':'+$input.val(), '', true);
+							self.templates.results.clear();
+							self._goToPage(1);
+							self._fetch();
+
 						}
 
-						if ( ! $.trim($input.val()).length)
-						{
-							return;
-						}
+ 					}, 800);
 
-						self._setFilters($column.val()+':'+$input.val(), '', true);
-						self.templates.results.clear();
-						self._goToPage(1);
-						self._fetch();
-
-					}, 800);
 				}
 
 			});
@@ -415,7 +422,6 @@
 				data: this._buildFetchData()
 			})
 			.done(function(response){
-				self._loader();
 
 				self.isActive = false;
 
@@ -439,6 +445,7 @@
 				}
 
 				self._callback();
+				self._loader();
 			})
 			.error(function(jqXHR, textStatus, errorThrown) {
 				console.log(jqXHR.status + ' ' + errorThrown);
@@ -636,6 +643,10 @@
 
 		_reset: function() {
 			//reset the grid back to first load
+			this.$body.find('[data-sort]').removeClass('asc desc');
+
+			this.$body.find('[data-search]').find('input').val('');
+			this.$body.find('[data-search]').find('select').prop('selectedIndex',0);
 
 			this.appliedFilters = [];
 			this.pagination = 1;
