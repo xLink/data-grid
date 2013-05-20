@@ -4,6 +4,7 @@
 - [Loading An Environment](#loading-an-environment)
 - [Registering Data Handlers](#registering-data-handlers)
 - [Default Data Handlers](#default-data-handlers)
+- [Creating Custom Data Handlers](#creating-custom-data-handlers)
 - [Creating A Data-Grid Instance](#creating-a-data-grid-instance)
 - [Catching Unsupported Data Types]()
 
@@ -79,6 +80,20 @@ If you'd like to use the `CollectionHandler` Data Handler you need to register i
 Now whenever you pass along an array of data or an `Illuminate\Support\Collection` object when instantiating the Data-Grid, the package will know to use the `CollectionHandler` to handle the data.
 
 > **Note:** When we're using examples in the documentation for Data-Grid, we're going to assume you have registered the `CollectionHandler` Data Handler.
+
+<a name="creating-custom-data-handlers"></a>
+#### Creating Custom Data Handlers
+
+In addition to register the default data handlers provided by the package, you can create your own custom data handlers as well. All data handlers need to extend the abstract `Cartalyst\DataGrid\DataHandlers\BaseHandler` class.
+
+	use Cartalyst\DataGrid\DataHandlers\BaseHandler;
+	use Cartalyst\DataGrid\DataHandlers\HandlerInterface;
+
+	class CustomHandler extends BaseHandler implements HandlerInterface {
+
+	}
+
+Specific handlers can be created to handle specific sets of data like framework specific result sets or a certain service's API result responses.
 
 <a name="creating-a-data-grid-instance"></a>
 #### Creating A Data-Grid Instance
