@@ -44,7 +44,7 @@ Data handlers are essentially drivers which manipulate a data source and return 
 
 Now whenever you pass along data which is an instance of `FooData` when instantiating the Data-Grid, the package will know to use the `FooDataHandler` to handle the data.
 
-Alternatively you can register your Data Handlers when loading an environment.
+Alternatively you can register your data handlers when loading an environment.
 
 	$handlers => array(
 
@@ -65,9 +65,9 @@ Alternatively you can register your Data Handlers when loading an environment.
 <a name="default-data-handlers"></a>
 #### Default Data Handlers
 
- Cartalyst's Data-Grid package provides two Data Handlers by default. One of them is the `Cartalyst\DataGrid\DataHandlers\CollectionHandler` which provides support for arrays and `Illuminate\Support\Collection` objects.
+ Cartalyst's Data-Grid package provides two data handlers by default. One of them is the `Cartalyst\DataGrid\DataHandlers\CollectionHandler` which provides support for arrays and `Illuminate\Support\Collection` objects.
 
-If you'd like to use the `CollectionHandler` Data Handler you need to register it to your Data-Grid environment.
+If you'd like to use the `CollectionHandler` data handler you need to register it to your Data-Grid environment.
 
 	$environment->addDataHandlerMapping('Cartalyst\DataGrid\DataHandlers\CollectionHandler', function($data)
 	{
@@ -79,7 +79,7 @@ If you'd like to use the `CollectionHandler` Data Handler you need to register i
 
 Now whenever you pass along an array of data or an `Illuminate\Support\Collection` object when instantiating the Data-Grid, the package will know to use the `CollectionHandler` to handle the data.
 
-> **Note:** When we're using examples in the documentation for Data-Grid, we're going to assume you have registered the `CollectionHandler` Data Handler.
+> **Note:** When we're using examples in the documentation for Data-Grid, we're going to assume you have registered the `CollectionHandler` data handler.
 
 <a name="creating-custom-data-handlers"></a>
 #### Creating Custom Data Handlers
@@ -102,7 +102,7 @@ Creating an instance of Data-Grid can be done by calling the `make` function on 
 
 	$dataGrid = $environment->make($data, $columns);
 
-Calling the `make` function will send back an instance of `Cartalyst\DataGrid\DataGrid`. The `$data` variable must contain all of the data you want to filter. This can be any sort of data type as long as it can be handled by your Data Handlers. The `$columns` variable must contain an array of all the columns for each data object to include in the result set.
+Calling the `make` function will send back an instance of `Cartalyst\DataGrid\DataGrid`. The `$data` variable must contain all of the data you want to filter. This can be any sort of data type as long as it can be handled by your data handlers. The `$columns` variable must contain an array of all the columns for each data object to include in the result set.
 
 The data provided can hold data objects of the following types:
 
