@@ -1,0 +1,129 @@
+### Basics
+
+- [Introduction](#introduction)
+- [Loading An Environment](#loading-an-environment)
+- [Registering Data Handlers](#registering-data-handlers)
+- [Default Data Handlers](#default-data-handlers)
+- [Creating A Data-Grid Instance](#creating-a-data-grid-instance)
+- [Catching Unsupported Data Types]()
+
+<a name="introduction"></a>
+#### Introduction
+
+Cartalyst's Data-Grid package provides a couple of ways to interact with. The most basic way is to instantiate a new environment with the `Cartalyst\DataGrid\Environment` class and use Cartalyst's default built-in `Cartalyst\DataGrid\DataHandlers\CollectionHandler` for data handling.
+
+After creating a Data-Grid object you can use the registered data handler to interact with your result set.
+
+<a name="loading-an-environment"></a>
+#### Loading An Environment
+
+Before you can use the Data-Grid package you need to load a new environment first. This environment will determine which request provider it needs to instantiate for you to interact with. Natively it will load an instance of `Cartalyst\DataGrid\RequestProviders\NativeProvider`.
+
+	$environment = new Cartalyst\DataGrid\Environment;
+
+From here on out you can start working with the Data-Grid package.
+
+You can register your custom request provider by sending it along when instantiating a new environment. Make sure that your request provider implements `Cartalyst\DataGrid\RequestProviders\ProviderInterface`.
+
+	$provider = new CustomProvider;
+
+	$environment = new Cartalyst\DataGrid\Environment($provider);
+
+<a name="registering-data-handlers"></a>
+#### Registering Data Handlers
+
+Data handlers are essentially drivers which manipulate a data source and return the required data. You can register data handlers with your environment by using the `addDataHandlerMapping` function.
+
+	$environment->addDataHandlerMapping('FooDataHandler', function($data)
+	{
+		return ($data instanceof FooData);
+	});
+
+Now whenever you pass along data which is an instance of `FooData` when instantiating the Data-Grid, the package will know to use the `FooDataHandler` to handle the data.
+
+Alternatively you can register your Data Handlers when loading an environment.
+
+	$handlers => array(
+
+		'FooDataHandler' => function($data)
+		{
+			return ($data instanceof FooData);
+		},
+
+		'BarDataHandler' => function($data)
+		{
+			return ($data instanceof BarData);
+		},
+
+	);
+
+	$environment = new Cartalyst\DataGrid\Environment(null, $handlers);
+
+<a name="default-data-handlers"></a>
+#### Default Data Handlers
+
+ Cartalyst's Data-Grid package provides two Data Handlers by default. One of them is the `Cartalyst\DataGrid\DataHandlers\CollectionHandler` which provides support for arrays and `Illuminate\Support\Collection` objects.
+
+If you'd like to use the `CollectionHandler` Data Handler you need to register it to your Data-Grid environment.
+
+	$environment->addDataHandlerMapping('Cartalyst\DataGrid\DataHandlers\CollectionHandler', function($data)
+	{
+		return (
+			$data instanceof Illuminate\Support\Collection or
+			is_array($data)
+		);
+	});
+
+Now whenever you pass along an array of data or an `Illuminate\Support\Collection` object when instantiating the Data-Grid, the package will know to use the `CollectionHandler` to handle the data.
+
+> **Note:** When we're using examples in the documentation for Data-Grid, we're going to assume you have registered the `CollectionHandler` Data Handler.
+
+<a name="creating-a-data-grid-instance"></a>
+#### Creating A Data-Grid Instance
+
+Creating an instance of Data-Grid can be done by calling the `make` function on the Data-Grid environment.
+
+	$dataGrid = $environment->make($data, $columns);
+
+Calling the `make` function will send back an instance of `Cartalyst\DataGrid\DataGrid`. The `$data` variable must contain all of the data you want to filter. This can be any sort of data type as long as it can be handled by your Data Handlers. The `$columns` variable must contain an array of all the columns for each data object to include in the result set.
+
+The data provided can hold data objects of the following types:
+
+- An array
+- An object which is an instance of or extends the `stdClass` object
+- An object which implements the `Illuminate\Support\ArrayableInterface` interface
+
+A basic example of creating a Data-Grid object could be:
+
+	$object = new StdClass;
+	$object->title = 'foo';
+	$object->age = 20;
+
+	$data = array(
+		array(
+			'title' => 'bar',
+			'age'   => 34,
+		),
+		$object,
+	);
+
+	$dataGrid = $environment->make($data, $columns);
+
+Because we send in the data wrapped in an array, the Data-Grid object will handle the data with the registered `CollectionHandler` Data Handler. Notice that when echoing the Data-Grid object to the browser, the Data-Grid object will convert the result set to a JSON response.
+
+> **Note:** If a data object in the `$data` set doesn't has a column set in the `$columns` array, it will return `null` in the result set for that column.
+
+<a name="creating-a-data-grid-instance"></a>
+#### Catching Unsupported Data Types
+
+When the Data Grid package can't find a Data Handler for the provided data, it will throw a `RuntimeException`[^1]. You can catch it by doing the following:
+
+	try {
+		$dataGrid = $environment->make($data, $columns);
+	}
+	catch (\RuntimeException $exception)
+	{
+		echo $exception->getMessage();
+	}
+
+[^1]: [PHP manual on the RuntimeException class](http://php.net/manual/en/class.runtimeexception.php)
