@@ -111,7 +111,7 @@ A basic example of creating a Data-Grid object could be:
 
 	$dataGrid = $environment->make($data, $columns);
 
-Because we send in the data wrapped in an array, the Data-Grid object will handle the data with the registered `CollectionHandler` Data Handler. Notice that when echoing the Data-Grid object to the browser, the Data-Grid object will convert the result set to a JSON response.
+Because we send in the data wrapped in an array, the Data-Grid object will handle the data with the registered `CollectionHandler` Data Handler.
 
 > **Note:** If a data object in the `$data` set doesn't has a column set in the `$columns` array, it will return `null` in the result set for that column.
 
