@@ -156,7 +156,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 	 */
 	public function getDataHandler()
 	{
-		return $this->getDataHandler();
+		return $this->dataHandler;
 	}
 
 	/**
