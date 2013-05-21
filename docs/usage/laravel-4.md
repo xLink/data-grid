@@ -153,7 +153,9 @@ Because the Data-Grid object will render the result set as a JSON response, you 
 
 	Route::get('users', function()
 	{
-		return DataGrid::make(DB::table('users'), array(
+		$query = DB::table('users');
+
+		return DataGrid::make($query, array(
 			'name',
 			'email',
 			'address',
