@@ -126,7 +126,7 @@ Eloquent relationships are also supported. Don't forget to call the relationship
 
 	$dataGrid = DataGrid::make($roles, array(
 		'title',
-		'excerpt',
+		'level',
 		'created_at',
 	));
 
