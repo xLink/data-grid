@@ -5,7 +5,7 @@
 - [Registering Data Handlers](#registering-data-handlers)
 - [Default Data Handlers](#default-data-handlers)
 - [Creating Custom Data Handlers](#creating-custom-data-handlers)
-- [Creating A Data-Grid Instance](#creating-a-data-grid-instance)
+- [Creating A Data-Grid object](#creating-a-data-grid-object)
 - [Catching Unsupported Data Types]()
 
 <a name="introduction"></a>
@@ -95,10 +95,10 @@ In addition to register the default data handlers provided by the package, you c
 
 Specific handlers can be created to handle specific sets of data like framework specific result sets or a certain service's API result responses.
 
-<a name="creating-a-data-grid-instance"></a>
-#### Creating A Data-Grid Instance
+<a name="creating-a-data-grid-object"></a>
+#### Creating A Data-Grid object
 
-Creating an instance of Data-Grid can be done by calling the `make` function on the Data-Grid environment.
+Creating a Data-Grid object can be done by calling the `make` function on the Data-Grid environment.
 
 	$dataGrid = $environment->make($data, $columns);
 
