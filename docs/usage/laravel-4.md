@@ -208,16 +208,16 @@ Now let's create the `posts` view.
 	<table>
 		<thead>
 			<tr>
-				@foreach ($columns as $column)
-				<th>{{ $column }}</th>
-				@endforeach
+				<th>#</th>
+				<th>Title</th>
+				<th>Created at</th>
 			</tr>
 		</thead>
 		<tbody>
 			@foreach ($results as $result)
 			<tr>
-				@foreach ($columns as $column)
-				<td>{{ $result[$column] }}</td>
+				@foreach ($result as $value)
+				<td>{{ $value }}</td>
 				@endforeach
 			</tr>
 			@endforeach
