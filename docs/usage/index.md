@@ -124,11 +124,21 @@ A basic example of creating a Data-Grid object could be:
 		$object,
 	);
 
-	$dataGrid = $environment->make($data, $columns);
+	$dataGrid = $environment->make($data, array(
+		'title',
+		'age',
+	));
 
 Because we send in the data wrapped in an array, the Data-Grid object will handle the data with the registered `CollectionHandler` Data Handler.
 
 > **Note:** If a data object in the `$data` set doesn't has a column set in the `$columns` array, it will return `null` in the result set for that column.
+
+You can also rename columns by defining them as a key/value pair with the originial name being the key and the new name being the value.
+
+	$dataGrid = $environment->make($data, array(
+		'title' => 'new_title_column_name',
+		'age'   => 'new_age_column_name',
+	));
 
 <a name="creating-a-data-grid-instance"></a>
 #### Catching Unsupported Data Types
