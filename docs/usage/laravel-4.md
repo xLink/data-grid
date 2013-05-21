@@ -77,7 +77,7 @@ The built-in database data handler also enables you to pass along Eloquent objec
 - [Eloquent Relationships](#eloquent-relationships)
 
 <a name="eloquent-models"></a>
-##### Eloquent Models
+**Eloquent Models**
 
 You can pass along an Eloquent model as a data source.
 
@@ -92,7 +92,7 @@ You can pass along an Eloquent model as a data source.
 This would retrieve all of the users and create a result set with them in the DataGrid object.
 
 <a name="eloquent-query-builder"></a>
-##### Eloquent Query Builder
+**Eloquent Query Builder**
 
 You can also pass along an instance of the Eloquent query builder:
 
@@ -105,7 +105,7 @@ You can also pass along an instance of the Eloquent query builder:
 	));
 
 <a name="eloquent-results"></a>
-##### Eloquent Results
+**Eloquent Results**
 
 Besides models and the query builder, the `DatabaseHandler` data handler also accepts Eloquent results.
 
@@ -118,7 +118,7 @@ Besides models and the query builder, the `DatabaseHandler` data handler also ac
 	));
 
 <a name="eloquent-relationships"></a>
-##### Eloquent Relationships
+**Eloquent Relationships**
 
 Eloquent relationships are also supported. Don't forget to call the relationship method instead of the property.
 
@@ -126,7 +126,7 @@ Eloquent relationships are also supported. Don't forget to call the relationship
 
 	$dataGrid = DataGrid::make($roles, array(
 		'title',
-		'excerpt',
+		'level',
 		'created_at',
 	));
 
@@ -153,7 +153,9 @@ Because the Data-Grid object will render the result set as a JSON response, you 
 
 	Route::get('users', function()
 	{
-		return DataGrid::make(DB::table('users'), array(
+		$query = DB::table('users');
+
+		return DataGrid::make($query, array(
 			'name',
 			'email',
 			'address',
