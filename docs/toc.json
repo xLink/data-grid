@@ -1,5 +1,7 @@
 {
 	"sections" : [
-		"overview"
+		"overview",
+		"installation",
+		"usage"
 	]
 }
