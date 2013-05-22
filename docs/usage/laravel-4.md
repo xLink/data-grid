@@ -184,9 +184,6 @@ First we'll register the route.
 		// If there are results, let's build the tabular data view.
 		if ($results = $dataHandler->getResults())
 		{
-			// Get all the columns that were set.
-			$columns = $dataGrid->getColumns();
-	
 			// Get the amount of pages.
 			$pagesCount = $dataHandler->getPagesCount();
 	
@@ -197,7 +194,7 @@ First we'll register the route.
 			$paginator = Paginator::make($results, count($posts), $perPage);
 	
 			// Build and output the view.
-			return View::make('posts', compact('results', 'columns', 'paginator'));
+			return View::make('posts', compact('results', 'paginator'));
 		}
 	
 		return 'No posts found.';
