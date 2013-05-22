@@ -173,30 +173,30 @@ First we'll register the route.
 	{
 		// Get all the posts from the database.
 		$posts = Post::all();
-	
+
 		// Create a data grid object to list all posts
 		// with their id, title and creation date.
 		$dataGrid = DataGrid::make($posts, array('id', 'title', 'created_at'));
-	
+
 		// Get the data handler.
 		$dataHandler = $dataGrid->getDataHandler();
-	
+
 		// If there are results, let's build the tabular data view.
 		if ($results = $dataHandler->getResults())
 		{
 			// Get the amount of pages.
 			$pagesCount = $dataHandler->getPagesCount();
-	
+
 			// Calculate the per page.
 			$perPage = floor(count($posts) / $pagesCount);
-	
+
 			// Manually create pagination.
 			$paginator = Paginator::make($results, count($posts), $perPage);
-	
+
 			// Build and output the view.
 			return View::make('posts', compact('results', 'paginator'));
 		}
-	
+
 		return 'No posts found.';
 	});
 
