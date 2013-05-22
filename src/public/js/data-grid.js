@@ -243,33 +243,6 @@
 				self._fetch();
 			});
 
-			/**
-			 * DEMO ONLY EVENTS
-			 */
-			$('[data-opt]'+this.grid).on('change', function(){
-
-				var opt = $(this).data('opt'),
-					val = $(this).val();
-
-				switch(opt){
-					case 'dividend':
-						self.opt.dividend = val;
-					break;
-					case 'throttle':
-						self.opt.throttle = val;
-					break;
-					case 'threshold':
-						self.opt.threshold = val;
-					break;
-				}
-
-				self.opt.tmpl.pagination.clear();
-				self.opt.tmpl.results.clear();
-				self._goToPage(1);
-				self._ajaxFetch();
-
-			});
-
 		},
 
 		_liveSearch: function(curr, old, column){
