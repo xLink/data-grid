@@ -16,554 +16,558 @@
  * @copyright  (c) 2011 - 2013, Cartalyst LLC
  * @link       http://cartalyst.com
  */
- ;(function($, window, document, undefined) {
+;(function($, window, document, undefined){
 
 	'use strict';
 
 	var defaults = {
-		source: undefined,
+		source: null,
 		dividend: 10,
 		threshold: 20,
 		throttle: 500,
-		type: 'single',
+		type: 'multiple',
 		loader: undefined,
-		sort: {
-			column: undefined,
-			direction: 'asc'
-		},
+		sort: {},
 		tempoOptions: {
 			var_braces: '\\[\\[\\]\\]',
 			tag_braces: '\\[\\?\\?\\]'
 		},
+		searchThreshold: 800,
 		callback: undefined
 	};
 
-	// DataGrid plugin constructor
-	function DataGrid(grid, results, pagination, filters, options) {
+	var helpers = {
+		appliedFilters: [],
+		tmpl: {},
+		pageIdx: 1,
+		nextIdx: null,
+		prevIdx: null,
+		totalPages: null,
+		isActive: false,
+		pagiThrottle: null,
+		totalCount: null,
+		filterCount: null
+	};
 
-		this.opt = $.extend({}, defaults, options);
+	function DataGrid(grid, results, pagination, filters, options){
 
-		//Binding grid
+		this.opt = $.extend({}, defaults, options, helpers);
+
+		//Binding Key
 		this.grid = '[data-grid='+grid+']';
 
-		//Common Selectors
+		//Cache Our Selectors
 		this.$results = $(results + this.grid);
-		this.$pagi = $(pagination + this.grid);
+		this.$pagination = $(pagination + this.grid);
 		this.$filters = $(filters + this.grid);
 		this.$body = $(document.body);
 
 		//Get Our Source
-		this.source = this.$results.data('source') || this.opt.source;
+		this.opt.source = this.$results.data('source') || this.opt.source;
 
-		//Helpers
-		this.appliedFilters = [];
-		this.templates = {};
-		this.pagination = 1;
-		this.isActive = false;
-		this.orgThrottle = this.opt.throttle;  //Helper for correct counting
-		this.sort = {
-			column: this.opt.sort.column,
-			direction: this.opt.sort.direction
-		};
+		//Default Throttle
+		this.opt.pagiThrottle = this.opt.throttle;
 
 		this._init();
+
 
 	}
 
 	DataGrid.prototype = {
 
-		_init: function() {
+		_init: function(){
 
-			//Check Dependencies
 			this._checkDeps();
 
-			//Find Our Templates
 			this._prepTemplates();
 
-			//Event Listners
 			this._events();
 
-			//Initanal Fetch
-			this._fetch();
+			if(!$.isEmptyObject(this.opt.sort)){
+
+				this.$body.find('[data-sort='+this.opt.sort.column+']'+this.grid).addClass(this.opt.sort.direction);
+
+			}
+
+			this._ajaxFetch();
+		},
+
+		_checkDeps: function(){
+
+			if(typeof Tempo === 'undefined'){
+				this._logError('Tempo is not defined. DataGrid requires TempoJS v2.0.0 or later to run!', this);
+			}
+
+			if(!this.$results.length){
+				this._logError('Missing a results container, make sure you have data-grid set!', this);
+			}
+
+			if(!this.$pagination.length){
+				this._logError('Missing a pagination container, make sure you have data-grid set!', this);
+			}
+
+			if(!this.$filters.length){
+				this._logError('Missing a applied filters container, make sure you have data-grid set!', this);
+			}
 
 		},
 
-		_checkDeps: function() {
+		_prepTemplates: function(){
 
-			if (typeof Tempo === 'undefined')
-			{
-				$.error('$.datagrid requires TempoJS v2.0.0 or later to run.');
-			}
-
-			if ( ! this.$results.length)
-			{
-				$.error('$.datagrid requires a results container');
-			}
-
-			if ( ! this.$pagi.length)
-			{
-				$.error('$.datagrid requires a pagination container');
-			}
-
-			if ( ! this.$filters.length)
-			{
-				$.error('$.datagrid requires an applied filters container');
-			}
+			this.opt.tmpl.results = Tempo.prepare(this.$results, this.opt.tempoOptions);
+			this.opt.tmpl.pagination = Tempo.prepare(this.$pagination, this.opt.tempoOptions);
+			this.opt.tmpl.appliedFilters = Tempo.prepare(this.$filters, this.opt.tempoOptions);
 
 		},
 
-		_prepTemplates: function() {
-
-			//initialize Tempo
-			this.templates.results = Tempo.prepare(this.$results, this.opt.tempoOptions);
-			this.templates.pagination = Tempo.prepare(this.$pagi, this.opt.tempoOptions);
-			this.templates.appliedFilters = Tempo.prepare(this.$filters, this.opt.tempoOptions);
-
-		},
-
-		_events: function() {
+		_events: function(){
 
 			var self = this;
 
-			//Sorting
 			this.$body.on('click', '[data-sort]'+this.grid, function(e){
 
-				//Visual Sort Helpers
-				$('[data-sort]'+self.grid).not($(this)).removeClass('asc desc');
+				self._setSortDirection($(this));
+				self._setSort($(this).data('sort'));
+				self.opt.tmpl.results.clear();
+				self._ajaxFetch();
 
-				if ($(this).hasClass('asc'))
-				{
-					$(this).removeClass('asc').addClass('desc');
-				}
-				else
-				{
-					$(this).removeClass('desc').addClass('asc');
-				}
-
-				self._setSorting($(this).data('sort'));
-				self.templates.results.clear();
-				self._fetch();
 			});
 
-			//Filters
-			this.$body.on('click', '[data-filter]'+this.grid, function(e) {
-				self._setFilters($(this).data('filter'), $(this).data('label'), false);
-				self.templates.results.clear();
+			this.$body.on('click', '[data-filter]'+this.grid, function(e){
+
+				self._setFilter($(this).data('filter'), $(this).data('label'));
+				self.opt.tmpl.results.clear();
 				self._goToPage(1);
-				self._fetch();
+				self._ajaxFetch();
+
 			});
 
-			//Search
-			var timeout;
-			this.$body.find('[data-search]'+this.grid).on('submit keyup', function(e) {
+			this.$pagination.on('click', '[data-page]', function(e){
 
 				e.preventDefault();
 
-				var $input = $(this).find('input'),
-					$column = $(this).find('select');
+				var pageIdx;
 
-				if (e.type === 'submit'){
+				if(self.opt.type === 'single' || self.opt.type === 'multiple'){
 
-					//lets make sure its a word
-					// and not just spaces
-					if ( ! $.trim($input.val()).length)
-					{
+					pageIdx = $(this).data('page');
+					self.opt.tmpl.pagination.clear();
+					self.opt.tmpl.results.clear();
+
+				}
+
+				if(self.opt.type === 'infinite'){
+
+					pageIdx = $(this).data('page');
+					$(this).data('page', ++pageIdx);
+
+				}
+
+				self._goToPage(pageIdx);
+				self._ajaxFetch();
+
+			});
+
+			this.$pagination.on('click', '[data-throttle]', function(e){
+
+				self.opt.throttle += self.opt.pagiThrottle;
+				self.opt.tmpl.pagination.clear();
+				self.opt.tmpl.results.clear();
+				self._ajaxFetch();
+
+			});
+
+			this.$filters.on('click', '[data-template]', function(e){
+
+				self._removeFilter($(this).index());
+				self._ajaxFetch();
+
+			});
+
+			var timeout;
+			this.$body.on('submit keyup', '[data-search]'+this.grid, function(e){
+
+				e.preventDefault();
+
+				var $input = $(this).find('input');
+				var $select = $(this).find('select');
+
+				if(e.type === 'submit'){
+
+					if(!$.trim($input.val()).length){
 						return;
 					}
-
-					$.map(self.appliedFilters, function(f) {
-
-						if (f.value === $input.val())
-						{
-							f.type = 'normal';
-						}
-
-					});
-
-					self.templates.appliedFilters.render(self.appliedFilters);
 
 					self.isActive = true;
 
 					clearTimeout(timeout);
 
-					self._setFilters($column.val()+':'+$input.val(), '', false);
-
-					self.templates.results.clear();
+					self._setFilter($select.val()+':'+$input.val());
+					self.opt.tmpl.results.clear();
 					self._goToPage(1);
-					self._fetch();
+					self._ajaxFetch();
 
-					$input.val('');
-					$column.prop('selectedIndex',0);
+					$input.val('').data('old', '');
+					$select.prop('selectedIndex',0);
 
 					return false;
 
 				}
 
-				if (e.type === 'keyup')
-				{
+				if(e.type === 'keyup' && e.keyCode !== 13){
 
-					if(self.isActive){ return; }
+					if(self.opt.isActive){
+						return;
+					}
 
 					clearTimeout(timeout);
 
- 					timeout = setTimeout(function(){
+					timeout = setTimeout(function(){
 
-						if($input.val().length === 0){
+						self._liveSearch($input.val(), $input.data('old'), $select.val());
+						$input.data('old', $input.val());
 
-							//Remove
-							$.each(self.appliedFilters, function(i, f) {
+						self._goToPage(1);
+						self._ajaxFetch();
 
-								if (f.type === 'live')
-								{
-									self.appliedFilters.splice($.inArray(f.type, self.appliedFilters), 1);
-								}
-
-							});
-
-							self._fetch();
-
-						}else{
-
-							if(!$.trim($input.val()).length){ return; }
-
-							$.each(self.appliedFilters, function(i, f) {
-
-								if (f.type === 'live')
-								{
-									self.appliedFilters.splice($.inArray(f.type, self.appliedFilters), 1);
-								}
-
-							});
-
-							self._setFilters($column.val()+':'+$input.val(), '', true);
-							self.templates.results.clear();
-							self._goToPage(1);
-							self._fetch();
-
-						}
-
- 					}, 800);
+					}, 800);
 
 				}
 
+
 			});
 
-			//Remove Filter
-			this.$filters.on('click', 'li', function(e) {
-
-				self._removeFilter($(this).index());
-
-				$.each(self.appliedFilters, function(i, val) {
-
-					if (val.type === 'normal')
-					{
-						self.templates.appliedFilters.append(val);
-					}
-
-				});
-
-				self._fetch();
-			});
-
-			//Reset Grid
-			this.$body.on('click', '[data-reset]'+this.grid, function(e) {
+			this.$body.on('click', '[data-reset]'+this.grid, function(e){
 				e.preventDefault();
 				self._reset();
+				self._fetch();
 			});
 
-			//Pagination
-			this.$pagi.on('click', '[data-page]', function(e) {
-				var pageId;
+			/**
+			 * DEMO ONLY EVENTS
+			 */
+			$('[data-opt]'+this.grid).on('change', function(){
 
-				e.preventDefault();
+				var opt = $(this).data('opt'),
+					val = $(this).val();
 
-				if (self.opt.type === 'multiple' || self.opt.type === 'single')
-				{
-
-					pageId = $(this).data('page');
-
-					self.templates.pagination.clear();
-					self.templates.results.clear();
-
+				switch(opt){
+					case 'dividend':
+						self.opt.dividend = val;
+					break;
+					case 'throttle':
+						self.opt.throttle = val;
+					break;
+					case 'threshold':
+						self.opt.threshold = val;
+					break;
 				}
 
-				if (self.opt.type === 'infinite')
-				{
-
-					pageId = $(this).data('page');
-					$(this).data('page', ++pageId);
-				}
-
-				self._goToPage(pageId);
-				self._fetch();
-
-			});
-
-			//Update Throttle
-			this.$pagi.on('click', '[data-throttle]', function(e) {
-
-				self.opt.throttle += self.orgThrottle;
-				self.templates.pagination.clear();
-				self.templates.results.clear();
-				self._fetch();
+				self.opt.tmpl.pagination.clear();
+				self.opt.tmpl.results.clear();
+				self._goToPage(1);
+				self._ajaxFetch();
 
 			});
 
 		},
 
-		// Set an applied filter
-		_setFilters: function(filter, label, live){
+		_liveSearch: function(curr, old, column){
 
-			var self = this;
+			this.opt.throttle = this.opt.pagiThrottle;
 
-			//when addeding a filter reset
-			this.opt.throttle = this.orgThrottle;
+			if(curr !== old){
 
-			$.each(filter.split(', '), function(i, val) {
+				for(var i = 0; i < this.opt.appliedFilters.length; i++){
 
-				var filteredItems = val.split(':');
+					if(this.opt.appliedFilters[i].value === old){
 
-				//check if filter is already applied
-				$.each(self.appliedFilters, function(i, f) {
+						this.opt.appliedFilters.splice(i, 1);
 
-					if (f.value === filteredItems[1])
-					{
-
-						filteredItems.splice($.inArray(f.value, filteredItems), 1);
-						filteredItems.splice($.inArray(f.column, filteredItems), 1);
-
-					}
-
-				});
-
-				//Lets check if we need a new label
-				if (typeof label !== 'undefined') {
-
-					$.each(label.split(', '), function(j, l) {
-
-						var labeledItems = l.split(':');
-
-						if (filteredItems[0] === labeledItems[0])
-						{
-							filteredItems[3] = labeledItems[1];
-						}
-
-						if (filteredItems[1] === labeledItems[0])
-						{
-							filteredItems[2] = labeledItems[1];
-						}
-
-					});
-
-				}
-
-				if (filteredItems.length > 0)
-				{
-
-					self.appliedFilters.push({
-						column: filteredItems[0] === 'all' ? undefined : filteredItems[0],
-						columnLabel: typeof filteredItems[2] === 'undefined' ? filteredItems[0] : filteredItems[2],
-						value: filteredItems[1],
-						valueLabel: typeof filteredItems[3] === 'undefined' ? filteredItems[1] : filteredItems[3],
-						type: !live ? 'normal' : 'live'
-					});
-
-					if ( ! live)
-					{
-						self.templates.appliedFilters.render(self.appliedFilters);
 					}
 
 				}
 
-			});
+				if(curr.length){
 
-		},
+					this.opt.appliedFilters.push({
+						column: column === 'all' ? undefined : column,
+						columnLabel: column === 'all' ? undefined : column,
+						value: curr,
+						valueLabel: curr,
+						type: 'live'
+					});
 
-		_removeFilter: function(idx) {
-			//remove a filter
-			this.templates.appliedFilters.clear();
-			this.templates.results.clear();
-			this.appliedFilters.splice(idx, 1);
+				}
 
-		},
-
-		_setSorting: function(column) {
-
-			//set an applied sorting
-			var sortable = column.split(':');
-			var direction = typeof sortable[1] !== 'undefined' ? sortable[1] : 'asc';
-
-			if (sortable[0] === this.sort.column)
-			{
-
-				this.sort.direction = (this.sort.direction === 'asc') ? 'desc' : 'asc';
-
+				this.opt.tmpl.results.clear();
 			}
-			else
-			{
 
-				this.sort.column = sortable[0];
-				this.sort.direction = direction;
+		},
+
+		_setFilter: function(filter, label){
+
+			this.opt.throttle = this.opt.pagiThrottle;
+
+			var arr = filter.split(', ');
+
+			for(var i = 0; i < arr.length; i++){
+
+				var values = arr[i].split(':');
+
+				//Check to See if its appled
+				for(var j = 0; j < this.opt.appliedFilters.length; j++){
+
+					if(this.opt.appliedFilters[j].value === values[1]){
+
+						if(this.opt.appliedFilters[j].type === 'live'){
+							this.opt.appliedFilters.splice(j, 1);
+						}else{
+							values.splice(j, 2);
+						}
+
+					}
+
+				}
+
+				if(typeof label !== 'undefined'){
+
+					var larr = label.split(', ');
+
+					for(var k = 0; k < larr.length; k++){
+
+						var labels = larr[k].split(':');
+
+						if(values[0] === labels[0]){
+							values[2] = labels[1];
+						}
+
+						if(values[1] === labels[0]){
+							values[3] = labels[1];
+						}
+
+					}
+
+				}
+
+
+				if(values.length){
+
+					this.opt.appliedFilters.push({
+						column: values[0] === 'all' ? undefined : values[0],
+						columnLabel: typeof values[3] === 'undefined' ? values[0] : values[3],
+						value: values[1],
+						valueLabel: typeof values[2] === 'undefined' ? values[1] : values[2],
+						type: 'normal'
+					});
+
+
+					this.opt.tmpl.appliedFilters.render(this.opt.appliedFilters);
+
+				}
 
 			}
 
 		},
 
-		_fetch: function() {
-			//fetch our results from our controller
+		_setSort: function(sort){
+
+			var arr = sort.split(':'),
+				direction = typeof arr[1] !== 'undefined' ? arr[1] : 'asc';
+
+			if(arr[0] === this.opt.sort.column){
+
+				this.opt.sort.direction = (this.opt.sort.direction === 'asc') ? 'desc' : 'asc';
+
+			}else{
+
+				this.opt.sort.column = arr[0];
+				this.opt.sort.direction = direction;
+
+			}
+
+			console.log(this.opt.sort);
+
+		},
+
+		_setSortDirection: function(el){
+
+			$('[data-sort]'+this.grid).not(el).removeClass('asc desc');
+
+			if(el.hasClass('asc')){
+				el.removeClass('asc').addClass('desc');
+			}else{
+				el.removeClass('desc').addClass('asc');
+			}
+
+		},
+
+		_ajaxFetch: function(){
+
+			this._loading();
 
 			var self = this;
-
-			this._loader();
 
 			$.ajax({
-				url : this.source,
+				url: this.opt.source,
 				dataType: 'json',
 				data: this._buildFetchData()
 			})
-			.done(function(response){
+			.done(function(json){
 
-				self.isActive = false;
+				self.opt.isActive = false;
 
-				self.totalCount = response.total_count; //For Callback
-				self.filteredCount = response.filtered_count; //For Callback
+				self.opt.totalCount = json.total_count;
+				self.opt.filterCount = json.filtered_count;
+				self.opt.nextIdx = json.next_page;
+				self.opt.prevIdx = json.previous_page;
+				self.opt.totalPages = json.pages_count;
 
-				if (self.opt.type === 'pages')
-				{
-					self.templates.results.render(response.results);
-				}
-				else
-				{
-					self.templates.results.append(response.results);
-				}
-
-				self.templates.pagination.render(self._buildPagination(response.pages_count, response.total_count, response.filtered_count));
-
-				if (response.pages_count <= 1 && self.opt.type === 'infinite')
-				{
-					self.templates.pagination.clear();
+				if(self.opt.type === 'single' || self.opt.type === 'multiple'){
+					self.opt.tmpl.results.render(json.results);
+				}else{
+					self.opt.tmpl.results.append(json.results);
 				}
 
+				self.opt.tmpl.pagination.render(self._buildPagination(json.page, json.next_page, json.previous_page, json.pages_count));
+
+				if(json.pages_count <= 1 && self.opt.type === 'infinite'){
+					self.opt.tmpl.pagination.clear();
+				}
+
+				if(!json.results.length){
+					self.$results.find('[data-results-fallback]').show();
+				}else{
+					self.$results.find('[data-results-fallback]').hide();
+				}
+
+				self._loading();
 				self._callback();
-				self._loader();
+
 			})
 			.error(function(jqXHR, textStatus, errorThrown) {
-				console.log(jqXHR.status + ' ' + errorThrown);
+				self._logError('ajaxFetch '+jqXHR.status ,errorThrown);
 			});
 
 		},
 
-		//build the url params to pass to the route
-		_buildFetchData: function() {
+		_buildFetchData: function(){
 
-			var params = {
-				page: this.pagination,
-				dividend: this.opt.dividend,
-				threshold: this.opt.threshold,
-				throttle: this.opt.throttle,
-				filters: [],
-				sort: '',
-				direction: ''
-			};
+			var params = {};
 
-			$.map(this.appliedFilters, function(n) {
+			params.page = this.opt.pageIdx;
+			params.dividend = this.opt.dividend;
+			params.threshold = this.opt.threshold;
+			params.throttle = this.opt.throttle;
+			params.filters = [];
 
-				if (typeof n.column === 'undefined')
-				{
-					params.filters.push(n.value);
-				}
-				else
-				{
+			for(var i = 0; i < this.opt.appliedFilters.length; i++){
 
-					var newFilter = {};
-					newFilter[n.column] = n.value;
-					params.filters.push(newFilter);
+				if(typeof this.opt.appliedFilters[i].column === 'undefined'){
+
+					params.filters.push(this.opt.appliedFilters[i].value);
+
+				}else{
+
+					var filter = {};
+					filter[this.opt.appliedFilters[i].column] = this.opt.appliedFilters[i].value;
+					params.filters.push(filter);
 
 				}
 
-			});
+			}
 
-			//if we are sorting
-			if (typeof this.sort.column !== 'undefined')
-			{
-				params.sort = this.sort.column;
-				params.direction = this.sort.direction;
+			if(typeof this.opt.sort.column !== 'undefined' && typeof this.opt.sort.direction !== 'undefined'){
+				params.sort = this.opt.sort.column;
+				params.direction = this.opt.sort.direction;
 			}
 
 			return $.param(params);
 
 		},
 
-		//build the pagination based on type
-		_buildPagination: function(pages_count, total_count, filtered_count) {
+		_buildPagination: function(page, next, prev, total){
 
-			var self = this,
-				pagiNav = [],
-				pagiData,
-				newPerPage,
+			var paginationNav = [],
+				params,
+				perPage,
 				i;
 
+			if(this.opt.type === 'single'){
 
-			if (this.opt.type === 'multiple')
-			{
+				if(this.opt.filterCount !== this.opt.totalCount){
+					perPage = this._resultsPerPage(this.opt.filterCount, total);
+				}else{
+					perPage = this._resultsPerPage(this.opt.totalCount, total);
+				}
 
-				//pagination if a throttle is set
-				if ( (total_count > this.opt.throttle) && (filtered_count > this.opt.throttle) )
-				{
+				params = {
+					pageStart: this.opt.pageIdx === 1 ? 1 : (perPage * (this.opt.pageIdx - 1) + 1),
+					pageLimit: this.opt.pageIdx === 1 ? perPage : (this.opt.totalCount < (perPage * this.opt.pageIdx)) ? this.opt.totalCount : perPage * this.opt.pageIdx,
+					prevPage: prev,
+					nextPage: next,
+					page: page,
+					active: true,
+					totalPages: total
+				};
 
-					newPerPage = Math.ceil(this.opt.throttle / this.opt.dividend);
+				paginationNav.push(params);
 
-					for(i = 1; i <= this.opt.dividend; i++)
-					{
 
-						pagiData = {
+			}
+
+			if(this.opt.type === 'multiple'){
+
+				if( (this.opt.totalCount > this.opt.throttle) && (this.opt.filterCount > this.opt.throttle) ){
+
+					perPage = this._resultsPerPage(this.opt.throttle, this.opt.dividend);
+
+					for(i = 1; i <= this.opt.dividend; i++){
+
+						params = {
+							pageStart: i === 1 ? 1 : (perPage * (i - 1) + 1),
+							pageLimit: i === 1 ? perPage : (this.opt.totalCount < this.opt.throttle && i === this.opt.dividend) ? this.opt.totalCount : perPage * i,
+							prevPage: prev,
+							nextPage: next,
 							page: i,
-							pageStart: i === 1 ? 1 : (newPerPage * (i - 1) + 1),
-							pageLimit: i === 1 ? newPerPage : (total_count < self.opt.throttle && i === self.opt.dividend) ? total_count : newPerPage * i,
-							active: self.pagination === i ? true : false,
+							active: this.opt.pageIdx === i ? true : false,
 							throttle: false
 						};
 
-						pagiNav.push(pagiData);
+						paginationNav.push(params);
 
 					}
 
-					//if final not final page
-					if (total_count > self.opt.throttle)
-					{
-						pagiData = {
-							throttle: true,
-							label: 'More'
+					if(this.opt.totalCount > this.opt.throttle){
+
+						params = {
+							throttle: true
 						};
 
-						pagiNav.push(pagiData);
+						paginationNav.push(params);
+
 					}
 
+				}else{
 
-				}
-				else
-				{
-
-					if (filtered_count !== total_count)
-					{
-						newPerPage = Math.ceil(filtered_count / pages_count);
-					}
-					else
-					{
-						newPerPage = Math.ceil(total_count / pages_count);
+					if(this.opt.filterCount !== this.opt.totalCount){
+						perPage = this._resultsPerPage(this.opt.filterCount, total);
+					}else{
+						perPage = this._resultsPerPage(this.opt.totalCount, total);
 					}
 
-					for(i = 1; i <= pages_count; i++)
-					{
+					for(i = 1; i <= total; i++){
 
-						pagiData = {
+						params = {
+							pageStart: i === 1 ? 1 : (perPage * (i - 1) + 1),
+							pageLimit: i === 1 ? perPage : (this.opt.totalCount < (perPage * i)) ? this.opt.totalCount : perPage * i,
+							prevPage: prev,
+							nextPage: next,
 							page: i,
-							pageStart: i === 1 ? 1 : (newPerPage * (i - 1) + 1),
-							pageLimit: i === 1 ? newPerPage : (total_count < (newPerPage * i)) ? total_count : newPerPage * i,
-							active: self.pagination === i ? true : false
+							active: this.opt.pageIdx === i ? true : false
 						};
 
-						pagiNav.push(pagiData);
+						paginationNav.push(params);
 
 					}
 
@@ -571,133 +575,120 @@
 
 			}
 
-			//load more pagination
-			if (this.opt.type === 'infinite')
-			{
+			if(this.opt.type === 'infinite'){
 
-				pagiData = {
-					page: self.pagination,
-					active: true,
+				params = {
+					page: page,
 					infinite: true
 				};
 
-				pagiNav.push(pagiData);
+				paginationNav.push(params);
 
 			}
 
-			if (this.opt.type === 'single'){
-
-				if (filtered_count !== total_count)
-				{
-					newPerPage = Math.ceil(filtered_count / pages_count);
-				}
-				else
-				{
-					newPerPage = Math.ceil(total_count / pages_count);
-				}
-
-
-				pagiData = {
-					pageStart: self.pagination === 1 ? 1 : (newPerPage * (self.pagination - 1) + 1),
-					pageLimit: self.pagination === 1 ? newPerPage : (total_count < (newPerPage * self.pagination)) ? total_count : newPerPage * self.pagination,
-					prevPage: (self.pagination - 1) === 0 ? 1 : (self.pagination - 1),
-					nextPage: (self.pagination + 1) > pages_count ? pages_count : (self.pagination + 1),
-					page: self.pagination,
-					active: true,
-					total: total_count
-				}
-
-				pagiNav.push(pagiData);
-
-			}
-
-
-			return pagiNav;
+			return paginationNav;
 
 		},
 
-		_goToPage: function(idx) {
-			//set our pagination helper to new page
+		_goToPage: function(idx){
 
-			if (isNaN(idx = parseInt(idx, 10)))
-			{
+			if(isNaN(idx = parseInt(idx, 10))){
 				idx = 1;
 			}
 
-			this.pagination = idx;
+			this.opt.pageIdx = idx;
 
 		},
 
-		_loader: function() {
-			//show a loader while fetching data
+		_removeFilter: function(idx){
 
-			if ($(this.opt.loader).is(':visible'))
-			{
-				$(this.opt.loader).fadeOut();
-			}
-			else
-			{
-				$(this.opt.loader).fadeIn();
-			}
+			this.opt.tmpl.appliedFilters.clear();
+			this.opt.tmpl.results.clear();
+			this.opt.appliedFilters.splice(idx, 1);
 
-		},
+			for(var i = 0; i < this.opt.appliedFilters.length; i++){
 
-		_trigger: function(params) {
-			//for custom events outside the normal
-			// data-filter, data-sort
+				if(this.opt.appliedFilters[i].type === 'normal'){
 
-			var self = this;
+					this.opt.tmpl.appliedFilters.append(this.opt.appliedFilters[i]);
 
-			$.each(params, function(k, v)
-			{
-
-				if (k === 'sort')
-				{
-					self._setSorting(v);
 				}
 
-				if (k === 'filter')
-				{
-					self._setFilters(v);
-				}
+			}
 
-			});
-
-			this.templates.results.clear();
-			this._fetch();
 		},
 
-		_reset: function() {
-			//reset the grid back to first load
+		_resultsPerPage: function(dividend, divisor){
+			return Math.ceil(dividend / divisor);
+		},
+
+		_reset: function(){
+
 			this.$body.find('[data-sort]').removeClass('asc desc');
-
 			this.$body.find('[data-search]').find('input').val('');
-			this.$body.find('[data-search]').find('select').prop('selectedIndex',0);
+			this.$body.find('[data-search]').find('select').prop('selectedIndex', 0);
 
-			this.appliedFilters = [];
-			this.pagination = 1;
-			this.sort = {
-				column: this.opt.sort.column,
-				direction: this.opt.sort.direction
-			};
-			this.templates.appliedFilters.clear();
-			this.templates.results.clear();
-			this._fetch();
+			this.opt.appliedFilters = [];
+			this.opt.sort = {};
+			this.opt.pageIdx = 1;
+
+			this.opt.tmpl.appliedFilters.clear();
+			this.opt.tmpl.results.clear();
 		},
 
-		_callback: function() {
-			//ran everything a fetch is completed
+		_loading: function(){
 
-			if (this.opt.callback !== undefined && $.isFunction(this.opt.callback))
-			{
-				this.opt.callback(this.totalCount, this.filteredCount, this.appliedFilters);
+			if ($(this.opt.loader).is(':visible')){
+
+				$(this.opt.loader).fadeOut();
+
+			}else{
+
+				$(this.opt.loader).fadeIn();
+
+			}
+
+		},
+
+		_log: function(msg, type, args){
+			if(window.console && console[type]){
+				console[type]('DataGrid :: ' + type, args);
+			}
+		},
+
+		_logDebug: function(msg){
+
+			if(this.debug){
+				this._log(msg, 'log', arguments);
+			}
+
+		},
+
+		_logError: function(msg){
+
+			this._log(msg, 'error', arguments);
+
+		},
+
+		_logWarn: function(msg){
+
+			this._log(msg, 'warn', arguments);
+
+		},
+
+		_callback: function(){
+
+			if(this.opt.callback !== undefined && $.isFunction(this.opt.callback)){
+
+				this.opt.callback(this.opt);
+
 			}
 
 		}
 
 	};
 
-	$.datagrid = function(grid, results, pagination, filters, options) {
+	$.datagrid = function(grid, results, pagination, filters, options){
 		return new DataGrid(grid, results, pagination, filters, options);
 	};
 
