@@ -12,7 +12,7 @@
 
 Using Data-Grid in Laravel 4 provides a much easier way of interaction. For instance, you don't need to load an environment, Laravel will load one for you. The default request provider that's being loaded in Laravel is the `Cartalyst\DataGrid\RequestProviders\IlluminateProvider` class. This class will use the `Illuminate\Http\Request` class to catch your request parameters.
 
-By default, the packae will register two built-in data handlers with Laravel, the `Cartalyst\DataGrid\DataHandlers\CollectionHandler` and the `Cartalyst\DataGrid\DataHandlers\DatabaseHandler`.
+By default, the package will register two built-in data handlers with Laravel, the `Cartalyst\DataGrid\DataHandlers\CollectionHandler` and the `Cartalyst\DataGrid\DataHandlers\DatabaseHandler`.
 
 With these two data handlers you can send use the follow types of data.
 
