@@ -12,7 +12,7 @@
 
 Using Data-Grid in Laravel 4 provides a much easier way of interaction. For instance, you don't need to load an environment, Laravel will load one for you. The default request provider that's being loaded in Laravel is the `Cartalyst\DataGrid\RequestProviders\IlluminateProvider` class. This class will use the `Illuminate\Http\Request` class to catch your request parameters.
 
-By default, the packae will register two built-in data handlers with Laravel, the `Cartalyst\DataGrid\DataHandlers\CollectionHandler` and the `Cartalyst\DataGrid\DataHandlers\DatabaseHandler`.
+By default, the package will register two built-in data handlers with Laravel, the `Cartalyst\DataGrid\DataHandlers\CollectionHandler` and the `Cartalyst\DataGrid\DataHandlers\DatabaseHandler`.
 
 With these two data handlers you can send use the follow types of data.
 
@@ -175,33 +175,30 @@ First we'll register the route.
 	{
 		// Get all the posts from the database.
 		$posts = Post::all();
-	
+
 		// Create a data grid object to list all posts
 		// with their id, title and creation date.
 		$dataGrid = DataGrid::make($posts, array('id', 'title', 'created_at'));
-	
+
 		// Get the data handler.
 		$dataHandler = $dataGrid->getDataHandler();
-	
+
 		// If there are results, let's build the tabular data view.
 		if ($results = $dataHandler->getResults())
 		{
-			// Get all the columns that were set.
-			$columns = $dataGrid->getColumns();
-	
 			// Get the amount of pages.
 			$pagesCount = $dataHandler->getPagesCount();
-	
+
 			// Calculate the per page.
 			$perPage = floor(count($posts) / $pagesCount);
-	
+
 			// Manually create pagination.
 			$paginator = Paginator::make($results, count($posts), $perPage);
-	
+
 			// Build and output the view.
-			return View::make('posts', compact('results', 'columns', 'paginator'));
+			return View::make('posts', compact('results', 'paginator'));
 		}
-	
+
 		return 'No posts found.';
 	});
 
