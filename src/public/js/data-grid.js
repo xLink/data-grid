@@ -25,7 +25,7 @@
 		dividend: 10,
 		threshold: 20,
 		throttle: 500,
-		type: 'pages',
+		type: 'single',
 		loader: undefined,
 		sort: {
 			column: undefined,
@@ -277,7 +277,7 @@
 
 				e.preventDefault();
 
-				if (self.opt.type === 'pages')
+				if (self.opt.type === 'multiple' || self.opt.type === 'single')
 				{
 
 					pageId = $(this).data('page');
@@ -504,7 +504,7 @@
 				i;
 
 
-			if (this.opt.type === 'pages')
+			if (this.opt.type === 'multiple')
 			{
 
 				//pagination if a throttle is set
@@ -580,6 +580,32 @@
 					active: true,
 					infinite: true
 				};
+
+				pagiNav.push(pagiData);
+
+			}
+
+			if (this.opt.type === 'single'){
+
+				if (filtered_count !== total_count)
+				{
+					newPerPage = Math.ceil(filtered_count / pages_count);
+				}
+				else
+				{
+					newPerPage = Math.ceil(total_count / pages_count);
+				}
+
+
+				pagiData = {
+					pageStart: self.pagination === 1 ? 1 : (newPerPage * (self.pagination - 1) + 1),
+					pageLimit: self.pagination === 1 ? newPerPage : (total_count < (newPerPage * self.pagination)) ? total_count : newPerPage * self.pagination,
+					prevPage: (self.pagination - 1) === 0 ? 1 : (self.pagination - 1),
+					nextPage: (self.pagination + 1) > pages_count ? pages_count : (self.pagination + 1),
+					page: self.pagination,
+					active: true,
+					total: total_count
+				}
 
 				pagiNav.push(pagiData);
 
