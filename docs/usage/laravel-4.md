@@ -6,6 +6,7 @@
 - [Working With Eloquent](#working-with-eloquent)
 - [Using Data-Grid With Routes](#using-data-grid-with-routes)
 - [Using Data-Grid In Views](#using-data-grid-in-views)
+- [Using With The Javascript Plugin](#using-with-the-javascript-plugin)
 
 <a name="introduction"></a>
 #### Introduction
@@ -226,3 +227,14 @@ Now let's create the `posts` view.
 	{{ $paginator->links() }}
 
 This will build you a nice overview table with your tabular data. Notice that we've manually created an instance of the `Paginator` class with the data from our data handler. If you change the pages on the paginator, the table should page through the list of records automatically because your request provider will catch the `page` request parameter.
+
+<a name="using-with-the-javascript-plugin"></a>
+#### Using With The Javascript Plugin
+
+Before you can use the Javascript plugin you have to publish the package's assets first.
+
+	php artisan asset:publish cartalyst/data-grid
+
+This will publish Data Grid's assets into `public/packages/cartalyst/data-grid` so you can link to them in your views.
+
+You can read more about installing and using the Javascript plugin [here](/data-grid/usage/using-the-javascript-plugin).
