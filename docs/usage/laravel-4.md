@@ -1,17 +1,17 @@
 ### Usage In Laravel 4
 
 - [Introduction](#introduction)
-- [Creating A Data-Grid object](#creating-a-data-grid-object)
+- [Creating A Data Grid object](#creating-a-data-grid-object)
 - [Working With The Query Builder](#working-with-the-query-builder)
 - [Working With Eloquent](#working-with-eloquent)
-- [Using Data-Grid With Routes](#using-data-grid-with-routes)
-- [Using Data-Grid In Views](#using-data-grid-in-views)
+- [Using Data Grid With Routes](#using-data-grid-with-routes)
+- [Using Data Grid In Views](#using-data-grid-in-views)
 - [Using With The Javascript Plugin](#using-with-the-javascript-plugin)
 
 <a name="introduction"></a>
 #### Introduction
 
-Using Data-Grid in Laravel 4 provides a much easier way of interaction. For instance, you don't need to load an environment, Laravel will load one for you. The default request provider that's being loaded in Laravel is the `Cartalyst\DataGrid\RequestProviders\IlluminateProvider` class. This class will use the `Illuminate\Http\Request` class to catch your request parameters.
+Using Data Grid in Laravel 4 provides a much easier way of interaction. For instance, you don't need to load an environment, Laravel will load one for you. The default request provider that's being loaded in Laravel is the `Cartalyst\DataGrid\RequestProviders\IlluminateProvider` class. This class will use the `Illuminate\Http\Request` class to catch your request parameters.
 
 By default, the package will register two built-in data handlers with Laravel, the `Cartalyst\DataGrid\DataHandlers\CollectionHandler` and the `Cartalyst\DataGrid\DataHandlers\DatabaseHandler`.
 
@@ -34,18 +34,18 @@ With these two data handlers you can send use the follow types of data.
 > **Note:** You can register more data handlers by publishing and editing the config file. Read more about publishing the config file [here](/data-grid/installation/laravel-4).
 
 <a name="creating-a-data-grid-object"></a>
-#### Creating A Data-Grid object
+#### Creating A Data Grid object
 
-Creating a Data-Grid object in Laravel 4 can be done in the same way as you do in native PHP except that you make use of the `DataGrid` alias.
+Creating a Data Grid object in Laravel 4 can be done in the same way as you do in native PHP except that you make use of the `DataGrid` alias.
 
 	$dataGrid = DataGrid::make($data, $columns);
 
 <a name="working-with-the-query-builder"></a>
 #### Working With The Query Builder
 
-Thanks to the default built-in database data handler, Cartalyst's Data-Grid package can work with instances of many different database objects. One of them is `Illuminate\Database\Query\Builder`. You can pass along an instance of this class as a data source for your Data-Grid and the data handler will extract the data from the query and prepares it as a result set.
+Thanks to the default built-in database data handler, Cartalyst's Data Grid package can work with instances of many different database objects. One of them is `Illuminate\Database\Query\Builder`. You can pass along an instance of this class as a data source for your Data Grid and the data handler will extract the data from the query and prepares it as a result set.
 
-For instance, if you'd like to use the data from the `users` table as a data source for your Data-Grid.
+For instance, if you'd like to use the data from the `users` table as a data source for your Data Grid.
 	
 	$query = DB::table('users')->where('age', '>', 20);
 
@@ -55,7 +55,7 @@ For instance, if you'd like to use the data from the `users` table as a data sou
 		'address',
 	));
 
-This will create a Data-Grid object with all of the users and the selected columns in the result set.
+This will create a Data Grid object with all of the users and the selected columns in the result set.
 
 You can also pass along a query result set.
 
@@ -148,9 +148,9 @@ Because we can pass along database query objects, we can also join tables togeth
 	));
 
 <a name="using-data-grid-with-routes"></a>
-#### Using Data-Grid With Routes
+#### Using Data Grid With Routes
 
-Because the Data-Grid object will render the result set as a JSON response, you can use it to make API routes in your application. 
+Because the Data Grid object will render the result set as a JSON response, you can use it to make API routes in your application. 
 
 	Route::get('users', function()
 	{
@@ -163,12 +163,12 @@ Because the Data-Grid object will render the result set as a JSON response, you 
 		));
 	});
 
-You can see at how a Data-Grid result set looks like [here](/data-grid/usage/working-with-result-sets#generating-results).
+You can see at how a Data Grid result set looks like [here](/data-grid/usage/working-with-result-sets#generating-results).
 
 <a name="using-data-grid-in-views"></a>
-#### Using Data-Grid In Views
+#### Using Data Grid In Views
 
-Besides outputting the Data-Grid object as JSON responses to work with APIs, you can also use them to build tabular data views for your application. Let's look at an extensive example.
+Besides outputting the Data Grid object as JSON responses to work with APIs, you can also use them to build tabular data views for your application. Let's look at an extensive example.
 
 First we'll register the route.
 

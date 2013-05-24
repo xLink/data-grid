@@ -39,10 +39,9 @@ Add jQuery, Tempo and `data-grid.js` to the `<head>` section of your page.
 
 Data Grid requires three elements for instantiation: a results container, pagination container and finally an applied filters container. Each of these containers will contain either one or many Tempo templates.
 
-<a name="results-container"></a>
-##### Results Container
+**Results Container**
 
-	<table class="results" data-grid="main" data-source="<api url>">
+	<table class="results" data-grid="main" data-source="http://example.com/api/v1/foo">
 		<thead>
 			<tr>
 				<td>City</td>
@@ -57,12 +56,11 @@ Data Grid requires three elements for instantiation: a results container, pagina
 		</tbody>
 	</table>
 
-The required `data-grid` attribute will allow you to create multiple Data-Grids on a single page and the `results` class will mark it as the results container. The `data-source` attribute contains the API endpoint URI.
+The required `data-grid` attribute will allow you to create multiple Data Grids on a single page and the `results` class will mark it as the results container. The `data-source` attribute contains the API endpoint URI.
 
 You might notice that the `[[ ... ]]` is different from the default Tempo brace syntax. This is needed to allow the use of `[? ... ?]`. You can always change this behaviour by changing the [plugin's options](#options).
 
-<a name="pagination-container"></a>
-##### Pagination Container
+**Pagination Container**
 
 	<ul class="pagination" data-grid="main">
 		<li data-template data-if-infinite data-page="[[ page ]]">Load More</li>
@@ -76,8 +74,7 @@ There are three templates that are used inside the pagination container. The `da
 
 As for the other attributes, the `data-page` attribute is where we store the current page. The `data-throttle` attribute is our selector for events to increase the throttle. By default we will use `pageStart` and `pageLimit` in our pagination template to indicate which results are displayed on each page. This would output to 1 - 10, 11 - 20, ...
 
-<a name="filters-container"></a>
-##### Filters Container
+**Filters Container**
 
 	<ul class="applied" data-grid="main">
 		<li data-template>
@@ -94,7 +91,7 @@ We use our custom itteration of Tempo's brace syntax to build if else statements
 <a name="the-javascript"></a>
 #### The Javascript
 
-Now that you have all of your templates setup, let's instantiate Data-Grid. The first argument within the instantiation is the grid, this is the value of the `data-grid` attribute. This allows us you to have a flexible layout, and multiple Data-Grids on a page. Next is the results container for the response, followed by the pagination container and finally the applied filters container.
+Now that you have all of your templates setup, let's instantiate Data Grid. The first argument within the instantiation is the grid, this is the value of the `data-grid` attribute. This allows us you to have a flexible layout, and multiple Data Grids on a page. Next is the results container for the response, followed by the pagination container and finally the applied filters container.
 
 	<script>
 		$(function()
@@ -110,7 +107,7 @@ After applying the plugin, you should get a nicely filled table with all of your
 <a name="applying-filters-and-sorting"></a>
 #### Applying Filters & Sorting
 
-Lets go over how to set filters and sorts now that you have your Data Grid returning results. We use two attributes for setting filters and sorts, `data-filter` and `data-sort`. Both are done in key/value pairs separated by `, `. **Note the space after the common, this is needed.** Filters and Sorts can be set on any element within site.
+Lets go over how to set filters and sorts now that you have your Data Grid returning results. We use two attributes for setting filters and sorts, `data-filter` and `data-sort`. Both are done in key/value pairs separated by `, `. **Note the space after the comma, this is needed.** Filters and Sorts can be set on any element within site.
 
 **Some filter examples:**
 
@@ -200,21 +197,7 @@ sort | object | Set a default column and direction for sorting.
 treshold | integer | Minimum amount of results before pagination is applied.
 dividend | integer | The maximum amount of pages you wish to have.
 throttle | integer | The maxmim amount of results on a single page. Overrides dividend.
-type | string | The type of pagination to use. Options are `single`, `multiple` and `infinite`.
-tempoOptions | object | Changes the surrounding braces. Data-Grid's default is set to [[ ... ]].
+type | string | The type of pagination to use. Options are: "single", "multiple" and "infinite".
+tempoOptions | object | Changes the surrounding braces. Data Grid's default is set to [[ ... ]].
 loader | string | class of id of a loading element to be shown while the ajax request is made.
 callback | function | This parameter you can pass a function that will run every time a filter is added, or a sort is applied. This function recives one argument, and gives you access to anyting set within the plugin.
-
-
-
-
-
-
-
-
-
-
-
-
-
-

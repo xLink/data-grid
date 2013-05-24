@@ -5,24 +5,24 @@
 - [Registering Data Handlers](#registering-data-handlers)
 - [Default Data Handlers](#default-data-handlers)
 - [Creating Custom Data Handlers](#creating-custom-data-handlers)
-- [Creating A Data-Grid Object](#creating-a-data-grid-object)
+- [Creating A Data Grid Object](#creating-a-data-grid-object)
 - [Catching Unsupported Data Types]()
 
 <a name="introduction"></a>
 #### Introduction
 
-Cartalyst's Data-Grid package provides a couple of ways to interact with. The most basic way is to instantiate a new environment with the `Cartalyst\DataGrid\Environment` class and use Cartalyst's default built-in `Cartalyst\DataGrid\DataHandlers\CollectionHandler` for data handling.
+Cartalyst's Data Grid package provides a couple of ways to interact with. The most basic way is to instantiate a new environment with the `Cartalyst\DataGrid\Environment` class and use Cartalyst's default built-in `Cartalyst\DataGrid\DataHandlers\CollectionHandler` for data handling.
 
-After creating a Data-Grid object you can use the registered data handler to interact with your result set.
+After creating a Data Grid object you can use the registered data handler to interact with your result set.
 
 <a name="loading-an-environment"></a>
 #### Loading An Environment
 
-Before you can use the Data-Grid package you need to load a new environment first. This environment will determine which request provider it needs to instantiate for you to interact with. Natively it will load an instance of `Cartalyst\DataGrid\RequestProviders\NativeProvider`.
+Before you can use the Data Grid package you need to load a new environment first. This environment will determine which request provider it needs to instantiate for you to interact with. Natively it will load an instance of `Cartalyst\DataGrid\RequestProviders\NativeProvider`.
 
 	$environment = new Cartalyst\DataGrid\Environment;
 
-From here on out you can start working with the Data-Grid package.
+From here on out you can start working with the Data Grid package.
 
 You can register your custom request provider by sending it along when instantiating a new environment.
 
@@ -42,7 +42,7 @@ Data handlers are essentially drivers which manipulate a data source and return 
 		return ($data instanceof FooData);
 	});
 
-Now whenever you pass along data which is an instance of `FooData` when instantiating the Data-Grid, the package will know to use the `FooDataHandler` to handle the data.
+Now whenever you pass along data which is an instance of `FooData` when instantiating the Data Grid, the package will know to use the `FooDataHandler` to handle the data.
 
 Alternatively you can register your data handlers when loading an environment.
 
@@ -65,9 +65,9 @@ Alternatively you can register your data handlers when loading an environment.
 <a name="default-data-handlers"></a>
 #### Default Data Handlers
 
- Cartalyst's Data-Grid package provides two data handlers by default. One of them is the `Cartalyst\DataGrid\DataHandlers\CollectionHandler` which provides support for arrays and `Illuminate\Support\Collection` objects.
+ Cartalyst's Data Grid package provides two data handlers by default. One of them is the `Cartalyst\DataGrid\DataHandlers\CollectionHandler` which provides support for arrays and `Illuminate\Support\Collection` objects.
 
-If you'd like to use the `CollectionHandler` data handler you need to register it to your Data-Grid environment.
+If you'd like to use the `CollectionHandler` data handler you need to register it to your Data Grid environment.
 
 	$environment->addDataHandlerMapping('Cartalyst\DataGrid\DataHandlers\CollectionHandler', function($data)
 	{
@@ -77,9 +77,9 @@ If you'd like to use the `CollectionHandler` data handler you need to register i
 		);
 	});
 
-Now whenever you pass along an array of data or an `Illuminate\Support\Collection` object when instantiating the Data-Grid, the package will know to use the `CollectionHandler` to handle the data.
+Now whenever you pass along an array of data or an `Illuminate\Support\Collection` object when instantiating the Data Grid, the package will know to use the `CollectionHandler` to handle the data.
 
-> **Note:** When we're using examples in the documentation for Data-Grid, we're going to assume you have registered the `CollectionHandler` data handler.
+> **Note:** When we're using examples in the documentation for Data Grid, we're going to assume you have registered the `CollectionHandler` data handler.
 
 <a name="creating-custom-data-handlers"></a>
 #### Creating Custom Data Handlers
@@ -98,7 +98,7 @@ Specific handlers can be created to handle specific sets of data like framework 
 <a name="creating-a-data-grid-object"></a>
 #### Creating A Data-Grid Object
 
-Creating a Data-Grid object can be done by calling the `make` function on the Data-Grid environment.
+Creating a Data Grid object can be done by calling the `make` function on the Data Grid environment.
 
 	$dataGrid = $environment->make($data, $columns);
 
@@ -110,7 +110,7 @@ The data provided can hold data objects of the following types:
 - An object which is an instance of or extends the `stdClass` object
 - An object which implements the `Illuminate\Support\ArrayableInterface` interface
 
-A basic example of creating a Data-Grid object could be:
+A basic example of creating a Data Grid object could be:
 
 	$object = new StdClass;
 	$object->title = 'foo';
@@ -129,7 +129,7 @@ A basic example of creating a Data-Grid object could be:
 		'age',
 	));
 
-Because we send in the data wrapped in an array, the Data-Grid object will handle the data with the registered `CollectionHandler` Data Handler.
+Because we send in the data wrapped in an array, the Data Grid object will handle the data with the registered `CollectionHandler` Data Handler.
 
 > **Note:** If a data object in the `$data` set doesn't has a column set in the `$columns` array, it will return `null` in the result set for that column.
 

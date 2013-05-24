@@ -10,14 +10,14 @@
 <a name="introduction"></a>
 #### Introduction
 
-After instantiating a Data-Grid object you have a couple of options to work with the data result sets. Depending on the request provider which you registered with your environment, the implementation of these methods can differ. In the examples below we're going to assume you're using the default `Cartalyst\DataGrid\RequestProviders\NativeProvider` request provider.
+After instantiating a Data Grid object you have a couple of options to work with the data result sets. Depending on the request provider which you registered with your environment, the implementation of these methods can differ. In the examples below we're going to assume you're using the default `Cartalyst\DataGrid\RequestProviders\NativeProvider` request provider.
 
 You can filter results by sending specific request parameters along with your HTTP request. Your request provider will catch these so your data handler can filter the data based on these request parameters.
 
 <a name="generating-results"></a>
 #### Generating Results
 
-You can convert the result set from the Data-Grid object to an array or JSON response by calling the `toArray` or `toJson` functions.
+You can convert the result set from the Data Grid object to an array or JSON response by calling the `toArray` or `toJson` functions.
 
 	$environment = new Cartalyst\DataGrid\Environment;
 	$dataGrid = $environment->make($data, $columns);
@@ -49,7 +49,7 @@ The returned response would look something like this:
 
 The response contains some useful information like the total number of results, the amount of filtered results, the current, previous and next page and a list with all of the results for the current page.
 
-> **Note:** When sending the Data-Grid object to the browser, it will be automatically converted to a JSON response. This is very useful, for example, when building APIs.
+> **Note:** When sending the Data Grid object to the browser, it will be automatically converted to a JSON response. This is very useful, for example, when building APIs.
 
 <a name="sorting-results"></a>
 #### Sorting Results
