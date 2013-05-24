@@ -48,3 +48,7 @@ Get the previous page.
 Get the next page.
 
 	$nextPage = $handler->getNextPage();
+
+Get the number of results per page.
+
+	$perPage = $handler->getPerPage();
