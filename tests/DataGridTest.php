@@ -81,6 +81,7 @@ class DataGridTest extends PHPUnit_Framework_TestCase {
 			'pages_count'    => 2,
 			'previous_page'  => null,
 			'next_page'      => 2,
+			'per_page'       => 10,
 			'results'        => array('foo', 'bar'),
 		);
 
@@ -106,6 +107,7 @@ class DataGridTest extends PHPUnit_Framework_TestCase {
 		$handler->shouldReceive('getPagesCount')->andReturn(2);
 		$handler->shouldReceive('getPreviousPage')->andReturn(null);
 		$handler->shouldReceive('getNextPage')->andReturn(2);
+		$handler->shouldReceive('getPerPage')->andReturn(10);
 		$handler->shouldReceive('getResults')->andReturn(array('foo', 'bar'));
 
 		return $handler;
