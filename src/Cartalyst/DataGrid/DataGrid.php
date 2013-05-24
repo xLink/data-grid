@@ -186,6 +186,7 @@ class DataGrid implements ArrayableInterface, JsonableInterface {
 			'pages_count'    => $handler->getPagesCount(),
 			'previous_page'  => $handler->getPreviousPage(),
 			'next_page'      => $handler->getNextPage(),
+			'per_page'       => $handler->getPerPage(),
 			'results'        => $handler->getResults(),
 		);
 	}

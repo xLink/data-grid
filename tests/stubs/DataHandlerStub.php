@@ -82,6 +82,13 @@ class DataHandlerStub implements HandlerInterface {
 	public function getNextPage() {}
 
 	/**
+	 * Get the amount of results per page.
+	 *
+	 * @return int|null
+	 */
+	public function getPerPage() {}
+
+	/**
 	 * Get the results.
 	 *
 	 * @return int

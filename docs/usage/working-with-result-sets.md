@@ -37,6 +37,7 @@ The returned response would look something like this:
 		"pages_count": 1,
 		"previous_page": null,
 		"next_page": null,
+		"per_page": 3,
 		"results": [
 			{
 				"name": "John Doe",

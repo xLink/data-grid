@@ -200,14 +200,14 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 		$throttle  = $this->request->getThrottle();
 		$page      = $this->request->getPage();
 
-		list($this->pagesCount, $perPage) = $this->calculatePagination($this->filteredCount, $dividend, $threshold, $throttle);
+		list($this->pagesCount, $this->perPage) = $this->calculatePagination($this->filteredCount, $dividend, $threshold, $throttle);
 
-		list($this->page, $this->previousPage, $this->nextPage) = $this->calculatePages($this->filteredCount, $page, $perPage);
+		list($this->page, $this->previousPage, $this->nextPage) = $this->calculatePages($this->filteredCount, $page, $this->perPage);
 
 		// Calculate the offset that's needed to slice our collection
-		$offset = ($this->page - 1) * $perPage;
+		$offset = ($this->page - 1) * $this->perPage;
 
-		$this->data = $this->data->slice($offset, $perPage);
+		$this->data = $this->data->slice($offset, $this->perPage);
 	}
 
 	/**

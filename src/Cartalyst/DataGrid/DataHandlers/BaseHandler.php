@@ -86,6 +86,13 @@ abstract class BaseHandler implements HandlerInterface {
 	protected $nextPage;
 
 	/**
+	 * Cached number of results per page.
+	 *
+	 * @var int|null
+	 */
+	protected $perPage;
+
+	/**
 	 * Cached results.
 	 *
 	 * @var array
@@ -196,6 +203,16 @@ abstract class BaseHandler implements HandlerInterface {
 	public function getNextPage()
 	{
 		return $this->nextPage;
+	}
+
+	/**
+	 * Get the number of results per page
+	 *
+	 * @return int|null
+	 */
+	public function getPerPage()
+	{
+		return $this->perPage;
 	}
 
 	/**
