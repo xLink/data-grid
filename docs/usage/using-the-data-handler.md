@@ -9,7 +9,7 @@
 
 The data handler is the class that handles and filters the data you passed along. In the examples below we'll go over the basic functionality for a data handler.
 
-Accessing the registered data handler can be done by calling the `getDataHandler` method on the Data-Grid object.
+Accessing the registered data handler can be done by calling the `getDataHandler` method on the Data Grid object.
 
 	$handler = $dataGrid->getDataHandler();
 
