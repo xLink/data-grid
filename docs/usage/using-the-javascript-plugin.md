@@ -152,7 +152,7 @@ Data Grid ships with a few other things to help developers get off the ground fa
 		<button>Add Filter</button>
 	</form>
 
-Now if you are looking for to let users filter within defined columns all you need to do is add a select menu within the form. The select name should be set to 'column' and the value of options set to the column name. 
+Now if you are looking for to let users filter within defined columns all you need to do is add a select menu within the form. The select name should be set to 'column' and the value of options set to the column name.
 
 	<form method="post" action="" accept-charset="utf-8" data-search data-grid="main">
 		<select name="column" class="input-medium">
@@ -203,4 +203,18 @@ throttle | integer | The maxmim amount of results on a single page. Overrides di
 type | string | The type of pagination to use. Options are `single`, `multiple` and `infinite`.
 tempoOptions | object | Changes the surrounding braces. Data-Grid's default is set to [[ ... ]].
 loader | string | class of id of a loading element to be shown while the ajax request is made.
-callback | function | This parameter you can pass a function that will run every time a filter is added, or a sort is applied. This function recives three arguments. The total count of records in the set, the filtered count of records, and the applied filters. This allows you to extend Data Grid and use other plugins.
+callback | function | This parameter you can pass a function that will run every time a filter is added, or a sort is applied. This function recives one argument, and gives you access to anyting set within the plugin.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
