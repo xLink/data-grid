@@ -481,7 +481,8 @@
 					nextPage: next,
 					page: page,
 					active: true,
-					totalPages: total
+					totalPages: total,
+					single: true
 				};
 
 				paginationNav.push(params);
