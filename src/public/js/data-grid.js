@@ -30,7 +30,8 @@
 		sort: {},
 		tempoOptions: {
 			var_braces: '\\[\\[\\]\\]',
-			tag_braces: '\\[\\?\\?\\]'
+			tag_braces: '\\[\\?\\?\\]',
+			escape: true
 		},
 		searchThreshold: 800,
 		callback: undefined
