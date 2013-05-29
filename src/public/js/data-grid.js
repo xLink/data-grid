@@ -500,7 +500,7 @@
 					for(i = 1; i <= this.opt.dividend; i++){
 
 						params = {
-							pageStart: i === 1 ? 1 : (perPage * (i - 1) + 1),
+							pageStart: this.opt.totalCount == 0 ? 0 : ( i === 1 ? 1 : (perPage * (i - 1) + 1)),
 							pageLimit: i === 1 ? perPage : (this.opt.totalCount < this.opt.throttle && i === this.opt.dividend) ? this.opt.totalCount : perPage * i,
 							prevPage: prev,
 							nextPage: next,
@@ -534,7 +534,7 @@
 					for(i = 1; i <= total; i++){
 
 						params = {
-							pageStart: i === 1 ? 1 : (perPage * (i - 1) + 1),
+							pageStart: this.opt.totalCount == 0 ? 0 : ( i === 1 ? 1 : (perPage * (i - 1) + 1)),
 							pageLimit: i === 1 ? perPage : (this.opt.totalCount < (perPage * i)) ? this.opt.totalCount : perPage * i,
 							prevPage: prev,
 							nextPage: next,
