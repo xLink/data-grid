@@ -476,7 +476,7 @@
 				}
 
 				params = {
-					pageStart: this.opt.pageIdx === 1 ? 1 : (perPage * (this.opt.pageIdx - 1) + 1),
+					pageStart: perPage == 0 ? 0 : (this.opt.pageIdx === 1 ? 1 : (perPage * (this.opt.pageIdx - 1) + 1)),
 					pageLimit: this.opt.pageIdx === 1 ? perPage : (this.opt.totalCount < (perPage * this.opt.pageIdx)) ? this.opt.totalCount : perPage * this.opt.pageIdx,
 					prevPage: prev,
 					nextPage: next,
