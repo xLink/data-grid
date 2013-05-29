@@ -129,6 +129,7 @@
 
 				self._setSortDirection($(this));
 				self._setSort($(this).data('sort'));
+				self._clearResults();
 				self._ajaxFetch();
 
 			});
@@ -136,6 +137,7 @@
 			this.$body.on('click', '[data-filter]'+this.grid, function(e){
 
 				self._setFilter($(this).data('filter'), $(this).data('label'));
+				self._clearResults();
 				self._goToPage(1);
 				self._ajaxFetch();
 
@@ -151,6 +153,7 @@
 
 					pageIdx = $(this).data('page');
 					self.opt.tmpl.pagination.clear();
+					self._clearResults();
 
 				}
 
@@ -170,6 +173,7 @@
 
 				self.opt.throttle += self.opt.pagiThrottle;
 				self.opt.tmpl.pagination.clear();
+				self._clearResults();
 				self._ajaxFetch();
 
 			});
@@ -200,6 +204,7 @@
 					clearTimeout(timeout);
 
 					self._setFilter($select.val()+':'+$input.val());
+					self._clearResults();
 					self._goToPage(1);
 					self._ajaxFetch();
 
@@ -268,6 +273,9 @@
 					});
 
 				}
+
+				this._clearResults();
+
 			}
 
 		},
@@ -420,6 +428,14 @@
 
 		},
 
+		_clearResults: function(){
+
+			if(this.opt.type === 'infinite'){
+				this.opt.tmpl.results.clear();
+			}
+
+		},
+
 		_buildFetchData: function(){
 
 			var params = {};
@@ -471,7 +487,7 @@
 				}
 
 				params = {
-					pageStart: perPage == 0 ? 0 : (this.opt.pageIdx === 1 ? 1 : (perPage * (this.opt.pageIdx - 1) + 1)),
+					pageStart: perPage === 0 ? 0 : (this.opt.pageIdx === 1 ? 1 : (perPage * (this.opt.pageIdx - 1) + 1)),
 					pageLimit: this.opt.pageIdx === 1 ? perPage : (this.opt.totalCount < (perPage * this.opt.pageIdx)) ? this.opt.totalCount : perPage * this.opt.pageIdx,
 					prevPage: prev,
 					nextPage: next,
@@ -495,7 +511,7 @@
 					for(i = 1; i <= this.opt.dividend; i++){
 
 						params = {
-							pageStart: perPage == 0 ? 0 : ( i === 1 ? 1 : (perPage * (i - 1) + 1)),
+							pageStart: perPage === 0 ? 0 : ( i === 1 ? 1 : (perPage * (i - 1) + 1)),
 							pageLimit: i === 1 ? perPage : (this.opt.totalCount < this.opt.throttle && i === this.opt.dividend) ? this.opt.totalCount : perPage * i,
 							prevPage: prev,
 							nextPage: next,
@@ -529,7 +545,7 @@
 					for(i = 1; i <= total; i++){
 
 						params = {
-							pageStart: perPage == 0 ? 0 : ( i === 1 ? 1 : (perPage * (i - 1) + 1)),
+							pageStart: perPage === 0 ? 0 : ( i === 1 ? 1 : (perPage * (i - 1) + 1)),
 							pageLimit: i === 1 ? perPage : (this.opt.totalCount < (perPage * i)) ? this.opt.totalCount : perPage * i,
 							prevPage: prev,
 							nextPage: next,
@@ -573,6 +589,7 @@
 		_removeFilter: function(idx){
 
 			this.opt.tmpl.appliedFilters.clear();
+			this._clearResults();
 			this.opt.appliedFilters.splice(idx, 1);
 
 			for(var i = 0; i < this.opt.appliedFilters.length; i++){
