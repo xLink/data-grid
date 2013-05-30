@@ -171,7 +171,7 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 	 */
 	public function prepareSort()
 	{
-		$column    = $this->calculateSortColumn($this->request->getSort());
+		$column = $this->calculateSortColumn($this->request->getSort());
 		$direction = $this->request->getDirection();
 
 		$this->data = $this->data->sort(function($a, $b) use ($column, $direction)

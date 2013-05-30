@@ -187,6 +187,18 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 		}
 	}
 
+	/**
+	 * @expectedException RuntimeException
+	 */
+	public function testPrepareSortWhereColumnDoesntExist()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getSort')->once()->andReturn('invalid');
+
+		$handler->prepareSort();
+	}
+
 	public function testPreparePagination()
 	{
 		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\CollectionHandler[calculatePagination]');

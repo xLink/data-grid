@@ -302,9 +302,18 @@ abstract class BaseHandler implements HandlerInterface {
 			$column = reset($columns);
 		}
 
+		$key = array_search($column, $this->dataGrid->getColumns());
+
+		// If the sort column doesn't exist in the array, something has
+		// gone wrong. Failing silently could confuse people.
+		if ($key === false)
+		{
+			throw new \RuntimeException("Sort column [$column] does not exist in data.");
+		}
+
 		// If our column is an alias, we'll use the actual value instead of the
 		// alias for sorting.
-		if ( ! is_numeric($key = array_search($column, $this->dataGrid->getColumns())))
+		if ( ! is_numeric($key))
 		{
 			$column = $key;
 		}
