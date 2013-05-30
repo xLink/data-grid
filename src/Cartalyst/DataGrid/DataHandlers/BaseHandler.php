@@ -407,7 +407,7 @@ abstract class BaseHandler implements HandlerInterface {
 			}
 			else
 			{
-				$previousPage = $pagesCount;
+				$previousPage = ceil($resultsCount / $perPage);
 			}
 		}
 		if (($page * $perPage) < $resultsCount)
