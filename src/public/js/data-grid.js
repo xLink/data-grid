@@ -22,9 +22,9 @@
 
 	var defaults = {
 		source: null,
-		dividend: 10,
-		threshold: 20,
-		throttle: 500,
+		dividend: 1,
+		threshold: 100,
+		throttle: 100,
 		type: 'multiple',
 		loader: undefined,
 		sort: {},
@@ -231,7 +231,7 @@
 						self._goToPage(1);
 						self._ajaxFetch();
 
-					}, 800);
+					}, self.opt.searchThreshold);
 
 				}
 
