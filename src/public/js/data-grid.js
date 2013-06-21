@@ -377,7 +377,7 @@
 
 		_ajaxFetch: function(){
 
-			this._loading();
+			this._loading.start();
 
 			var self = this;
 
@@ -418,7 +418,7 @@
 					self.$results.find('[data-results-fallback]').hide();
 				}
 
-				self._loading();
+				self._loading.stop();
 				self._callback();
 
 			})
