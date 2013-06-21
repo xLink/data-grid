@@ -330,9 +330,9 @@
 
 					this.opt.appliedFilters.push({
 						column: values[0] === 'all' ? undefined : values[0],
-						columnLabel: typeof values[2] === 'undefined' ? values[1] : values[2],
+						columnLabel: typeof values[2] === 'undefined' ? values[0] : values[2],
 						value: values[1],
-						valueLabel: typeof values[3] === 'undefined' ? values[0] : values[3],
+						valueLabel: typeof values[3] === 'undefined' ? values[1] : values[3],
 						type: 'normal'
 					});
 
