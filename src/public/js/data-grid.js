@@ -624,21 +624,11 @@
 
 		_loading: function(){
 
-			var count = 0;
-			return {
-				start: function() {
-					if (count === 0) {
-						$(this.opt.loader).fadeIn();
-					}
-					count++;
-				},
-				stop: function() {
-					count--;
-					if (count === 0) {
-						$(this.opt.loader).fadeOut();
-					}
-				}
-			};
+			if ($(this.opt.loader).is(':visible')){
+				$(this.opt.loader).fadeOut();
+			}else{
+				$(this.opt.loader).fadeIn();
+			}
 
 		},
 
