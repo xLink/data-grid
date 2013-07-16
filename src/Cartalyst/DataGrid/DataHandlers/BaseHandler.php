@@ -387,9 +387,10 @@ abstract class BaseHandler implements HandlerInterface {
 	/**
 	 * Calculates the page, common logic used in multiple handlers.
 	 *
-	 * Returns the current page,
+	 * Returns the current page, the previous page and the next page.
 	 *
 	 * @param  int  $resultsCount
+	 * @param  int  $page
 	 * @param  int  $perPage
 	 * @return array
 	 */
@@ -401,7 +402,7 @@ abstract class BaseHandler implements HandlerInterface {
 		// Now we will generate the previous and next page links
 		if ($page > 1)
 		{
-			if (($page * $perPage) <= $resultsCount)
+			if ((($page - 1) * $perPage) <= $resultsCount)
 			{
 				$previousPage = $page - 1;
 			}
