@@ -218,9 +218,9 @@ class DatabaseDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$request->shouldReceive('getPage')->once()->andReturn(1);
 		$request->shouldReceive('getDividend')->once()->andReturn(10);
 		$request->shouldReceive('getThreshold')->once()->andReturn(100);
-		$request->shouldReceive('getThrottle')->once()->andReturn(1000);
+		$request->shouldReceive('getThrottle')->once()->andReturn(100);
 
-		$handler->shouldReceive('calculatePagination')->with(10, 10, 100, 1000)->once()->andReturn(array(1, 10));
+		$handler->shouldReceive('calculatePagination')->with(10, 10, 100, 100)->once()->andReturn(array(1, 10));
 
 		$dataGrid->getData()->shouldReceive('forPage')->with(1, 10)->once();
 
@@ -241,9 +241,9 @@ class DatabaseDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$request->shouldReceive('getPage')->once()->andReturn(2);
 		$request->shouldReceive('getDividend')->once()->andReturn(10);
 		$request->shouldReceive('getThreshold')->once()->andReturn(100);
-		$request->shouldReceive('getThrottle')->once()->andReturn(1000);
+		$request->shouldReceive('getThrottle')->once()->andReturn(100);
 
-		$handler->shouldReceive('calculatePagination')->with(30, 10, 100, 1000)->once()->andReturn(array(3, 10));
+		$handler->shouldReceive('calculatePagination')->with(30, 10, 100, 100)->once()->andReturn(array(3, 10));
 
 		$dataGrid->getData()->shouldReceive('forPage')->with(2, 10)->once();
 
@@ -264,9 +264,9 @@ class DatabaseDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$request->shouldReceive('getPage')->once()->andReturn(3);
 		$request->shouldReceive('getDividend')->once()->andReturn(10);
 		$request->shouldReceive('getThreshold')->once()->andReturn(100);
-		$request->shouldReceive('getThrottle')->once()->andReturn(1000);
+		$request->shouldReceive('getThrottle')->once()->andReturn(100);
 
-		$handler->shouldReceive('calculatePagination')->with(30, 10, 100, 1000)->once()->andReturn(array(3, 10));
+		$handler->shouldReceive('calculatePagination')->with(30, 10, 100, 100)->once()->andReturn(array(3, 10));
 
 		$dataGrid->getData()->shouldReceive('forPage')->with(3, 10)->once();
 

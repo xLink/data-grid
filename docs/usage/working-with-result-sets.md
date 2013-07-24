@@ -96,7 +96,7 @@ There are three request parameters you can use to paginate a result set: `thresh
 
 `dividend` is the ideal number of pages you want to have for your result set. If you set this, for example, to 5 and the number of results is greater then the `threshold` the data handler will try to create a paginated result set with a maximum of 5 pages. The amount of results / page is calculated by dividing the total results with the `dividend`. the default value for this parameter is 10.
 
-`throttle` is the maximum amount of results you wish to display on a single page. Should the amount of results for each page be greater than this number, a new amount of results / page will be calculated by diving the `threshold` with the `dividend`. This means that the amount of pages can be greater than set by `dividend`. The default value for this parameter is 1000.
+`throttle` is the maximum amount of results you wish to display on a single page. Should the amount of results for each page be greater than this number, a new amount of results / page will be calculated by diving the `threshold` with the `dividend`. This means that the amount of pages can be greater than set by `dividend`. The default value for this parameter is 100.
 
 An example of these request parameters can be:
 

@@ -209,7 +209,7 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 		// Just need these here even though we're mocking the method
 		$request->shouldReceive('getDividend')->once()->andReturn(10);
 		$request->shouldReceive('getThreshold')->once()->andReturn(100);
-		$request->shouldReceive('getThrottle')->once()->andReturn(1000);
+		$request->shouldReceive('getThrottle')->once()->andReturn(100);
 
 		$handler->shouldReceive('calculatePagination')->once()->andReturn(array(3, 2));
 		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getPage')->once()->andReturn(2);

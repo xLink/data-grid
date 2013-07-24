@@ -30,6 +30,27 @@ class IlluminateProvider implements ProviderInterface {
 	protected $request;
 
 	/**
+	 * Default dividend.
+	 *
+	 * @var int
+	 */
+	protected $defaultDividend = 10;
+
+	/**
+	 * Default threshold.
+	 *
+	 * @var int
+	 */
+	protected $defaultThreshold = 100;
+
+	/**
+	 * Default throttle.
+	 *
+	 * @var int
+	 */
+	protected $defaultThrottle = 100;
+
+	/**
 	 * Creates a new Illuminate data grid
 	 * request provider.
 	 *
@@ -99,9 +120,9 @@ class IlluminateProvider implements ProviderInterface {
 	 */
 	public function getDividend()
 	{
-		$dividend = (int) $this->request->input('dividend', 10);
+		$dividend = (int) $this->request->input('dividend');
 
-		return ($dividend > 0) ? $dividend : 10;
+		return ($dividend > 0) ? $dividend : $this->defaultDividend;
 	}
 
 	/**
@@ -111,9 +132,9 @@ class IlluminateProvider implements ProviderInterface {
 	 */
 	public function getThreshold()
 	{
-		$threshold = (int) $this->request->input('threshold', 100);
+		$threshold = (int) $this->request->input('threshold');
 
-		return ($threshold > 0) ? $threshold : 100;
+		return ($threshold > 0) ? $threshold : $this->defaultThreshold;
 	}
 
 	/**
@@ -125,9 +146,42 @@ class IlluminateProvider implements ProviderInterface {
 	 */
 	public function getThrottle()
 	{
-		$threshold = (int) $this->request->input('throttle', 1000);
+		$threshold = (int) $this->request->input('throttle');
 
-		return ($threshold > 0) ? $threshold : 1000;
+		return ($threshold > 0) ? $threshold : $this->defaultThrottle;
+	}
+
+	/**
+	 * Set the default dividend.
+	 *
+	 * @param  int  $defaultDividend
+	 * @return void
+	 */
+	public function setDefaultDividend($defaultDividend)
+	{
+		$this->defaultDividend = $defaultDividend;
+	}
+
+	/**
+	 * Set the default threshold.
+	 *
+	 * @param  int  $defaultThreshold
+	 * @return void
+	 */
+	public function setDefaultThreshold($defaultThreshold)
+	{
+		$this->defaultThreshold = $defaultThreshold;
+	}
+
+	/**
+	 * Set the default throttle.
+	 *
+	 * @param  int  $defaultThrottle
+	 * @return void
+	 */
+	public function setDefaultThrottle($defaultThrottle)
+	{
+		$this->defaultThrottle = $defaultThrottle;
 	}
 
 }

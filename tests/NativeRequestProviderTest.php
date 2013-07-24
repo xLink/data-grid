@@ -99,13 +99,13 @@ class NativeRequestProviderTest extends PHPUnit_Framework_TestCase {
 	public function testGettingThrottle()
 	{
 		$provider = new Provider;
-		$this->assertSame(1000, $provider->getThrottle());
+		$this->assertSame(100, $provider->getThrottle());
 		$_GET['throttle'] = '4';
 		$this->assertSame(4, $provider->getThrottle());
 		$_GET['throttle'] = '0';
-		$this->assertSame(1000, $provider->getThrottle());
+		$this->assertSame(100, $provider->getThrottle());
 		$_GET['throttle'] = '-1';
-		$this->assertSame(1000, $provider->getThrottle());
+		$this->assertSame(100, $provider->getThrottle());
 	}
 
 }

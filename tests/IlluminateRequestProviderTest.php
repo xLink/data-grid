@@ -73,34 +73,34 @@ class IlluminateRequestProviderTest extends PHPUnit_Framework_TestCase {
 	public function testGettingDividend()
 	{
 		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
-		$request->shouldReceive('input')->with('dividend', 10)->once()->andReturn('4');
+		$request->shouldReceive('input')->with('dividend')->once()->andReturn('4');
 		$this->assertSame(4, $provider->getDividend());
 
 		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
-		$request->shouldReceive('input')->with('dividend', 10)->once()->andReturn(0);
+		$request->shouldReceive('input')->with('dividend')->once()->andReturn(0);
 		$this->assertSame(10, $provider->getDividend());
 	}
 
 	public function testGettingThreshold()
 	{
 		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
-		$request->shouldReceive('input')->with('threshold', 100)->once()->andReturn('4');
+		$request->shouldReceive('input')->with('threshold')->once()->andReturn('4');
 		$this->assertSame(4, $provider->getThreshold());
 
 		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
-		$request->shouldReceive('input')->with('threshold', 100)->once()->andReturn(0);
+		$request->shouldReceive('input')->with('threshold')->once()->andReturn(0);
 		$this->assertSame(100, $provider->getThreshold());
 	}
 
 	public function testGettingThrottle()
 	{
 		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
-		$request->shouldReceive('input')->with('throttle', 1000)->once()->andReturn('4');
+		$request->shouldReceive('input')->with('throttle')->once()->andReturn('4');
 		$this->assertSame(4, $provider->getThrottle());
 
 		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
-		$request->shouldReceive('input')->with('throttle', 1000)->once()->andReturn(0);
-		$this->assertSame(1000, $provider->getThrottle());
+		$request->shouldReceive('input')->with('throttle')->once()->andReturn(0);
+		$this->assertSame(100, $provider->getThrottle());
 	}
 
 }

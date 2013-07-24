@@ -29,6 +29,43 @@ return array(
 
 	/*
 	|--------------------------------------------------------------------------
+	| Dividend
+	|--------------------------------------------------------------------------
+	|
+	| Define the defualt dividend (ideal number of pages, once the results
+	| count is greater than the threshold and each page has
+	| less results than the throttle).
+	|
+	*/
+
+	'dividend' => 10,
+
+	/*
+	|--------------------------------------------------------------------------
+	| Threshold
+	|--------------------------------------------------------------------------
+	|
+	| Define the default threshold (number of results before pagination begins).
+	|
+	*/
+
+	'threshold' => 100,
+
+	/*
+	|--------------------------------------------------------------------------
+	| Throttle
+	|--------------------------------------------------------------------------
+	|
+	| Define the default throttle, which is the maximum results set. If the
+	| results total is greater than this (before we apply the
+	| dividend, we'll reduce the results set).
+	|
+	*/
+
+	'throttle' => 100,
+
+	/*
+	|--------------------------------------------------------------------------
 	| Data Handler Mappings
 	|--------------------------------------------------------------------------
 	|

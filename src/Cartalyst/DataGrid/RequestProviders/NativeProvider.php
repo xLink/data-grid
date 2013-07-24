@@ -116,11 +116,11 @@ class NativeProvider implements ProviderInterface {
 	 */
 	public function getThrottle()
 	{
-		if ( ! isset($_GET['throttle'])) return 1000;
+		if ( ! isset($_GET['throttle'])) return 100;
 
 		$throttle = (int) $_GET['throttle'];
 
-		return ($throttle > 0) ? $throttle : 1000;
+		return ($throttle > 0) ? $throttle : 100;
 	}
 
 }

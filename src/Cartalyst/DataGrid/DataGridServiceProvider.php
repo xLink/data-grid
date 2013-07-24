@@ -41,7 +41,16 @@ class DataGridServiceProvider extends ServiceProvider {
 	{
 		$this->app['datagrid.request'] = $this->app->share(function($app)
 		{
-			return new IlluminateProvider($app['request']);
+			$dividend  = $app['config']['cartalyst/data-grid::dividend'];
+			$threshold = $app['config']['cartalyst/data-grid::threshold'];
+			$throttle  = $app['config']['cartalyst/data-grid::throttle'];
+
+			$requestProvider = new IlluminateProvider($app['request']);
+			$requestProvider->setDefaultDividend($dividend);
+			$requestProvider->setDefaultThreshold($threshold);
+			$requestProvider->setDefaultThrottle($throttle);
+
+			return $requestProvider;
 		});
 	}
 
