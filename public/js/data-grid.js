@@ -86,7 +86,7 @@
 
 			if(!$.isEmptyObject(this.opt.sort)){
 
-				this.$body.find('[data-sort='+this.opt.sort.column+']'+this.grid).addClass(this.opt.sort.direction);
+				this.$body.find('[data-sort="'+this.opt.sort.column+'"]'+this.grid).addClass(this.opt.sort.direction);
 
 			}
 
