@@ -27,8 +27,8 @@
         throttle: 100,
         type: 'multiple',
         loader: undefined,
-        ascClass: 'asc',
-        descClass: 'desc',
+        ascClass: 'sort_asc',
+        descClass: 'sort_desc',
         sort: {},
         tempoOptions: {
             var_braces: '\\[\\[\\]\\]',
@@ -88,7 +88,7 @@
 
             if(!$.isEmptyObject(this.opt.sort)){
 
-                this.$body.find('[data-sort="'+this.opt.sort.column+'"]'+this.grid).addClass(this.opt.sort.direction);
+                this._setSortDirection(this.$body.find('[data-sort="'+this.opt.sort.column+'"]'+this.grid));
 
             }
 
@@ -350,13 +350,11 @@
         _setSort: function(sort){
 
             var arr = sort.split(':'),
-                direction = typeof arr[1] !== 'undefined' ? arr[1] : this.opt.ascClass;
-
-                console.log(this.opt);
+                direction = typeof arr[1] !== 'undefined' ? arr[1] : 'asc';
 
             if(arr[0] === this.opt.sort.column){
 
-                this.opt.sort.direction = (this.opt.sort.direction === this.opt.ascClass) ? this.opt.descClass : this.opt.sort.ascClass;
+                this.opt.sort.direction = (this.opt.sort.direction === 'asc') ? 'desc' : 'asc';
 
             }else{
 
@@ -369,7 +367,8 @@
 
         _setSortDirection: function(el){
 
-            $('[data-sort]'+this.grid).not(el).removeClass(this.opt.ascClass + this.opt.descClass);
+            $('[data-sort]'+this.grid).not(el).removeClass(this.opt.ascClass);
+            $('[data-sort]'+this.grid).not(el).removeClass(this.opt.descClass);
 
             if(el.hasClass(this.opt.ascClass)){
                 el.removeClass(this.opt.ascClass).addClass(this.opt.descClass);
