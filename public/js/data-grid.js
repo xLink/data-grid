@@ -27,8 +27,8 @@
         throttle: 100,
         type: 'multiple',
         loader: undefined,
-        ascClass: 'sort_asc',
-        descClass: 'sort_desc',
+        ascClass: 'asc',
+        descClass: 'desc',
         sort: {},
         tempoOptions: {
             var_braces: '\\[\\[\\]\\]',
