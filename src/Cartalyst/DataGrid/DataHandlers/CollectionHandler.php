@@ -142,7 +142,17 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 				{
 					foreach ($item as $key => $value)
 					{
-						if (stripos($value, $filter) !== false)
+						if (is_array($value))
+						{
+							foreach ($value as $k => $v)
+							{
+								if (stripos($v, $filter) !== false)
+								{
+									return true;
+								}
+							}
+						}
+						elseif (stripos($value, $filter) !== false)
 						{
 							return true;
 						}
