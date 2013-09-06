@@ -188,7 +188,7 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 
 		$this->data = $this->data->sort(function($a, $b) use ($column, $direction)
 		{
-			$result = strnatcmp($a[$column], $b[$column]);
+			$result = strnatcasecmp($a[$column], $b[$column]);
 
 			$invert = ($direction == 'desc');
 
