@@ -32,7 +32,7 @@ interface ProviderInterface {
 
 	/**
 	 * Get the column by which we sort our
-	 * datatable.
+	 * datagrid.
 	 *
 	 * @return string
 	 */
