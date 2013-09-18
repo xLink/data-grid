@@ -51,6 +51,13 @@ class IlluminateProvider implements ProviderInterface {
 	protected $defaultThrottle = 100;
 
 	/**
+	 * Default direction.
+	 *
+	 * @var string
+	 */
+	protected $defaultDirection = 'asc';
+
+	/**
 	 * Creates a new Illuminate data grid
 	 * request provider.
 	 *
@@ -94,7 +101,7 @@ class IlluminateProvider implements ProviderInterface {
 	 */
 	public function getDirection()
 	{
-		$direction = $this->request->input('direction', 'asc');
+		$direction = $this->request->input('direction', $this->defaultDirection);
 
 		return in_array($direction, array('asc', 'desc')) ? $direction : 'asc';
 	}
@@ -182,6 +189,17 @@ class IlluminateProvider implements ProviderInterface {
 	public function setDefaultThrottle($defaultThrottle)
 	{
 		$this->defaultThrottle = $defaultThrottle;
+	}
+
+	/**
+	 * Set the default direction.
+	 *
+	 * @param  string  $defaultDirection
+	 * @return void
+	 */
+	public function setDefaultDirection($defaultDirection)
+	{
+		$this->defaultDirection = $defaultDirection;
 	}
 
 }

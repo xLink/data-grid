@@ -44,11 +44,13 @@ class DataGridServiceProvider extends ServiceProvider {
 			$dividend  = $app['config']['cartalyst/data-grid::dividend'];
 			$threshold = $app['config']['cartalyst/data-grid::threshold'];
 			$throttle  = $app['config']['cartalyst/data-grid::throttle'];
+			$direction = $app['config']['cartalyst/data-grid::direction'];
 
 			$requestProvider = new IlluminateProvider($app['request']);
 			$requestProvider->setDefaultDividend($dividend);
 			$requestProvider->setDefaultThreshold($threshold);
 			$requestProvider->setDefaultThrottle($throttle);
+			$requestProvider->setDefaultDirection($direction);
 
 			return $requestProvider;
 		});
