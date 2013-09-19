@@ -194,7 +194,7 @@ Option | Type | Description
 ------ | ---- | -----------
 source | string | The API endpoint URI.
 sort | object | Set a default column and direction for sorting.
-treshold | integer | Minimum amount of results before pagination is applied.
+threshold | integer | Minimum amount of results before pagination is applied.
 dividend | integer | The maximum amount of pages you wish to have.
 throttle | integer | The maxmim amount of results on a single page. Overrides dividend.
 type | string | The type of pagination to use. Options are: "single", "multiple" and "infinite".
