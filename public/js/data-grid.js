@@ -243,7 +243,7 @@
             this.$body.on('click', '[data-reset]'+this.grid, function(e){
                 e.preventDefault();
                 self._reset();
-                self._fetch();
+                self._ajaxFetch();
             });
 
         },
