@@ -1,4 +1,4 @@
-### Basics
+## Basics
 
 - [Introduction](#introduction)
 - [Loading An Environment](#loading-an-environment)
@@ -8,15 +8,18 @@
 - [Creating A Data Grid Object](#creating-a-data-grid-object)
 - [Catching Unsupported Data Types]()
 
-<a name="introduction"></a>
-#### Introduction
+### Introduction {#introduction}
+
+----
 
 Cartalyst's Data Grid package provides a couple of ways to interact with. The most basic way is to instantiate a new environment with the `Cartalyst\DataGrid\Environment` class and use Cartalyst's default built-in `Cartalyst\DataGrid\DataHandlers\CollectionHandler` for data handling.
 
 After creating a Data Grid object you can use the registered data handler to interact with your result set.
 
-<a name="loading-an-environment"></a>
-#### Loading An Environment
+
+### Loading An Environment {#loading-an-environment}
+
+---
 
 Before you can use the Data Grid package you need to load a new environment first. This environment will determine which request provider it needs to instantiate for you to interact with. Natively it will load an instance of `Cartalyst\DataGrid\RequestProviders\NativeProvider`.
 
@@ -32,8 +35,10 @@ You can register your custom request provider by sending it along when instantia
 
 > **Note:** Make sure that your request provider implements `Cartalyst\DataGrid\RequestProviders\ProviderInterface`.
 
-<a name="registering-data-handlers"></a>
-#### Registering Data Handlers
+
+### Registering Data Handlers {#registering-data-handlers}
+
+---
 
 Data handlers are essentially drivers which manipulate a data source and return the required data. You can register data handlers with your environment by using the `addDataHandlerMapping` function.
 
@@ -62,8 +67,10 @@ Alternatively you can register your data handlers when loading an environment.
 
 	$environment = new Cartalyst\DataGrid\Environment(null, $handlers);
 
-<a name="default-data-handlers"></a>
-#### Default Data Handlers
+
+### Default Data Handlers {#default-data-handlers}
+
+---
 
  Cartalyst's Data Grid package provides two data handlers by default. One of them is the `Cartalyst\DataGrid\DataHandlers\CollectionHandler` which provides support for arrays and `Illuminate\Support\Collection` objects.
 
@@ -71,7 +78,7 @@ If you'd like to use the `CollectionHandler` data handler you need to register i
 
 	$environment->addDataHandlerMapping('Cartalyst\DataGrid\DataHandlers\CollectionHandler', function($data)
 	{
-		return (
+		return(
 			$data instanceof Illuminate\Support\Collection or
 			is_array($data)
 		);
@@ -81,8 +88,10 @@ Now whenever you pass along an array of data or an `Illuminate\Support\Collectio
 
 > **Note:** When we're using examples in the documentation for Data Grid, we're going to assume you have registered the `CollectionHandler` data handler.
 
-<a name="creating-custom-data-handlers"></a>
-#### Creating Custom Data Handlers
+
+#### Creating Custom Data Handlers {#creating-custom-data-handlers}
+
+---
 
 In addition to register the default data handlers provided by the package, you can create your own custom data handlers as well. All data handlers need to extend the abstract `Cartalyst\DataGrid\DataHandlers\BaseHandler` class.
 
@@ -95,8 +104,10 @@ In addition to register the default data handlers provided by the package, you c
 
 Specific handlers can be created to handle specific sets of data like framework specific result sets or a certain service's API result responses.
 
-<a name="creating-a-data-grid-object"></a>
-#### Creating A Data-Grid Object
+
+### Creating a Data-Grid Object {#creating-a-data-grid-object}
+
+---
 
 Creating a Data Grid object can be done by calling the `make` function on the Data Grid environment.
 
@@ -140,12 +151,15 @@ You can also rename columns by defining them as a key/value pair with the origin
 		'age'   => 'new_age_column_name',
 	));
 
-<a name="creating-a-data-grid-instance"></a>
-#### Catching Unsupported Data Types
+
+### Catching Unsupported Data Types {#creating-a-data-grid-instance}
+
+---
 
 When the Data Grid package can't find a Data Handler for the provided data, it will throw a `RuntimeException`[^1]. You can catch it by doing the following:
 
-	try {
+	try
+	{
 		$dataGrid = $environment->make($data, $columns);
 	}
 	catch (\RuntimeException $exception)

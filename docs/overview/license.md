@@ -1,4 +1,4 @@
-### The BSD 3-Clause License
+## The BSD 3-Clause License
 
 Copyright (c) 2011-2013, Cartalyst LLC
 All rights reserved.

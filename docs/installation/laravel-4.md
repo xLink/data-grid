@@ -1,15 +1,16 @@
-### Install & Configure in Laravel 4
+## Install & Configure in Laravel 4
 
 > **Note:** To use Cartalyst's Data Grid package you need to have a valid Cartalyst.com subscription.
 Click [here](https://www.cartalyst.com/pricing) to obtain your subscription.
 
-1. [Composer](#composer)
-2. [Service Provider](#service-provider)
-3. [Alias](#alias)
-4. [Configuration](#configuration)
+- 1. [Composer](#composer)
+- 2. [Service Provider](#service-provider)
+- 3. [Alias](#alias)
+- 4. [Configuration](#configuration)
 
-<a name="composer"></a>
-#### 1. Composer
+### 1. Composer {#compoers}
+
+---
 
 Open your `composer.json` file and add the following lines:
 
@@ -23,31 +24,35 @@ Open your `composer.json` file and add the following lines:
 				"url": "http://packages.cartalyst.com"
 			}
 		],
-		"minimum-stability": "dev"
+		"minimum-stability": "stable"
 	}
-
-> **Note:** The minimum-stability key is needed so that you can use the package (which isn't marked as stable, yet).
 
 Run a composer update from the command line.
 
-	php composer.phar update
+	composer update
 
-<a name="service-provider"></a>
-#### 2. Service Provider
+
+### 2. Service Provider {#service-provider}
+
+---
 
 Add the following to the list of service providers in `app/config/app.php`.
 
 	'Cartalyst\DataGrid\DataGridServiceProvider',
 
-<a name="alias"></a>
-#### 3. Alias
 
-Add the following to the to the list of class aliases in `app/config/app.php`.
+### 3. Alias {#alias}
+
+---
+
+Add the following to the list of class aliases in `app/config/app.php`.
 
 	'DataGrid' => 'Cartalyst\DataGrid\Facades\DataGrid',
 
-<a name="configuration"></a>
-#### 4. Configuration
+
+### 4. Configuration {#configuration}
+
+---
 
 After installing, you can publish the package's configuration file into you application by running the following command:
 

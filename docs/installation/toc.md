@@ -1,5 +1,5 @@
 ## Install & Configure
 
-- [Installation](/data-grid/installation)
-- [Composer](/data-grid/installation/composer)
-- [Laravel 4](/data-grid/installation/laravel-4)
+- [Installation]({url}/installation)
+- [Composer]({url}/installation/composer)
+- [Laravel 4]({url}/installation/laravel-4)

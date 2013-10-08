@@ -1,4 +1,4 @@
-### Using The Javascript Plugin
+## Using The Javascript Plugin
 
 - [Introduction](#introduction)
 - [Requirements](#requirements)
@@ -10,32 +10,37 @@
 - [Resetting](#resetting)
 - [Options](#options)
 
-<a name="introduction"></a>
-#### Introduction
+### Introduction {#introduction}
+
+---
 
 One of our goals with Data Grid was to leave the front end HTML up to you, and avoid what most plugins do by keeping you within a container. We built a Javascript plugin (`data-grid.js`) that works together with the [Tempo](http://tempojs.com) rendering engine to allow you to easily built flexible data grids.
 
 You can see a working demo of the plugin at [the demo page](http://demo.cartalyst.com/data-grid).
 
-<a name="requirements"></a>
-#### Requirements
+
+### Requirements {#requirements}
+
+---
 
 Using `data-grid.js` requires the following:
 
 - [Tempo](http://tempojs.com) v2.0.0 or later
 - [jQuery](http://jquery.com/) v1.9.1 or later
 
-<a name="installing"></a>
-#### Installing
+
+### Installing {#installing}
+
+---
 
 Add jQuery, Tempo and `data-grid.js` to the `<head>` section of your page.
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script src="//raw.github.com/twigkit/tempo/master/tempo.min.js"></script>
-	<script src="/vendor/cartalyst/data-grid/src/public/js/data-grid.js"></script>
+	<script src="/vendor/cartalyst{url}/src/public/js/data-grid.js"></script>
 
-<a name="the-html"></a>
-#### The HTML
+
+### The HTML {#the-html}
 
 Data Grid requires three elements for instantiation: a results container, pagination container and finally an applied filters container. Each of these containers will contain either one or many Tempo templates.
 
@@ -88,8 +93,10 @@ As for the other attributes, the `data-page` attribute is where we store the cur
 
 We use our custom itteration of Tempo's brace syntax to build if else statements. We check for columns so you can display your filters in a readable manner. If your filter isn't filtering within a column it will just display the filter. If your filtering within a column we show both the filter and column.
 
-<a name="the-javascript"></a>
-#### The Javascript
+
+### The Javascript {#the-javascript}
+
+---
 
 Now that you have all of your templates setup, let's instantiate Data Grid. The first argument within the instantiation is the grid, this is the value of the `data-grid` attribute. This allows us you to have a flexible layout, and multiple Data Grids on a page. Next is the results container for the response, followed by the pagination container and finally the applied filters container.
 
@@ -104,8 +111,8 @@ Should you have placed the `data-source` attribute on the results container, the
 
 After applying the plugin, you should get a nicely filled table with all of your data and pagination.
 
-<a name="applying-filters-and-sorting"></a>
-#### Applying Filters & Sorting
+
+### Applying Filters & Sorting {#applying-filters-and-sorting}
 
 Lets go over how to set filters and sorts now that you have your Data Grid returning results. We use two attributes for setting filters and sorts, `data-filter` and `data-sort`. Both are done in key/value pairs separated by `, `. **Note the space after the comma, this is needed.** Filters and Sorts can be set on any element within site.
 
@@ -139,8 +146,10 @@ Heres a filter with a label fix.
 
 	<a href="#" data-filter="country_code:USA" data-label="country_code:Country Code">Filter by Country Code</a>
 
-<a name="adding-search"></a>
-#### Adding Search
+
+### Adding Search {#adding-search}
+
+---
 
 Data Grid ships with a few other things to help developers get off the ground faster. If you are looking to search within your data set, all you need to do is create a form and set the `data-grid` attribute and set `data-search`. Make sure the input name is set to filter.
 
@@ -161,15 +170,19 @@ Now if you are looking for to let users filter within defined columns all you ne
 		<button>Add Filter</button>
 	</form>
 
-<a name="resetting"></a>
-#### Resetting
+
+### Resetting {#resetting}
+
+---
 
 If you want to give your users a simple way to reset Data Grid, just create a button, set the attributes `data-grid`  and `data-reset` and your done.
 
 	<button data-reset data-grid="main">Reset</button>
 
-<a name="options"></a>
-#### Options
+
+### Options {#options}
+
+---
 
 You can add plugin options by adding a fifth object parameter to your plugin instantiation.
 
@@ -178,7 +191,7 @@ You can add plugin options by adding a fifth object parameter to your plugin ins
 		{
 			$.datagrid('main', '.results', '.pagination', '.applied',
 			{
-				source: 'http://example.com/api/v1/data-grid',
+				source: 'http://example.com/api/v1{url}',
 				sort: {
 					column: 'city',
 					direction: 'desc'

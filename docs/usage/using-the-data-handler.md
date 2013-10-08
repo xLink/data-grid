@@ -1,11 +1,12 @@
-### Using The Data Handler
+## Using The Data Handler
 
 - [Introduction](#introduction)
 - [Retrieving Results](#retrieving-results)
 - [Other Methods](#other-methods)
 
-<a name="introduction"></a>
-#### Introduction
+### Introduction {#introduction}
+
+---
 
 The data handler is the class that handles and filters the data you passed along. In the examples below we'll go over the basic functionality for a data handler.
 
@@ -13,8 +14,10 @@ Accessing the registered data handler can be done by calling the `getDataHandler
 
 	$handler = $dataGrid->getDataHandler();
 
-<a name="retrieving-results"></a>
-#### Retrieving Results
+
+### Retrieving Results {#retrieving-results}
+
+---
 
 You can retrieve the result set by calling the `getResults` method on the data handler.
 
@@ -22,8 +25,10 @@ You can retrieve the result set by calling the `getResults` method on the data h
 
 This will return an array with the result set after all the request parameters have been applied.
 
-<a name="other-methods"></a>
-#### Other Methods
+
+### Other Methods {#other-methods}
+
+---
 
 Get the total amount of results.
 

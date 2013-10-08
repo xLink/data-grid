@@ -1,21 +1,24 @@
-### Working With Result Sets
+## Working With Result Sets
 
 - [Introduction](#introduction)
 - [Generating Results](#generating-results)
 - [Sorting Results](#sorting-results)
 - [Switching Pages](#switching-pages)
 - [Filter Results](#filter-results)
-- [Paginating Results](#paginating)
+- [Paginating Results](#paginating-results)
 
-<a name="introduction"></a>
-#### Introduction
+### Introduction {#introduction}
+
+---
 
 After instantiating a Data Grid object you have a couple of options to work with the data result sets. Depending on the request provider which you registered with your environment, the implementation of these methods can differ. In the examples below we're going to assume you're using the default `Cartalyst\DataGrid\RequestProviders\NativeProvider` request provider.
 
 You can filter results by sending specific request parameters along with your HTTP request. Your request provider will catch these so your data handler can filter the data based on these request parameters.
 
-<a name="generating-results"></a>
-#### Generating Results
+
+### Generating Results {#generating-results}
+
+---
 
 You can convert the result set from the Data Grid object to an array or JSON response by calling the `toArray` or `toJson` functions.
 
@@ -52,8 +55,10 @@ The response contains some useful information like the total number of results, 
 
 > **Note:** When sending the Data Grid object to the browser, it will be automatically converted to a JSON response. This is very useful, for example, when building APIs.
 
-<a name="sorting-results"></a>
-#### Sorting Results
+
+### Sorting Results {#sorting-results}
+
+---
 
 You can sort the result set by sending a request parameter with the `sort` key.
 
@@ -67,8 +72,10 @@ Reverting the sorted results can be done by sending a request parameter with the
 
 Now the results will be sorted descended by name.
 
-<a name="switching-pages"></a>
-#### Switching Pages
+
+### Switching Pages {#switching-pages}
+
+---
 
 Changing the page in a result set can be done by sending a request parameter with the `page` key.
 
@@ -76,8 +83,10 @@ Changing the page in a result set can be done by sending a request parameter wit
 
 This would show the results on the second page of the result set.
 
-<a name="filter-results"></a>
-#### Filter Results
+
+### Filter Results {#filter-results}
+
+---
 
 You can filter results by sending a request parameter with the `filters` key. The filters request parameter must provide filters based as a key (column) and value (column value) array.
 
@@ -87,8 +96,10 @@ For example:
 
 This would show only results which have a foo name and an age of 24.
 
-<a name="paginating-results"></a>
-#### Paginating Results
+
+### Paginating Results {#paginating-results}
+
+---
 
 There are three request parameters you can use to paginate a result set: `threshold`, `dividend` and `throttle`.
 
