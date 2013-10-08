@@ -8,7 +8,7 @@ Click [here](https://www.cartalyst.com/pricing) to obtain your subscription.
 - 3. [Alias](#alias)
 - 4. [Configuration](#configuration)
 
-### 1. Composer {#compoers}
+### 1. Composer {#composer}
 
 ---
 
