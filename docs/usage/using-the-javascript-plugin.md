@@ -1,15 +1,5 @@
 ## Using The Javascript Plugin
 
-- [Introduction](#introduction)
-- [Requirements](#requirements)
-- [Installing](#installing)
-- [The HTML](#the-html)
-- [The Javascript](#the-javascript)
-- [Applying Filters & Sorting](#applying-filters-and-sorting)
-- [Adding Search](#adding-search)
-- [Resetting](#resetting)
-- [Options](#options)
-
 ### Introduction {#introduction}
 
 ---

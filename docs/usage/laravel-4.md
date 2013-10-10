@@ -1,13 +1,5 @@
 ## Usage In Laravel 4
 
-- [Introduction](#introduction)
-- [Creating a Data Grid object](#creating-a-data-grid-object)
-- [Working With The Query Builder](#working-with-the-query-builder)
-- [Working With Eloquent](#working-with-eloquent)
-- [Using Data Grid With Routes](#using-data-grid-with-routes)
-- [Using Data Grid In Views](#using-data-grid-in-views)
-- [Using With The Javascript Plugin](#using-with-the-javascript-plugin)
-
 ### Introduction {#introduction}
 
 ---

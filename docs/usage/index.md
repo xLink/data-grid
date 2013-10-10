@@ -1,13 +1,5 @@
 ## Basics
 
-- [Introduction](#introduction)
-- [Loading An Environment](#loading-an-environment)
-- [Registering Data Handlers](#registering-data-handlers)
-- [Default Data Handlers](#default-data-handlers)
-- [Creating Custom Data Handlers](#creating-custom-data-handlers)
-- [Creating A Data Grid Object](#creating-a-data-grid-object)
-- [Catching Unsupported Data Types]()
-
 ### Introduction {#introduction}
 
 ----
@@ -89,7 +81,7 @@ Now whenever you pass along an array of data or an `Illuminate\Support\Collectio
 > **Note:** When we're using examples in the documentation for Data Grid, we're going to assume you have registered the `CollectionHandler` data handler.
 
 
-#### Creating Custom Data Handlers {#creating-custom-data-handlers}
+### Creating Custom Data Handlers {#creating-custom-data-handlers}
 
 ---
 
@@ -152,7 +144,7 @@ You can also rename columns by defining them as a key/value pair with the origin
 	));
 
 
-### Catching Unsupported Data Types {#creating-a-data-grid-instance}
+### Catching Unsupported Data Types {#catching-unsupported-data-types}
 
 ---
 

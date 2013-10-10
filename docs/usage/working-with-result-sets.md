@@ -1,12 +1,5 @@
 ## Working With Result Sets
 
-- [Introduction](#introduction)
-- [Generating Results](#generating-results)
-- [Sorting Results](#sorting-results)
-- [Switching Pages](#switching-pages)
-- [Filter Results](#filter-results)
-- [Paginating Results](#paginating-results)
-
 ### Introduction {#introduction}
 
 ---

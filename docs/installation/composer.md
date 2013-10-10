@@ -1,8 +1,5 @@
 ## Install & Configure through Composer
 
-> **Note:** To use Cartalyst's Data Grid package you need to have a valid Cartalyst.com subscription.
-Click [here](https://www.cartalyst.com/pricing) to obtain your subscription.
-
 Open your `composer.json` file and add the following lines:
 
 	{

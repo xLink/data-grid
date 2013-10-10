@@ -1,9 +1,5 @@
 ## Using The Data Handler
 
-- [Introduction](#introduction)
-- [Retrieving Results](#retrieving-results)
-- [Other Methods](#other-methods)
-
 ### Introduction {#introduction}
 
 ---
