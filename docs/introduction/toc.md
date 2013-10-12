@@ -1,6 +1,5 @@
 ## Introduction
 
 - [Introduction]({url}/introduction)
-	- [Features]({url}/introduction#features)
-	- [Requirements]({url}/introduction#requirements)
-	- [License]({url}/introduction#license)
+- [Features]({url}/introduction/features)
+- [Requirements]({url}/introduction/requirements)
