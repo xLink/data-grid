@@ -1,9 +1,5 @@
 ## Basics
 
-### Introduction {#introduction}
-
-----
-
 Cartalyst's Data Grid package provides a couple of ways to interact with. The most basic way is to instantiate a new environment with the `Cartalyst\DataGrid\Environment` class and use Cartalyst's default built-in `Cartalyst\DataGrid\DataHandlers\CollectionHandler` for data handling.
 
 After creating a Data Grid object you can use the registered data handler to interact with your result set.

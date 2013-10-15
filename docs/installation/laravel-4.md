@@ -3,11 +3,6 @@
 > **Note:** To use Cartalyst's Data Grid package you need to have a valid Cartalyst.com subscription.
 Click [here](https://www.cartalyst.com/pricing) to obtain your subscription.
 
-- 1. [Composer](#composer)
-- 2. [Service Provider](#service-provider)
-- 3. [Alias](#alias)
-- 4. [Configuration](#configuration)
-
 ### 1. Composer {#composer}
 
 ---
