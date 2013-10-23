@@ -58,6 +58,13 @@ class IlluminateProvider implements ProviderInterface {
 	protected $defaultDirection = 'asc';
 
 	/**
+	 * Default sort column.
+	 *
+	 * @var string
+	 */
+	protected $defaultSort = 'id';
+
+	/**
 	 * Creates a new Illuminate data grid
 	 * request provider.
 	 *
@@ -90,7 +97,9 @@ class IlluminateProvider implements ProviderInterface {
 	 */
 	public function getSort()
 	{
-		return $this->request->input('sort');
+		$sort = $this->request->input('sort', $this->defaultSort);
+
+		return $sort ? $sort : 'id';
 	}
 
 	/**
@@ -200,6 +209,17 @@ class IlluminateProvider implements ProviderInterface {
 	public function setDefaultDirection($defaultDirection)
 	{
 		$this->defaultDirection = $defaultDirection;
+	}
+
+	/**
+	 * Set the default sort column.
+	 *
+	 * @param  string  $defaultSort
+	 * @return void
+	 */
+	public function setDefaultSort($defaultSort)
+	{
+		$this->defaultSort = $defaultSort;
 	}
 
 }
