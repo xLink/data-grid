@@ -97,9 +97,7 @@ class IlluminateProvider implements ProviderInterface {
 	 */
 	public function getSort()
 	{
-		$sort = $this->request->input('sort', $this->defaultSort);
-
-		return $sort ? $sort : 'id';
+		return $this->request->input('sort', $this->defaultSort);
 	}
 
 	/**
