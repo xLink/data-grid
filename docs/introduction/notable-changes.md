@@ -1,29 +1,33 @@
 ### Notable Changes
 
-We have removed tempojs as our templating engine in favour of underscorejs. With
-this chanage, we made updates to the javascript plugin and the way the front-end
-templates are development and included.
+We have removed TempoJs as our templating engine in favour of Underscorejs. With
+this change, we made updates to the javascript plugin and the way the front-end
+templates are developed and included.
 
 ----------
 
 ### data-grid.js
 
-The only notable change within the jQuery Plugin is the setting for `templateOptions`
-has now be converted to `templateSettings` to match better with underscore's `_.templateSettings`.
-Just like before you can change the brace syntax to anything you want, we ship using
-the default underscore braces of `<% ... %>`.
+The only notable change within the jQuery plugin is the setting for `templateOptions`
+has now been converted to `templateSettings` to match with Underscore's `_.templateSettings`.
+Just like before we ship default settings for the Underscore braces of `<% ... %>` but you
+can change the brace syntax to anything you want.
 
 ----------
 
 ### The HTML
 
-Data Grid's templates are now required to be in a `script` tag. As this allows, you
+Data Grid's templates are now required to be inside a `script` tag, as this allows you
 the most flexiblity to edit the templates from text files and use `@include` to include
-them. The script tags for the templates require a few attributes to be set, and must
-stick to our strict name convention. To Start your `script` tags must be set to
+them.
+
+The script tags for the templates require a few attributes to be set, and must
+stick to our strict name convention. That said, your `script` tags must be set to
 `type="text/template"`, along with a `data-grid` attribute that matches the key you
-set in the plugin options. Templates must have an `id` that matches the passed element
-within your plugin instantiation, appened by `-tmpl`.
+set in the plugin options.
+
+Templates must have an `id` that matches the passed element
+within your plugin instantiation, appended by `-tmpl`.
 
 ** Example Template Setup **
 
@@ -41,5 +45,4 @@ Please note that there is no need for `data-template` anymore.
 ### Underscore
 
 For more information on [underscorejs](http://underscorejs.org/) and their [templates](http://underscorejs.org/#template),
-please refer to their [documentation](http://underscorejs.org/)
-
+please refer to their [documentation](http://underscorejs.org/).
