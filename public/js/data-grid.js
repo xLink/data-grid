@@ -99,7 +99,7 @@
         _init: function() {
 
             if( $('#no-results-tmpl'+this.grid).length ) {
-                _this.$results.html( _.template( $('#no-results-tmpl').html() ) );
+                this.$results.html( _.template( $('#no-results-tmpl'+this.grid).html() ) );
             }
 
             this._addListeners();
@@ -423,7 +423,7 @@
 
                 // If No Results
                 if(!json.results.length){
-                    _this.$results.html( _.template( $('#no-results-tmpl'+this.grid).html() ) );
+                    _this.$results.html( _.template( $('#no-results-tmpl'+_this.grid).html() ) );
                 }
 
                 _this._loading();
