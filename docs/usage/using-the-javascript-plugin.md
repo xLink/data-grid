@@ -4,7 +4,7 @@
 
 ---
 
-One of our goals with Data Grid was to leave the front end HTML up to you, and avoid what most plugins do by keeping you within a container. We built a Javascript plugin (`data-grid.js`) that works together with the [Tempo](http://tempojs.com) rendering engine to allow you to easily built flexible data grids.
+One of our goals with Data Grid was to leave the front end HTML up to you, and avoid what most plugins do by keeping you within a container. We built a Javascript plugin (`data-grid.js`) that works together with the [Underscore](http://underscorejs.org/) rendering engine to allow you to easily built flexible data grids.
 
 You can see a working demo of the plugin at [the demo page](http://demo.cartalyst.com/data-grid).
 
@@ -15,7 +15,7 @@ You can see a working demo of the plugin at [the demo page](http://demo.cartalys
 
 Using `data-grid.js` requires the following:
 
-- [Tempo](http://tempojs.com) v2.0.0 or later
+- [Underscore](http://underscorejs.org/) v1.5.2 or later
 - [jQuery](http://jquery.com/) v1.9.1 or later
 
 
@@ -23,16 +23,16 @@ Using `data-grid.js` requires the following:
 
 ---
 
-Add jQuery, Tempo and `data-grid.js` to the `<head>` section of your page.
+Add jQuery, Underscore and `data-grid.js` to the `<head>` section of your page.
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-	<script src="//raw.github.com/twigkit/tempo/master/tempo.min.js"></script>
+	<script src="//underscorejs.org/underscore.js"></script>
 	<script src="/vendor/cartalyst{url}/src/public/js/data-grid.js"></script>
 
 
 ### The HTML {#the-html}
 
-Data Grid requires three elements for instantiation: a results container, pagination container and finally an applied filters container. Each of these containers will contain either one or many Tempo templates.
+Data Grid requires three elements for instantiation: a results container, pagination container and finally an applied filters container. Each of these containers will have either one or many Underscore templates.
 
 **Results Container**
 
@@ -44,44 +44,63 @@ Data Grid requires three elements for instantiation: a results container, pagina
 			</tr>
 		</thead>
 		<tbody>
-			<tr data-template>
-				<td>[[ city ]]</td>
-				<td>[[ population ]]</td>
-			</tr>
 		</tbody>
 	</table>
 
-The required `data-grid` attribute will allow you to create multiple Data Grids on a single page and the `results` class will mark it as the results container. The `data-source` attribute contains the API endpoint URI.
+	<script type="text/template" data-grid="main" id="results-tmpl">
 
-You might notice that the `[[ ... ]]` is different from the default Tempo brace syntax. This is needed to allow the use of `[? ... ?]`. You can always change this behaviour by changing the [plugin's options](#options).
+		<% _.each(results, function(r){ %>
+			<tr>
+				<td><%= r.city %></td>
+				<td><%= r.population %></td>
+			</tr>
+		<% }); %>
+
+	</script>
+
+The required `data-grid` attribute will allow you to create multiple Data Grids on a single page and the `results` class will mark it as the results container. The `data-source` attribute contains the API endpoint URI. If your results container is a table, we will automatically render the template in the `<tbody>`
+
+You might notice that the `<% ... %>` is the default underscore brace syntax. You can always change this behaviour by changing the [plugin's options](#options).
 
 **Pagination Container**
 
-	<ul class="pagination" data-grid="main">
-		<li data-template data-if-infinite data-page="[[ page ]]">Load More</li>
-		<li data-template data-if-throttle data-throttle>[[ label ]]</li>
-		<li data-template data-page="[[ page ]]">[[ pageStart ]] - [[ pageLimit ]]</li>
-	</ul>
+	<ul class="pagination" data-grid="main"></ul>
+
+	<script type="text/template" data-grid="main" id="pagination-tmpl">
+
+		<% _.each(pagination, function(p) { %>
+
+			<li data-page="<%= p.page %>"><%= p.pageStart %> - <%= p.pageLimit %></li>
+
+		<% }); %>
+
+	</script>
 
 Because we're setting the same `data-grid` attribute, the plugin will know to group it with your results container. We use the `pagination` class to indicate it as the pagination container.
-
-There are three templates that are used inside the pagination container. The `data-if-infinite` template will render only when the pagination type is set to `infinite`. The `data-if-throttle` template will render if a throttle is set and reached. The last template is the template used for the `multiple` pagination type.
 
 As for the other attributes, the `data-page` attribute is where we store the current page. The `data-throttle` attribute is our selector for events to increase the throttle. By default we will use `pageStart` and `pageLimit` in our pagination template to indicate which results are displayed on each page. This would output to 1 - 10, 11 - 20, ...
 
 **Filters Container**
 
-	<ul class="applied" data-grid="main">
-		<li data-template>
-			[? if column == undefined ?]
-				[[ valueLabel ]]
-			[? else ?]
-				[[ valueLabel ]] in [[ columnLabel ]]
-			[? endif ?]
-		</li>
-	</ul>
+	<ul class="applied" data-grid="main"></ul>
 
-We use our custom itteration of Tempo's brace syntax to build if else statements. We check for columns so you can display your filters in a readable manner. If your filter isn't filtering within a column it will just display the filter. If your filtering within a column we show both the filter and column.
+	<script type="text/template" data-grid="main" id="applied-tmpl">
+
+		<% _.each(filters, function(f) { %>
+
+			<li>
+				<% if(column === 'all' %>
+					<%= f.valueLabel %>
+				<% }else{ %>
+					<%= r.valueLabel %> in <%= f.columnLabel %>
+				<% } %>
+			</li>
+
+		<% }); %>
+
+	</script>
+
+We check for columns so you can display your filters in a readable manner. If your filter isn't filtering within a column it will just display the filter. If your filtering within a column we show both the filter and column.
 
 
 ### The Javascript {#the-javascript}
@@ -201,6 +220,6 @@ threshold | integer | Minimum amount of results before pagination is applied.
 dividend | integer | The maximum amount of pages you wish to have.
 throttle | integer | The maxmim amount of results on a single page. Overrides dividend.
 type | string | The type of pagination to use. Options are: "single", "multiple" and "infinite".
-tempoOptions | object | Changes the surrounding braces. Data Grid's default is set to [[ ... ]].
+templateSettings | object | Changes the surrounding braces. Data Grid's default is set to <% ... %>.
 loader | string | class of id of a loading element to be shown while the ajax request is made.
 callback | function | This parameter you can pass a function that will run every time a filter is added, or a sort is applied. This function recives one argument, and gives you access to anyting set within the plugin.
