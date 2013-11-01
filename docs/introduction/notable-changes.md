@@ -43,3 +43,5 @@ Please note that there is no need for `data-template` anymore.
 For more information on [underscorejs](http://underscorejs.org/) and their [templates](http://underscorejs.org/#template),
 please refer to their [documentation](http://underscorejs.org/)
 
+Please note that if you pass `undefined` values in an object to a template you will get an error,
+please refer to this [github issues](https://github.com/jashkenas/underscore/issues/237)
