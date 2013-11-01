@@ -98,6 +98,10 @@
 
         _init: function() {
 
+            if( $('#no-results-tmpl').length ) {
+                _this.$results.html( _.template( $('#no-results-tmpl').html() ) );
+            }
+
             this._addListeners();
 
             this._ajaxFetch();
