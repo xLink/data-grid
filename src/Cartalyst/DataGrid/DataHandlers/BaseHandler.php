@@ -122,9 +122,6 @@ abstract class BaseHandler implements HandlerInterface {
 		// Before we apply any filters, we need to setup the total count.
 		$this->prepareTotalCount();
 
-		// We'll now setup what columns we will select
-		$this->prepareSelect();
-
 		// Apply all the filters requested
 		$this->prepareFilters();
 
@@ -137,6 +134,9 @@ abstract class BaseHandler implements HandlerInterface {
 		// And we'll setup pagination, pagination
 		// is rather unique in the data grid.
 		$this->preparePagination();
+
+		// We'll now setup what columns we will select
+		$this->prepareSelect();
 
 		// Hydrate our results
 		$this->hydrate();
