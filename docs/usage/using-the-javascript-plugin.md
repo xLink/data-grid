@@ -4,7 +4,7 @@
 
 ---
 
-One of our goals with Data Grid was to leave the front end HTML up to you, and avoid what most plugins do by keeping you within a container. We built a Javascript plugin (`data-grid.js`) that works together with the [Underscore](http://underscorejs.org/) rendering engine to allow you to easily built flexible data grids.
+One of our goals with Data Grid was to leave the front end HTML up to you, and avoid what most plugins do by keeping you within a container. We built a Javascript plugin (`data-grid.js`) that works together with the [Underscore](http://underscorejs.org/) rendering engine to allow you to easily build flexible data grids.
 
 You can see a working demo of the plugin at [the demo page](http://demo.cartalyst.com/data-grid).
 
