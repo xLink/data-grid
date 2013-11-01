@@ -417,6 +417,11 @@
                     _this.$results.empty();
                 }
 
+                // If No Results
+                if(!json.results.length){
+                    _this.$results.html( _.template( $('#no-results-tmpl').html() ) );
+                }
+
                 _this._loading();
                 _this._callback()
 
