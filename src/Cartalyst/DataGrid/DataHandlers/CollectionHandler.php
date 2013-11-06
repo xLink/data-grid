@@ -88,9 +88,7 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 			// the alias and not the actual key.
 			foreach ($columns as $key => $value)
 			{
-				$column = is_numeric($key) ? $value : $key;
-
-				$modified[$column] = $item[$column];
+				$modified[$value] = $item[is_numeric($key) ? $value : $key];
 			}
 
 			return $modified;
