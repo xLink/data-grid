@@ -44,7 +44,7 @@ class IlluminateRequestProviderTest extends PHPUnit_Framework_TestCase {
 	public function testGettingSort()
 	{
 		$provider = new Provider($request = m::mock('Illuminate\Http\Request'));
-		$request->shouldReceive('input')->with('sort')->once()->andReturn('foo');
+		$request->shouldReceive('input')->with('sort', 'id')->once()->andReturn('foo');
 		$this->assertEquals('foo', $provider->getSort());
 	}
 
