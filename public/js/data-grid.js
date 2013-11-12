@@ -489,7 +489,7 @@
 
 			var pageArr = page.split('-');
 
-			if (pageArr[1] === '')
+			if (pageArr[1] === '' || pageArr[1] >= 0)
 			{
 				pagi.pageIdx = 1;
 			}
