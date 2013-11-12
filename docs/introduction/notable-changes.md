@@ -8,10 +8,46 @@ templates are developed and included.
 
 ### data-grid.js
 
-The only notable change within the jQuery plugin is the setting for `templateOptions`
-has now been converted to `templateSettings` to match with Underscore's `_.templateSettings`.
-Just like before we ship default settings for the Underscore braces of `<% ... %>` but you
-can change the brace syntax to anything you want.
+The Data-Grid plugin has be refactored from the top down, along with adding in new features.
+Data-Grid, now pushes its current state to the url, for linkable and sharable content. We
+use the `history` api when its supported and fallback to `window.location.hash` for unsupported
+browsers.
+
+A few of the `options` that you set on instantiation of the plugin have been renamed.
+Below is the current list of options that have been changed from version 1;
+
+~~type~~ : is now : paginationType
+~~ascClass~~ and ~~descClass~~ : is now : sortClass
+~~sort~~ : is now : defaultSort
+~~tempoOptions~~ : is now : templateSettings
+~~searchThreshold~~ : is now : searchTimeout
+
+**Complete Option List**
+
+	var defaults = {
+			source: null,
+			dividend: 1,
+			threshold: 100,
+			throttle: 100,
+			paginationType: 'single',
+			sortClasses: {
+				asc: 'asc',
+				desc: 'desc'
+			},
+			defaultSort: {},
+			templateSettings : {
+				evaluate    : /<%([\s\S]+?)%>/g,
+				interpolate : /<%=([\s\S]+?)%>/g,
+				escape      : /<%-([\s\S]+?)%>/g
+			},
+			searchTimeout: 800,
+			loader: undefined,
+			callback: undefined
+		};
+
+We have also made changes to the pagination object that we pass to the respective template.
+Now the pagination object will containt `totalCount` and `filteredCount` so you can access
+them directly without using the `callback`.
 
 ----------
 
