@@ -489,7 +489,14 @@
 
 			var pageArr = page.split('-');
 
-			pagi.pageIdx = parseInt(pageArr[1], 10);
+			if (pageArr[1] === '')
+			{
+				pagi.pageIdx = 1;
+			}
+			else
+			{
+				pagi.pageIdx = parseInt(pageArr[1], 10);
+			}
 
 		},
 
@@ -778,8 +785,6 @@
 				data: _this._buildAjaxURI()
 			})
 			.done(function(response) {
-
-				console.log(pagi.pageIdx + ' | ' + response.pages_count);
 
 				if (pagi.pageIdx > response.pages_count)
 				{
