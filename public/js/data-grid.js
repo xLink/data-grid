@@ -16,6 +16,7 @@
  * @copyright  (c) 2011 - 2013, Cartalyst LLC
  * @link       http://cartalyst.com
  */
+
 ;(function ($, window, document, undefined) {
 
 	'use strict';
@@ -53,7 +54,7 @@
 		index: 0
 	};
 
-	//Search
+	// Search
 	var searchTimeout;
 	var isSearchActive = false;
 
@@ -77,16 +78,16 @@
 			_this.grid = '[data-grid="'+_this.key+'"]';
 
 			// Our Main Elements
-			_this.$results		= $(results + _this.grid);
-			_this.$pagination	= $(pagination + _this.grid);
-			_this.$filters		= $(filters + _this.grid);
-			_this.$body			= $(document.body);
+			_this.$results      = $(results + _this.grid);
+			_this.$pagination   = $(pagination + _this.grid);
+			_this.$filters      = $(filters + _this.grid);
+			_this.$body         = $(document.body);
 
 			// Source
 			_this.source = _this.$results.data('source') || _this.opt.source;
 
 			// Safty Check
-			if( _this.$results.get(0).tagName.toLowerCase() === 'table')
+			if (_this.$results.get(0).tagName.toLowerCase() === 'table')
 			{
 				_this.$results = $(results + this.grid).find('tbody');
 			}
@@ -115,9 +116,10 @@
 
 		_checkDependencies: function (results, pagination, filters) {
 
-			if( typeof window._ === 'undefined' )
+			if (typeof window._ === 'undefined')
 			{
 				console.log('Underscore is not defined. DataGrid Requires UnderscoreJS v 1.5.2 or later to run!');
+
 				return false;
 			}
 
@@ -129,16 +131,16 @@
 			};
 
 			// Build Template Selectors based on classes set
-			results		= $('#'+results.substr(1)+'-tmpl' + this.grid);
-			pagination	= $('#'+pagination.substr(1)+'-tmpl' + this.grid);
-			filters		= $('#'+filters.substr(1)+'-tmpl' + this.grid);
+			results     = $('#'+results.substr(1)+'-tmpl' + this.grid);
+			pagination  = $('#'+pagination.substr(1)+'-tmpl' + this.grid);
+			filters     = $('#'+filters.substr(1)+'-tmpl' + this.grid);
 
 			// Cache Underscore Templates
 			this.tmpl = {
-				results:	_.template( results.html() ),
-				pagination: _.template( pagination.html() ),
-				filters:	_.template( filters.html() ),
-				empty:		_.template( $('#no-results-tmpl'+ this.grid).html() )
+				results:    _.template(results.html()),
+				pagination: _.template(pagination.html()),
+				filters:    _.template(filters.html()),
+				empty:      _.template($('#no-results-tmpl'+ this.grid).html())
 			};
 
 		},
@@ -160,14 +162,14 @@
 		_checkHash: function() {
 
 			var newPath = window.location.hash;
-				newPath = String( newPath.slice(3) );
+				newPath = String(newPath.slice(3));
 
-			if( newPath === '' )
+			if (newPath === '')
 			{
 				newPath = defaultHash;
 			}
 
-			if( newPath !== route )
+			if (newPath !== route)
 			{
 				this._handleHashChange(newPath);
 			}
@@ -181,36 +183,50 @@
 			$(this).on('dg:update', this._ajaxFetchResults);
 
 			$(window).on('hashchange', function() {
+
 				_this._checkHash();
+
 			});
 
 			this.$body.on('click', '[data-sort]'+this.grid, function(){
-				_this._extractSortsFromClick( $(this) , $(this).data('sort'));
+
+				_this._extractSortsFromClick($(this) , $(this).data('sort'));
+
 			});
 
 			this.$body.on('click', '[data-filter]'+this.grid, function(e) {
+
 				e.preventDefault();
+
 				_this._extractFiltersFromClick($(this).data('filter'), $(this).data('label'));
+
 			});
 
 			this.$filters.on('click', '> *', function(e) {
+
 				e.preventDefault();
+
 				_this._removeFilters($(this).index());
+
 			});
 
 			this.$pagination.on('click', '[data-page]'+this.grid, function(e) {
+
 				e.preventDefault();
+
 				_this._handlePageChange($(this));
+
 			});
 
 			this.$body.on('submit keyup', '[data-search]', function(e){
+
 				e.preventDefault();
 
-				if( e.type === 'submit' )
+				if (e.type === 'submit')
 				{
 					_this._handleSearchOnSubmit($(this));
 				}
-				else if( e.type === 'keyup' && e.keyCode !== 13)
+				else if (e.type === 'keyup' && e.keyCode !== 13)
 				{
 					_this._handeLiveSearch($(this));
 				}
@@ -227,32 +243,31 @@
 			appliedFilters.push(filters);
 
 			// Create A New Array Without any livesearch items
-			for(var i = 0; i < appliedFilters.length; i++)
+			for (var i = 0; i < appliedFilters.length; i++)
 			{
-				if( appliedFilters[i].type !== 'live' )
+				if (appliedFilters[i].type !== 'live')
 				{
 					without.push(appliedFilters[i]);
 				}
 			}
 
 			// Render Our Filters
-			this.$filters.html( this.tmpl['filters']({ filters: without }) );
+			this.$filters.html(this.tmpl['filters']({ filters: without }));
 
 		},
 
 		_handleHashChange: function(hash) {
 
-			if( hash !== route )
+			if (hash !== route)
 			{
-
 				route = hash;
+
 				var routeArr = route.split('/');
 
-				if( routeArr[0] === this.key )
+				if (routeArr[0] === this.key)
 				{
 					this._updateOnHash(routeArr);
 				}
-
 			}
 
 		},
@@ -267,39 +282,41 @@
 			var nextItem = routeArr[(routeArr.length - 2)];
 
 			// Use test to return true/false
-			if( /page/g.test(lastItem) )
+			if (/page/g.test(lastItem))
 			{
 				// Remove Page From routeArr
 				routeArr = routeArr.splice(0, (routeArr.length - 1));
 				this._extractPageFromRoute(lastItem);
 			}
 
-			if (( /desc/g.test(nextItem) ) || ( /asc/g.test(nextItem) ) )
+			if ((/desc/g.test(nextItem)) || (/asc/g.test(nextItem)))
 			{
 				// Remove Sort From routeArr
 				routeArr = routeArr.splice(0, (routeArr.length - 1));
 				this._extractSortsFromRoute(nextItem);
 			}
-			else if( this.opt.defaultSort.hasOwnProperty('column') &&
-					this.opt.defaultSort.hasOwnProperty('direction') )
+			else if (this.opt.defaultSort.hasOwnProperty('column') &&
+					this.opt.defaultSort.hasOwnProperty('direction'))
 			{
-				//Convert Object to string
+				// Convert Object to string
 				var str = this.opt.defaultSort.column+'-'+this.opt.defaultSort.direction;
+
 				this._extractSortsFromRoute(str);
 			}
 
 			// Build Array For Filters
-			if( routeArr.length !== 0 )
+			if (routeArr.length !== 0 )
 			{
 				// We Must Reset then rebuild.
 				appliedFilters = [];
-				this._extractFiltersFromRoute(routeArr);
 
+				this._extractFiltersFromRoute(routeArr);
 			}
 			else
 			{
 				// Reset Applied Filters if none are set via the hash
 				appliedFilters = [];
+
 				this.$filters.empty();
 			}
 
@@ -314,7 +331,7 @@
 			var rect = [];
 
 			// Make sure we arn't submiting white space only
-			if( !$.trim($input.val()).length)
+			if ( ! $.trim($input.val()).length)
 			{
 				return;
 			}
@@ -323,17 +340,19 @@
 
 			clearTimeout(searchTimeout);
 
-			if( el.find('select').length )
+			if (el.find('select').length)
 			{
 				column = el.find('select').val();
+
 				el.find('select').prop('selectedIndex', 0);
 			}
 
 			// If theres a live search item with the same value
 			// we remove the live search item
-			if( this._searchForValue( $input.val(), appliedFilters) > -1 )
+			if (this._searchForValue( $input.val(), appliedFilters) > -1)
 			{
-				var idx = this._searchForValue( $input.val(), appliedFilters);
+				var idx = this._searchForValue($input.val(), appliedFilters);
+
 				appliedFilters.splice(idx, 1);
 			}
 
@@ -355,7 +374,8 @@
 			var column = 'all';
 			var _this = this;
 
-			if( isSearchActive ) {
+			if (isSearchActive)
+			{
 				return;
 			}
 
@@ -364,7 +384,7 @@
 			searchTimeout = setTimeout(function()
 			{
 
-				if( el.find('select').length )
+				if (el.find('select').length)
 				{
 					column = el.find('select').val();
 				}
@@ -374,17 +394,17 @@
 				var old = $input.data('old');
 
 				// Remove the old term from the applied filters
-				for( var i = 0; i < appliedFilters.length; i++)
+				for (var i = 0; i < appliedFilters.length; i++)
 				{
 
-					if( appliedFilters[i].value === old )
+					if(appliedFilters[i].value === old)
 					{
 						appliedFilters.splice(i, 1);
 					}
 
 				}
 
-				if(curr.length > 0)
+				if (curr.length > 0)
 				{
 					_this._applyFilter({
 						column: column,
@@ -396,6 +416,7 @@
 				$input.data('old', curr);
 
 				_this._goToPage(1);
+
 				$(_this).trigger('dg:update');
 
 			}, this.opt.searchTimeout);
@@ -406,20 +427,23 @@
 
 			var idx;
 
-			if( this.opt.paginationType === 'single' ||
+			if (this.opt.paginationType === 'single' ||
 				this.opt.paginationType === 'multiple')
 			{
 				idx = el.data('page');
+
 				this.$pagination.empty();
 			}
 
-			if( this.opt.paginationType === 'infinite' )
+			if (this.opt.paginationType === 'infinite')
 			{
 				idx = el.data('page');
+
 				el.data('page', ++idx);
 			}
 
 			this._goToPage(idx);
+
 			$(this).trigger('dg:update');
 
 		},
@@ -430,9 +454,10 @@
 			$('[data-sort]').not(el).removeClass(this.opt.sortClasses.asc);
 			$('[data-sort]').not(el).removeClass(this.opt.sortClasses.desc);
 
-			if( currentSort.index === 3 )
+			if (currentSort.index === 3)
 			{
 				el.removeClass(this.opt.sortClasses.asc);
+
 				el.removeClass(this.opt.sortClasses.desc);
 
 				// reset our sorting index back to 0
@@ -444,7 +469,9 @@
 			{
 				// get the oppsite class from which is set
 				var remove = currentSort.direction === 'asc' ? 'desc' : 'asc';
+
 				el.removeClass(remove);
+
 				el.addClass(this.opt.sortClasses[currentSort.direction]);
 			}
 
@@ -453,6 +480,7 @@
 		_extractPageFromRoute: function(page) {
 
 			var pageArr = page.split('-');
+
 			pagi.pageIdx = pageArr[1];
 
 		},
@@ -464,21 +492,20 @@
 
 			var filtersArr = filters.split(', ');
 
-			for( var i = 0; i < filtersArr.length; i++ )
+			for (var i = 0; i < filtersArr.length; i++)
 			{
-
 				var filter = filtersArr[i].split(':');
 
-				if( _this._searchForValue( filter[1], appliedFilters) > -1 )
+				if (_this._searchForValue(filter[1], appliedFilters) > -1)
 				{
 					return true;
 				}
 
-				if( typeof labels !== 'undefined' )
+				if (typeof labels !== 'undefined')
 				{
 					var labelsArr = labels.split(', ');
 
-					if( typeof labelsArr[i] !== 'undefined' )
+					if (typeof labelsArr[i] !== 'undefined')
 					{
 						var label = labelsArr[i].split(':');
 
@@ -495,27 +522,26 @@
 							mask: (key === 0 ? 'column' : 'value'),
 							maskOrg: label[0]
 						});
-
-					}else{
-
+					}
+					else
+					{
 						_this._applyFilter({
 							column: filter[0],
 							value: filter[1]
 						});
 					}
-
-				}else{
-
+				}
+				else
+				{
 					_this._applyFilter({
 						column: filter[0],
 						value: filter[1]
 					});
-
 				}
-
 			}
 
 			$(this).trigger('dg:update');
+
 			this._goToPage(1);
 
 		},
@@ -525,7 +551,7 @@
 			var sortArr = sort.split(':');
 			var direction = 'asc';
 
-			if( currentSort.column === sortArr[0] )
+			if (currentSort.column === sortArr[0])
 			{
 				currentSort.index++;
 			}
@@ -535,21 +561,21 @@
 				currentSort.index = 1;
 			}
 
-			if( typeof sortArr[1] !== 'undefined' )
+			if (typeof sortArr[1] !== 'undefined')
 			{
 
 				direction = sortArr[1];
 
 			}
 
-			if( sortArr[0] === currentSort.column )
+			if (sortArr[0] === currentSort.column)
 			{
 
-				if( currentSort.direction === 'asc' && currentSort.index !== 3 )
+				if (currentSort.direction === 'asc' && currentSort.index !== 3)
 				{
 					currentSort.direction = 'desc';
 				}
-				else if( currentSort.index !== 3)
+				else if (currentSort.index !== 3)
 				{
 					currentSort.direction = 'asc';
 				}
@@ -573,11 +599,11 @@
 
 			var _this = this;
 
-			for( var i = 0; i < routeArr.length; i++ )
+			for (var i = 0; i < routeArr.length; i++)
 			{
 
 				// Check to see if a filter is already set
-				if( _this._searchForValue( routeArr[i].split('-')[1], appliedFilters) === -1 )
+				if (_this._searchForValue( routeArr[i].split('-')[1], appliedFilters) === -1)
 				{
 					// If its not already set, lets set the filter
 					_this._applyFilter({
@@ -592,11 +618,10 @@
 
 		_searchForValue: function(key, arr) {
 
-			for( var i = 0; i < arr.length; i++)
+			for (var i = 0; i < arr.length; i++)
 			{
-
-				if( (arr[i].value === key) ||
-					(arr[i].maskOrg === key) )
+				if ((arr[i].value === key) ||
+					(arr[i].maskOrg === key))
 				{
 					return i;
 				}
@@ -608,9 +633,9 @@
 
 		_indexOf: function(array, item) {
 
-			if( this._checkIE() < 9 )
+			if (this._checkIE() < 9)
 			{
-				if( array === null )
+				if (array === null)
 				{
 					return -1;
 				}
@@ -625,10 +650,8 @@
 
 				return -1;
 			}
-			else
-			{
-				return array.indexOf(item);
-			}
+
+			return array.indexOf(item);
 
 		},
 
@@ -637,7 +660,7 @@
 			var sort = lastItem.split('-');
 
 			// Setup Sort and put index at 1
-			if(currentSort.column !== sort[0] )
+			if (currentSort.column !== sort[0])
 			{
 				currentSort.index = 1;
 			}
@@ -645,39 +668,41 @@
 			currentSort.column = sort[0];
 			currentSort.direction = sort[1];
 
-			this._setSortDirection( $('[data-sort="'+sort[0]+'"]'+this.grid) );
+			this._setSortDirection($('[data-sort="'+sort[0]+'"]'+this.grid));
 
 		},
 
 		_updatedCurrentHash: function() {
 
 			// #!/grid/column-value/column-sort
-			var base	= '!/'+this.key;
+			var base    = '!/'+this.key;
 			var filters = this._buildFilterFragment();
-			var sort	= this._buildSortFragment();
-			var page	= this._buildPageFragment();
+			var sort    = this._buildSortFragment();
+			var page    = this._buildPageFragment();
 
-			if( filters.length > 1)
+			if (filters.length > 1)
 			{
 				base += filters;
 			}
 
-			if( sort.length > 1)
+			if (sort.length > 1)
 			{
 				base += sort;
 			}
 
-			if( pagi.pageIdx >= 1 )
+			if (pagi.pageIdx >= 1)
 			{
 				base += page;
 			}
 
-			if( this._checkIE() < 9 ) {
+			if (this._checkIE() < 9)
+			{
 				window.location.hash = base;
 			}
 			else
 			{
 				var defaultURI = window.location.origin + window.location.pathname;
+
 				window.history.pushState(null, null, defaultURI +'#'+ base);
 			}
 
@@ -693,17 +718,17 @@
 
 			var filterFragment = '';
 
-			for( var i = 0; i < appliedFilters.length; i++)
+			for (var i = 0; i < appliedFilters.length; i++)
 			{
 
-				if( appliedFilters[i].type !== 'live')
+				if (appliedFilters[i].type !== 'live')
 				{
 
-					if( appliedFilters[i].mask === 'column' )
+					if (appliedFilters[i].mask === 'column')
 					{
 						filterFragment += '/'+appliedFilters[i].maskOrg+'-'+appliedFilters[i].value;
 					}
-					else if( appliedFilters[i].mask === 'value' )
+					else if (appliedFilters[i].mask === 'value')
 					{
 						filterFragment += '/'+appliedFilters[i].column+'-'+appliedFilters[i].maskOrg;
 					}
@@ -724,7 +749,7 @@
 
 			var sortFragment = '';
 
-			if( currentSort.column !== null && currentSort.direction !== '')
+			if (currentSort.column !== null && currentSort.direction !== '')
 			{
 				sortFragment += '/'+currentSort.column+'-'+currentSort.direction;
 				return sortFragment;
@@ -744,30 +769,30 @@
 				dataType : 'json',
 				data: _this._buildAjaxURI()
 			})
-			.done( function (response) {
+			.done(function(response) {
 
 				pagi.filteredCount = response.filtered_count;
 				pagi.totalCount = response.total_count;
 
-				if( _this.opt.type !== 'infinite' )
+				if (_this.opt.type !== 'infinite')
 				{
 					_this.$results.empty();
 				}
 
-				if( _this.opt.type === 'single' || _this.opt.type === 'multiple')
+				if (_this.opt.type === 'single' || _this.opt.type === 'multiple')
 				{
-					_this.$results.html( _this.tmpl['results'](response) );
+					_this.$results.html(_this.tmpl['results'](response));
 				}
 				else
 				{
-					_this.$results.append( _this.tmpl['results'](response) );
+					_this.$results.append(_this.tmpl['results'](response));
 				}
 
-				_this.$pagination.html( _this.tmpl['pagination']( _this._buildPagination(response) ));
+				_this.$pagination.html(_this.tmpl['pagination'](_this._buildPagination(response)));
 
-				if( !response.results.length )
+				if ( ! response.results.length)
 				{
-					_this.$results.html( _this.tmpl['empty']() );
+					_this.$results.html(_this.tmpl['empty']());
 				}
 
 				_this._updatedCurrentHash();
@@ -775,8 +800,10 @@
 				_this._callback();
 
 			})
-			.error( function (jqXHR, textStatus, errorThrown) {
+			.error(function(jqXHR, textStatus, errorThrown) {
+
 				console.log('_ajaxFetchResults' + jqXHR.status, errorThrown);
+
 			});
 
 		},
@@ -784,20 +811,20 @@
 		_buildAjaxURI: function() {
 
 			var params = {};
-				params.filters		= [];
-				params.page			= pagi.pageIdx;
-				params.dividend		= this.opt.dividend;
-				params.threshold	= this.opt.threshold;
-				params.throttle		= this.opt.throttle;
+				params.filters      = [];
+				params.page         = pagi.pageIdx;
+				params.dividend     = this.opt.dividend;
+				params.threshold    = this.opt.threshold;
+				params.throttle     = this.opt.throttle;
 
-			for( var i = 0; i < appliedFilters.length; i++ )
+			for (var i = 0; i < appliedFilters.length; i++)
 			{
 				var filter = {};
 
-				if( 'mask' in appliedFilters[i] )
+				if ('mask' in appliedFilters[i])
 				{
 
-					if( appliedFilters[i].mask === 'column' )
+					if (appliedFilters[i].mask === 'column')
 					{
 						filter[appliedFilters[i].maskOrg] = appliedFilters[i].value;
 						params.filters.push(filter);
@@ -809,8 +836,7 @@
 				}
 				else
 				{
-
-					if( appliedFilters[i].column === 'all')
+					if (appliedFilters[i].column === 'all')
 					{
 						params.filters.push(appliedFilters[i].value);
 					}
@@ -819,7 +845,6 @@
 						filter[appliedFilters[i].column] = appliedFilters[i].value;
 						params.filters.push(filter);
 					}
-
 				}
 			}
 
@@ -839,7 +864,7 @@
 				prev = json.previous_page,
 				total = json.pages_count;
 
-			switch ( this.opt.paginationType )
+			switch (this.opt.paginationType)
 			{
 				case 'single' :
 					rect = _this._buildSinglePagination(page, next, prev, total);
@@ -864,13 +889,13 @@
 				perPage,
 				rect = [];
 
-			if( pagi.filteredCount !== pagi.totalCount )
+			if (pagi.filteredCount !== pagi.totalCount)
 			{
-				perPage = this._resultsPerPage( pagi.filteredCount, total);
+				perPage = this._resultsPerPage(pagi.filteredCount, total);
 			}
 			else
 			{
-				perPage = this._resultsPerPage( pagi.totalCount, total);
+				perPage = this._resultsPerPage(pagi.totalCount, total);
 			}
 
 			params = {
@@ -898,11 +923,11 @@
 				perPage,
 				rect = [];
 
-			if( (pagi.totalCount > this.opt.throttle) && (pagi.filteredCount > this.opt.throttle ))
+			if ((pagi.totalCount > this.opt.throttle) && (pagi.filteredCount > this.opt.throttle))
 			{
-				perPage = this._resultsPerPage( this.opt.throttle, this.opt.dividend);
+				perPage = this._resultsPerPage(this.opt.throttle, this.opt.dividend);
 
-				for( var i = 1; i <= this.opt.dividend; i++ )
+				for (var i = 1; i <= this.opt.dividend; i++)
 				{
 					params = {
 						pageStart: perPage === 0 ? 0 : ( i === 1 ? 1 : (perPage * (i - 1) + 1)),
@@ -919,7 +944,7 @@
 					rect.push(params);
 				}
 
-				if( pagi.totalCount > this.opt.throttle )
+				if (pagi.totalCount > this.opt.throttle)
 				{
 					params = {
 						throttle: true
@@ -931,16 +956,16 @@
 			else
 			{
 
-				if( pagi.filteredCount !== pagi.totalCount )
+				if (pagi.filteredCount !== pagi.totalCount)
 				{
-					perPage = this._resultsPerPage( pagi.filteredCount, total);
+					perPage = this._resultsPerPage(pagi.filteredCount, total);
 				}
 				else
 				{
-					perPage = this._resultsPerPage( pagi.totalCount, total);
+					perPage = this._resultsPerPage(pagi.totalCount, total);
 				}
 
-				for( var i = 1; i <= total; i++)
+				for (var i = 1; i <= total; i++)
 				{
 
 					params = {
@@ -980,7 +1005,9 @@
 		},
 
 		_resultsPerPage: function(dividend, divisor) {
+
 			return Math.ceil(dividend / divisor);
+
 		},
 
 		_removeFilters: function(idx) {
@@ -995,7 +1022,7 @@
 
 		_goToPage: function(idx) {
 
-			if(isNaN(idx = parseInt(idx, 10)))
+			if (isNaN(idx = parseInt(idx, 10)))
 			{
 				idx = 1;
 			}
@@ -1008,7 +1035,7 @@
 
 			var _this = this;
 
-			if( $(this.opt.loader).is(':visible') )
+			if ($(this.opt.loader).is(':visible'))
 			{
 				setTimeout(function(){
 					$(_this.opt.loader).fadeOut();
@@ -1052,8 +1079,9 @@
 		},
 
 		_callback: function() {
+
 			// TODO: Figure out what we should pass back in the callback.
-			if( this.opt.callback !== undefined && $.isFunction( this.opt.callback ))
+			if (this.opt.callback !== undefined && $.isFunction(this.opt.callback))
 			{
 				this.opt.callback();
 			}
@@ -1062,10 +1090,8 @@
 
 	};
 
-
 	$.datagrid = function(grid, results, pagination, filters, options) {
 		return new DataGrid(grid, results, pagination, filters, options);
 	};
-
 
 })(jQuery, window, document);
