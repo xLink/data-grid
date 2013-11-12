@@ -16,11 +16,11 @@ browsers.
 A few of the `options` that you set on instantiation of the plugin have been renamed.
 Below is the current list of options that have been changed from version 1;
 
-~~type~~ : is now : paginationType
-~~ascClass~~ and ~~descClass~~ : is now : sortClass
-~~sort~~ : is now : defaultSort
-~~tempoOptions~~ : is now : templateSettings
-~~searchThreshold~~ : is now : searchTimeout
+~~type~~ : is now : paginationType <br>
+~~ascClass~~ and ~~descClass~~ : is now : sortClass <br>
+~~sort~~ : is now : defaultSort <br>
+~~tempoOptions~~ : is now : templateSettings <br>
+~~searchThreshold~~ : is now : searchTimeout <br>
 
 **Complete Option List**
 
