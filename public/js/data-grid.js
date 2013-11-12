@@ -64,11 +64,9 @@
 	// Pagination
 	var pagi = {
 		pageIdx: 1,
-		nextIdx: null,
-		prevIdx: null,
-		totalPages: null,
 		totalCount: null,
-		filteredCount: null
+		filteredCount: null,
+		baseTrottle: null
 	};
 
 	function DataGrid(grid, results, pagination, filters, options) {
@@ -92,11 +90,13 @@
 				_this.$results = $(results + this.grid).find('tbody');
 			}
 
-			// Setup Default Hash
-			defaultHash = _this.key;
-
 			// Options
 			_this.opt = $.extend({}, defaults, options);
+
+			// Setup Default Hash
+			defaultHash = _this.key;
+			// Setup Base Throttle
+			pagi.baseTrottle = _this.opt.throttle;
 
 		this._checkDependencies(results, pagination, filters);
 
@@ -190,6 +190,7 @@
 
 			this.$body.on('click', '[data-sort]'+this.grid, function(){
 
+				_this.$results.empty(); //safty
 				_this._extractSortsFromClick($(this) , $(this).data('sort'));
 
 			});
@@ -197,7 +198,7 @@
 			this.$body.on('click', '[data-filter]'+this.grid, function(e) {
 
 				e.preventDefault();
-
+				_this.$results.empty(); //safty
 				_this._extractFiltersFromClick($(this).data('filter'), $(this).data('label'));
 
 			});
@@ -215,6 +216,15 @@
 				e.preventDefault();
 
 				_this._handlePageChange($(this));
+
+			});
+
+			this.$pagination.on('click', '[data-throttle]'+this.grid, function(e) {
+				e.preventDefault();
+
+				_this.opt.throttle += pagi.baseTrottle;
+
+				$(_this).trigger('dg:update');
 
 			});
 
@@ -431,8 +441,6 @@
 				this.opt.paginationType === 'multiple')
 			{
 				idx = el.data('page');
-
-				this.$pagination.empty();
 			}
 
 			if (this.opt.paginationType === 'infinite')
@@ -481,7 +489,7 @@
 
 			var pageArr = page.split('-');
 
-			pagi.pageIdx = pageArr[1];
+			pagi.pageIdx = parseInt(pageArr[1], 10);
 
 		},
 
@@ -771,15 +779,24 @@
 			})
 			.done(function(response) {
 
+				console.log(pagi.pageIdx + ' | ' + response.pages_count);
+
+				if (pagi.pageIdx > response.pages_count)
+				{
+					pagi.pageIdx = response.pages_count;
+					$(_this).trigger('dg:update');
+					return false;
+				}
+
 				pagi.filteredCount = response.filtered_count;
 				pagi.totalCount = response.total_count;
 
-				if (_this.opt.type !== 'infinite')
+				if (_this.opt.paginationType !== 'infinite')
 				{
 					_this.$results.empty();
 				}
 
-				if (_this.opt.type === 'single' || _this.opt.type === 'multiple')
+				if (_this.opt.paginationType === 'single' || _this.opt.paginationType === 'multiple')
 				{
 					_this.$results.html(_this.tmpl['results'](response));
 				}
@@ -929,9 +946,10 @@
 
 				for (var i = 1; i <= this.opt.dividend; i++)
 				{
+
 					params = {
 						pageStart: perPage === 0 ? 0 : ( i === 1 ? 1 : (perPage * (i - 1) + 1)),
-						pageLimit: i === 1 ? perPage : ( pagi.totalCount < this.opt.throttle && i === this.opt.dividend),
+						pageLimit: i === 1 ? perPage : (pagi.totalCount < this.opt.throttle && i === this.opt.dividend) ? pagi.totalCount : perPage * i,
 						nextPage: next,
 						prevPage: prev,
 						page: i,
@@ -984,7 +1002,8 @@
 
 			}
 
-			return rect;
+			return { pagination: rect };
+
 
 		},
 
@@ -1000,7 +1019,7 @@
 
 			rect.push(params);
 
-			return rect;
+			return { pagination: rect };
 
 		},
 
@@ -1080,10 +1099,12 @@
 
 		_callback: function() {
 
+			var callbackObject = $.extend({}, pagi, currentSort, appliedFilters);
+
 			// TODO: Figure out what we should pass back in the callback.
 			if (this.opt.callback !== undefined && $.isFunction(this.opt.callback))
 			{
-				this.opt.callback();
+				this.opt.callback(callbackObject);
 			}
 
 		}
