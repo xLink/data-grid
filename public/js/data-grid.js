@@ -206,7 +206,7 @@
 			this.$filters.on('click', '> *', function(e) {
 
 				e.preventDefault();
-
+				_this.$results.empty(); //safty
 				_this._removeFilters($(this).index());
 
 			});
@@ -489,7 +489,7 @@
 
 			var pageArr = page.split('-');
 
-			if (pageArr[1] === '' || pageArr[1] >= 0)
+			if (pageArr[1] === '' || pageArr[1] <= 0)
 			{
 				pagi.pageIdx = 1;
 			}
@@ -617,9 +617,12 @@
 			for (var i = 0; i < routeArr.length; i++)
 			{
 
+				var filters = routeArr[i].split('-');
+
 				// Check to see if a filter is already set
-				if (_this._searchForValue( routeArr[i].split('-')[1], appliedFilters) === -1)
+				if (_this._searchForValue( filters[1], appliedFilters) === -1)
 				{
+
 					// If its not already set, lets set the filter
 					_this._applyFilter({
 						column: routeArr[i].split('-')[0],
@@ -1040,6 +1043,7 @@
 
 			// TODO: See about removing this
 			this.$filters.html( this.tmpl['filters']({ filters: appliedFilters }));
+			this._goToPage(1);
 			$(this).trigger('dg:update');
 
 		},
