@@ -614,15 +614,44 @@
 
 			var _this = this;
 
+			var labels = $('[data-label]'+this.grid);
+
 			for (var i = 0; i < routeArr.length; i++)
 			{
 
 				var filters = routeArr[i].split('-');
 
-				// Check to see if a filter is already set
-				if (_this._searchForValue( filters[1], appliedFilters) === -1)
+				for (var x = 0; x < labels.length; x++)
 				{
 
+					if( $(labels[x]).data('label').indexOf( filters[0] ) !== -1 ||
+						$(labels[x]).data('label').indexOf( filters[1] ) !== -1 )
+					{
+						var matchedLabel = $(labels[x]).data('label').split(':');
+						var key = _this._indexOf(filters, matchedLabel[0]);
+
+						// Map Filter that is equal to the returned key
+						// to the label value for renaming
+						filters[key] = matchedLabel[1];
+
+						// Check to make sure filter isn't already set.
+						if (_this._searchForValue( filters[1], appliedFilters) === -1)
+						{
+							// if its not already set, lets set the filter
+							_this._applyFilter({
+								column: filters[0],
+								value: filters[1],
+								mask: (key === 0 ? 'column' : 'value'),
+								maskOrg: matchedLabel[0]
+							});
+						}
+
+					}
+				}
+
+				// Check to  make sure filter isn't already set
+				if (_this._searchForValue( filters[1], appliedFilters) === -1)
+				{
 					// If its not already set, lets set the filter
 					_this._applyFilter({
 						column: routeArr[i].split('-')[0],
@@ -856,7 +885,17 @@
 					}
 					else
 					{
-						params.filters.push(appliedFilters[i].maskOrg);
+
+						if (appliedFilters[i].column === 'all')
+						{
+							params.filters.push(appliedFilters[i].maskOrg);
+						}
+						else
+						{
+							filter[appliedFilters[i].column] = appliedFilters[i].maskOrg;
+							params.filters.push(filter);
+						}
+
 					}
 				}
 				else
