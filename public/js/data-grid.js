@@ -110,6 +110,8 @@
 
 			this._addEventListeners();
 
+			this._loading();
+
 			this._checkHash();
 
 		},
@@ -809,7 +811,6 @@
 		_ajaxFetchResults: function() {
 
 			var _this = this;
-			this._loading();
 
 			$.ajax({
 				url: _this.source,
@@ -850,7 +851,7 @@
 				}
 
 				_this._updatedCurrentHash();
-				_this._loading();
+				// _this._loading();
 				_this._callback();
 
 			})
@@ -1102,19 +1103,11 @@
 
 			var _this = this;
 
-			if ($(this.opt.loader).is(':visible'))
-			{
-				setTimeout(function(){
-					$(_this.opt.loader).fadeOut();
-				}, 100);
-			}
-			else
-			{
-				setTimeout(function(){
-					$(_this.opt.loader).fadeIn();
-				}, 100);
-			}
-
+			$(document).ajaxStart(function() {
+				$(_this.opt.loader).fadeIn();
+			}).ajaxStop(function() {
+				$(_this.opt.loader).fadeOut();
+			});
 		},
 
 		_reset: function() {
