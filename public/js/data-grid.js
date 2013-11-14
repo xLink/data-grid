@@ -213,7 +213,7 @@
 
 			});
 
-			this.$pagination.on('click', '[data-page]'+this.grid, function(e) {
+			this.$pagination.on('click', '[data-page]', function(e) {
 
 				e.preventDefault();
 
@@ -221,7 +221,7 @@
 
 			});
 
-			this.$pagination.on('click', '[data-throttle]'+this.grid, function(e) {
+			this.$pagination.on('click', '[data-throttle]', function(e) {
 				e.preventDefault();
 
 				_this.opt.throttle += pagi.baseTrottle;
@@ -1142,7 +1142,6 @@
 
 			var callbackObject = $.extend({}, pagi, currentSort, appliedFilters);
 
-			// TODO: Figure out what we should pass back in the callback.
 			if (this.opt.callback !== undefined && $.isFunction(this.opt.callback))
 			{
 				this.opt.callback(callbackObject);
