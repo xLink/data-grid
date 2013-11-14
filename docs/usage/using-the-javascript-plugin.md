@@ -70,7 +70,7 @@ You might notice that the `<% ... %>` is the default underscore brace syntax. Yo
 
 		<% _.each(pagination, function(p) { %>
 
-			<li data-page="<%= p.page %>"><%= p.pageStart %> - <%= p.pageLimit %></li>
+			<li data-grid="main" data-page="<%= p.page %>"><%= p.pageStart %> - <%= p.pageLimit %></li>
 
 		<% }); %>
 
@@ -90,9 +90,9 @@ As for the other attributes, the `data-page` attribute is where we store the cur
 
 			<li>
 				<% if(column === 'all' %>
-					<%= f.valueLabel %>
+					<%= f.value %>
 				<% }else{ %>
-					<%= r.valueLabel %> in <%= f.columnLabel %>
+					<%= r.value %> in <%= f.column %>
 				<% } %>
 			</li>
 
@@ -215,11 +215,13 @@ Below is a list with all of the available options.
 Option | Type | Description
 ------ | ---- | -----------
 source | string | The API endpoint URI.
-sort | object | Set a default column and direction for sorting.
 threshold | integer | Minimum amount of results before pagination is applied.
 dividend | integer | The maximum amount of pages you wish to have.
 throttle | integer | The maxmim amount of results on a single page. Overrides dividend.
-type | string | The type of pagination to use. Options are: "single", "multiple" and "infinite".
+paginationType | string | The type of pagination to use. Options are: "single", "multiple" and "infinite".
 templateSettings | object | Changes the surrounding braces. Data Grid's default is set to <% ... %>.
+defaultSort | object | Set a default sort, by applying column and direction attributes.
+sortClasses | object | Set the CSS classes to apply to [data-sort] objects by changed the asc and desc attributes.
+searchTimeout | number | Set the threshold for the live search feature. (Time after last keystroke before search starts)
 loader | string | class of id of a loading element to be shown while the ajax request is made.
-callback | function | This parameter you can pass a function that will run every time a filter is added, or a sort is applied. This function recives one argument, and gives you access to anyting set within the plugin.
+callback | function | This parameter you can pass a function that will run every time a filter is added, or a sort is applied. This function recives one argument, and gives you access most values within Data Grid.
