@@ -120,9 +120,7 @@
 
 			if (typeof window._ === 'undefined')
 			{
-				console.log('Underscore is not defined. DataGrid Requires UnderscoreJS v 1.5.2 or later to run!');
-
-				return false;
+				throw new Error('Underscore is not defined. DataGrid Requires UnderscoreJS v 1.5.2 or later to run!');
 			}
 
 			// Set _ templates interpolate
@@ -851,7 +849,6 @@
 				}
 
 				_this._updatedCurrentHash();
-				// _this._loading();
 				_this._callback();
 
 			})
