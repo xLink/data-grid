@@ -47,6 +47,79 @@ class DatabaseDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$handler->prepareSelect();
 	}
 
+	public function testGettingSimpleFilters()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('foo' => 'Filter 1'),
+			array('qux' => 'Filter 2'),
+			'Filter 3',
+		));
+
+		$expectedColumn = array(
+			array(
+				'foo',
+				'like',
+				'Filter 1',
+			),
+			array(
+				'bar.baz',
+				'like',
+				'Filter 2',
+			),
+		);
+		$expectedGlobal = array(
+			array(
+				'like',
+				'Filter 3',
+			),
+		);
+
+		$actual = $handler->getFilters();
+		$this->assertCount(2, $actual);
+		list($actualColumn, $actualGlobal) = $actual;
+
+		$this->assertEquals($actualColumn, $expectedColumn);
+		$this->assertEquals($actualGlobal, $expectedGlobal);
+	}
+
+	public function testGettingComplexFilters()
+	{
+		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\DatabaseHandler[canUseComplexFilters]');
+		$handler->__construct($dataGrid = $this->getMockDataGrid());
+
+		$handler->shouldReceive('canUseComplexFilters')->andReturn(true);
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('foo' => '/^\d{1,5}.*?$/'),
+			array('qux' => '|>=5|<=8|'),
+		));
+
+		$expected = array(
+			array(
+				'foo',
+				'regex',
+				'^\d{1,5}.*?$',
+			),
+			array(
+				'bar.baz',
+				'>=',
+				'5',
+			),
+			array(
+				'bar.baz',
+				'<=',
+				'8',
+			),
+		);
+		$actual = $handler->getFilters();
+		$this->assertCount(2, $actual);
+		list($actual, ) = $actual;
+
+		$this->assertEquals($expected, $actual);
+	}
+
 	public function testSettingUpColumnFilters()
 	{
 		$handler = new Handler($dataGrid = $this->getMockDataGrid());
@@ -71,7 +144,7 @@ class DatabaseDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$query->shouldReceive('orWhere')->with('foo', 'like', '%Global Filter%')->once();
 		$query->shouldReceive('orWhere')->with('bar.baz', 'like', '%Global Filter%')->once();
 
-		$handler->globalFilter($query, 'Global Filter');
+		$handler->globalFilter($query, 'like', 'Global Filter');
 	}
 
 	public function testFilteredCount()

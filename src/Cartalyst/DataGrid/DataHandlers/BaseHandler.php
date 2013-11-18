@@ -288,6 +288,13 @@ abstract class BaseHandler implements HandlerInterface {
 	abstract public function hydrate();
 
 	/**
+	 * Flag for whether the handler supports complex filters.
+	 *
+	 * @return void
+	 */
+	abstract public function canUseComplexFilters();
+
+	/**
 	 * Calculates sort from the request.
 	 *
 	 * @param  string  $column
@@ -417,6 +424,105 @@ abstract class BaseHandler implements HandlerInterface {
 		}
 
 		return array($page, $previousPage, $nextPage);
+	}
+
+	/**
+	 * Grabs the filters from the current request environment, adapats and
+	 * parses complex filters and presents them in a useful way for
+	 * processing by the handler.
+	 *
+	 * @return array
+	 */
+	public function getFilters()
+	{
+		$columnFilters = array();
+		$globalFilters = array();
+
+		foreach ($this->request->getFilters() as $filter)
+		{
+			// If the filter is an array where the key matches one of our
+			// columns, we're filtering that column.
+			if (is_array($filter))
+			{
+				$filterValue  = reset($filter);
+				$filterColumn = key($filter);
+
+				if (($index = array_search($filterColumn, $this->dataGrid->getColumns())) !== false)
+				{
+					if ( ! is_numeric($index))
+					{
+						$filterColumn = $index;
+					}
+				}
+
+				foreach ($this->extractFilterFeatures($filterValue) as $feature)
+				{
+					list($featureOperator, $featureValue) = $feature;
+					$columnFilters[] = array($filterColumn, $featureOperator, $featureValue);
+				}
+			}
+
+			// Otherwise if a string was provided, the
+			// filter is an "or where" filter across all
+			// columns.
+			elseif (is_string($filter))
+			{
+				foreach ($this->extractFilterFeatures($filter) as $feature)
+				{
+					list($featureOperator, $featureValue) = $feature;
+					$globalFilters[] = array($featureOperator, $featureValue);
+				}
+			}
+		}
+
+		return array($columnFilters, $globalFilters);
+	}
+
+	/**
+	 * Extracts filter features from the given value, depending on
+	 * the existance of complex filters.
+	 *
+	 * @param  string  $filterValue
+	 * @return array
+	 */
+	public function extractFilterFeatures($filterValue)
+	{
+		// Conditional check for whether the collection supports
+		// complex filters or not.
+		if ($this->canUseComplexFilters())
+		{
+			// Regular expresssion
+			if (preg_match('/^\/(.*)\/$/', $filterValue, $matches))
+			{
+				return array(array('regex', $matches[1]));
+			}
+
+			// Operator
+			if (preg_match('/^\|(.*)\|$/', $filterValue, $matches))
+			{
+				$clauses = explode('|', $matches[1]);
+				$operators = array('<=', '>=', '<>', '!=', '=', '<', '>');
+
+				$features = array();
+
+				foreach ($clauses as $clause)
+				{
+					foreach ($operators as $operator)
+					{
+						if (strpos($clause, $operator) === 0)
+						{
+							$features[] = array($operator, substr($clause, strlen($operator)));
+
+							break;
+						}
+					}
+				}
+
+				return $features;
+			}
+		}
+
+		return array(array('like', $filterValue));
 	}
 
 	/**

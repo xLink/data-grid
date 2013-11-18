@@ -106,44 +106,32 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	 * and manipulates the data.
 	 *
 	 * @return void
+	 * @todo   Sub-out hard-coded "LIKE"
 	 */
 	public function prepareFilters()
 	{
-		foreach ($this->request->getFilters() as $filter)
+		list($columnFilters, $globalFilters) = $this->getFilters();
+
+		foreach ($columnFilters as $filter)
 		{
-			// If the filter is an array where the key matches one of our
-			// columns, we're filtering that column.
-			if (is_array($filter))
+			list($column, $operator, $value) = $filter;
+
+			$this->data->where(
+				$column,
+				'like',
+				"%{$value}%"
+			);
+		}
+
+		foreach ($globalFilters as $filter)
+		{
+			list($operator, $value) = $filter;
+			$me = $this;
+
+			$this->data->whereNested(function($data) use ($me, $operator, $value)
 			{
-				$filterValue  = reset($filter);
-				$filterColumn = key($filter);
-
-				if (($index = array_search($filterColumn, $this->dataGrid->getColumns())) !== false)
-				{
-					if ( ! is_numeric($index))
-					{
-						$filterColumn = $index;
-					}
-
-					$this->data->where(
-						$filterColumn,
-						'like',
-						"%{$filterValue}%"
-					);
-				}
-			}
-
-			// Otherwise if a string was provided, the
-			// filter is an "or where" filter across all
-			// columns.
-			elseif (is_string($filter))
-			{
-				$me = $this;
-				$this->data->whereNested(function($data) use ($me, $filter)
-				{
-					$me->globalFilter($data, $filter);
-				});
-			}
+				$me->globalFilter($data, $operator, $value);
+			});
 		}
 	}
 
@@ -153,21 +141,21 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	 * the value can be matched across any column.
 	 *
 	 * @param  Illuminate\Database\Query\Builder  $nestedQuery
-	 * @param  string  $filter
+	 * @param  string  $operator
+	 * @param  string  $value
 	 * @return void
+	 * @todo   Sub-out hard-coded "LIKE"
 	 */
-	public function globalFilter(QueryBuilder $nestedQuery, $filter)
+	public function globalFilter(QueryBuilder $nestedQuery, $operator, $value)
 	{
-		foreach ($this->dataGrid->getColumns() as $key => $value)
+		foreach ($this->dataGrid->getColumns() as $key => $_value)
 		{
 			if (is_numeric($key))
 			{
-				$nestedQuery->orWhere($value, 'like', "%{$filter}%");
+				$key = $_value;
 			}
-			else
-			{
-				$nestedQuery->orWhere($key, 'like', "%{$filter}%");
-			}
+
+			$nestedQuery->orWhere($key, 'like', "%{$value}%");
 		}
 	}
 
@@ -274,6 +262,16 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 			return (array) $result;
 
 		}, (array) $results);
+	}
+
+	/**
+	 * Flag for whether the handler supports complex filters.
+	 *
+	 * @return void
+	 */
+	public function canUseComplexFilters()
+	{
+		return false;
 	}
 
 }

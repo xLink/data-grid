@@ -100,59 +100,61 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 	 * and manipulates the data.
 	 *
 	 * @return void
+	 * @todo   Sub-out hard-coding to "like"
 	 */
 	public function prepareFilters()
 	{
-		$filters = $this->request->getFilters();
+		list($columnFilters, $globalFilters) = $this->getFilters();
 		$columns = $this->dataGrid->getColumns();
 
-		if (count($filters) === 0) return;
-
-		$this->data = $this->data->filter(function($item) use ($filters, $columns)
+		if (count($columnFilters) === 0 and count($globalFilters) === 0)
 		{
-			foreach ($filters as $filter)
+			return;
+		}
+
+		$this->data = $this->data->filter(function($item) use ($columnFilters, $globalFilters, $columns)
+		{
+			foreach ($columnFilters as $filter)
 			{
-				// If the filter is an array,
-				if (is_array($filter))
+				list($column, $operator, $value) = $filter;
+
+				if (($index = array_search($column, $columns)) !== false)
 				{
-					$filterValue  = reset($filter);
-					$filterColumn = key($filter);
-
-					if (($index = array_search($filterColumn, $columns)) !== false)
+					if ( ! is_numeric($index))
 					{
-						if ( ! is_numeric($index))
-						{
-							$filterColumn = $index;
-						}
+						$column = $index;
+					}
 
-						if (stripos($item[$filterColumn], $filterValue) === false)
-						{
-							return false;
-						}
+					if (stripos($item[$column], $value) === false)
+					{
+						return false;
 					}
 				}
-				else
+			}
+
+			foreach ($globalFilters as $filter)
+			{
+				list($operator, $value) = $filter;
+
+				foreach ($item as $columnValue)
 				{
-					foreach ($item as $key => $value)
+					if (is_array($columnValue))
 					{
-						if (is_array($value))
+						foreach ($columnValue as $_columnKey => $_columnValue)
 						{
-							foreach ($value as $k => $v)
+							if (stripos($_columnValue, $value) !== false)
 							{
-								if (stripos($v, $filter) !== false)
-								{
-									return true;
-								}
+								return true;
 							}
 						}
-						elseif (stripos($value, $filter) !== false)
-						{
-							return true;
-						}
 					}
-
-					return false;
+					elseif (stripos($columnValue, $value) !== false)
+					{
+						return true;
+					}
 				}
+
+				return false;
 			}
 
 			return true;
@@ -223,6 +225,16 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 	public function hydrate()
 	{
 		$this->results = $this->data->all();
+	}
+
+	/**
+	 * Flag for whether the handler supports complex filters.
+	 *
+	 * @return void
+	 */
+	public function canUseComplexFilters()
+	{
+		return false;
 	}
 
 }
