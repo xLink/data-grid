@@ -120,22 +120,16 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 
 				if (($index = array_search($filterColumn, $this->dataGrid->getColumns())) !== false)
 				{
-					if (is_numeric($index))
+					if ( ! is_numeric($index))
 					{
-						$this->data->where(
-							$filterColumn,
-							'like',
-							"%{$filterValue}%"
-						);
+						$filterColumn = $index;
 					}
-					else
-					{
-						$this->data->where(
-							$index,
-							'like',
-							"%{$filterValue}%"
-						);
-					}
+
+					$this->data->where(
+						$filterColumn,
+						'like',
+						"%{$filterValue}%"
+					);
 				}
 			}
 
