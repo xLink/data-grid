@@ -120,19 +120,14 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 
 					if (($index = array_search($filterColumn, $columns)) !== false)
 					{
-						if (is_numeric($index))
+						if ( ! is_numeric($index))
 						{
-							if (stripos($item[$filterColumn], $filterValue) === false)
-							{
-								return false;
-							}
+							$filterColumn = $index;
 						}
-						else
+
+						if (stripos($item[$filterColumn], $filterValue) === false)
 						{
-							if (stripos($item[$index], $filterValue) === false)
-							{
-								return false;
-							}
+							return false;
 						}
 					}
 				}
