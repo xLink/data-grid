@@ -105,30 +105,21 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 	public function prepareFilters()
 	{
 		list($columnFilters, $globalFilters) = $this->getFilters();
-		$columns = $this->dataGrid->getColumns();
 
 		if (count($columnFilters) === 0 and count($globalFilters) === 0)
 		{
 			return;
 		}
 
-		$this->data = $this->data->filter(function($item) use ($columnFilters, $globalFilters, $columns)
+		$this->data = $this->data->filter(function($item) use ($columnFilters, $globalFilters)
 		{
 			foreach ($columnFilters as $filter)
 			{
 				list($column, $operator, $value) = $filter;
 
-				if (($index = array_search($column, $columns)) !== false)
+				if ( ! $this->checkColumnFilter($item, $column, $operator, $value))
 				{
-					if ( ! is_numeric($index))
-					{
-						$column = $index;
-					}
-
-					if (stripos($item[$column], $value) === false)
-					{
-						return false;
-					}
+					return false;
 				}
 			}
 
@@ -136,29 +127,54 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 			{
 				list($operator, $value) = $filter;
 
-				foreach ($item as $columnValue)
-				{
-					if (is_array($columnValue))
-					{
-						foreach ($columnValue as $_columnKey => $_columnValue)
-						{
-							if (stripos($_columnValue, $value) !== false)
-							{
-								return true;
-							}
-						}
-					}
-					elseif (stripos($columnValue, $value) !== false)
-					{
-						return true;
-					}
-				}
-
-				return false;
+				return $this->checkGlobalFilter($item, $operator, $value);
 			}
 
 			return true;
 		});
+	}
+
+	protected function checkColumnFilter(array $item, $column, $operator, $value)
+	{
+		$columns = $this->dataGrid->getColumns();
+
+		if (($index = array_search($column, $columns)) !== false)
+		{
+			if ( ! is_numeric($index))
+			{
+				$column = $index;
+			}
+
+			if (stripos($item[$column], $value) === false)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	protected function checkGlobalFilter(array $item, $operator, $value)
+	{
+		foreach ($item as $columnValue)
+		{
+			if (is_array($columnValue))
+			{
+				foreach ($columnValue as $_columnKey => $_columnValue)
+				{
+					if (stripos($_columnValue, $value) !== false)
+					{
+						return true;
+					}
+				}
+			}
+			elseif (stripos($columnValue, $value) !== false)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
