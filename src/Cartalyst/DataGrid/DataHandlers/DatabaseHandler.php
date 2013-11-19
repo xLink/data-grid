@@ -266,7 +266,30 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	 */
 	public function supportsRegexFilters()
 	{
-		return true;
+		switch ($connection = $this->getConnection())
+		{
+			case $connection instanceof MySqlDatabaseConnection:
+				return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the connection associated with the handler's data set.
+	 *
+	 * @return \Illuminate\Database\ConnectionInterface
+	 */
+	protected function getConnection()
+	{
+		$data = $this->data;
+
+		if ($data instanceof EloquentQueryBuilder)
+		{
+			$data = $data->getQuery();
+		}
+
+		return $data->getConnection();
 	}
 
 	/**
@@ -291,15 +314,12 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 
 			case 'regex':
 
-				$data = $this->data;
-				if ($data instanceof EloquentQueryBuilder)
+				if ($this->supportsRegexFilters())
 				{
-					$data = $data->getQuery();
+					$method .= 'Raw';
 				}
 
-				$method .= 'Raw';
-
-				switch ($connection = $data->getConnection())
+				switch ($connection = $this->getConnection())
 				{
 					case $connection instanceof MySqlDatabaseConnection:
 						$query->$method("{$column} {$operator} ?", array($value));
