@@ -237,13 +237,18 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 			{
 				foreach ($columnValue as $arrayColumnValue)
 				{
-					if ( ! $this->checkColumnFilterValue($operator, $arrayColumnValue, $value))
+					if (is_array($arrayColumnValue))
+					{
+						continue;
+					}
+
+					if ( ! $this->checkFilterValue($operator, $arrayColumnValue, $value))
 					{
 						return false;
 					}
 				}
 			}
-			elseif ( ! $this->checkColumnFilterValue($operator, $columnValue, $value))
+			elseif ( ! $this->checkFilterValue($operator, $columnValue, $value))
 			{
 				return false;
 			}
@@ -268,13 +273,18 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 			{
 				foreach ($columnValue as $arrayColumnValue)
 				{
-					if ($this->checkColumnFilterValue($operator, $arrayColumnValue, $value))
+					if (is_array($arrayColumnValue))
+					{
+						continue;
+					}
+
+					if ($this->checkFilterValue($operator, $arrayColumnValue, $value))
 					{
 						return true;
 					}
 				}
 			}
-			elseif ($this->checkColumnFilterValue($operator, $columnValue, $value))
+			elseif ($this->checkFilterValue($operator, $columnValue, $value))
 			{
 				return true;
 			}
@@ -292,7 +302,7 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 	 * @param  mixed   $filterValue
 	 * @return bool
 	 */
-	protected function checkColumnFilterValue($operator, $columnValue, $filterValue)
+	protected function checkFilterValue($operator, $columnValue, $filterValue)
 	{
 		switch ($operator)
 		{
