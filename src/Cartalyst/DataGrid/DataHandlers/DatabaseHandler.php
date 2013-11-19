@@ -19,6 +19,7 @@
  */
 
 use Cartalyst\DataGrid\DataGrid;
+use Illuminate\Database\MySqlConnection as MySqlDatabaseConnection;
 use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -106,7 +107,6 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	 * and manipulates the data.
 	 *
 	 * @return void
-	 * @todo   Sub-out hard-coded "LIKE"
 	 */
 	public function prepareFilters()
 	{
@@ -116,11 +116,7 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 		{
 			list($column, $operator, $value) = $filter;
 
-			$this->data->where(
-				$column,
-				'like',
-				"%{$value}%"
-			);
+			$this->applyFilter($this->data, $column, $operator, $value);
 		}
 
 		foreach ($globalFilters as $filter)
@@ -144,7 +140,6 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	 * @param  string  $operator
 	 * @param  string  $value
 	 * @return void
-	 * @todo   Sub-out hard-coded "LIKE"
 	 */
 	public function globalFilter(QueryBuilder $nestedQuery, $operator, $value)
 	{
@@ -155,7 +150,7 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 				$key = $_value;
 			}
 
-			$nestedQuery->orWhere($key, 'like', "%{$value}%");
+			$this->applyFilter($nestedQuery, $key, $operator, $value, 'or');
 		}
 	}
 
@@ -265,13 +260,56 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	}
 
 	/**
-	 * Flag for whether the handler supports complex filters.
+	 * Flag for whether the handler supports regex filters.
 	 *
 	 * @return void
 	 */
-	public function canUseComplexFilters()
+	public function supportsRegexFilters()
 	{
-		return false;
+		return true;
+	}
+
+	/**
+	 * Applies a filter to the given query.
+	 *
+	 * @param  mixed   $query
+	 * @param  string  $column
+	 * @param  string  $operator
+	 * @param  mixed   $value
+	 * @param  string  $boolean
+	 * @return void
+	 */
+	protected function applyFilter($query, $column, $operator, $value, $boolean = 'and')
+	{
+		$method = ($boolean === 'and') ? 'where' : 'orWhere';
+
+		switch ($operator)
+		{
+			case 'like':
+				$value = "%{$value}%";
+				break;
+
+			case 'regex':
+
+				$data = $this->data;
+				if ($data instanceof EloquentQueryBuilder)
+				{
+					$data = $data->getQuery();
+				}
+
+				$method .= 'Raw';
+
+				switch ($connection = $data->getConnection())
+				{
+					case $connection instanceof MySqlDatabaseConnection:
+						$query->$method("{$column} {$operator} ?", array($value));
+						return;
+				}
+
+				return;
+		}
+
+		$query->$method($column, $operator, $value);
 	}
 
 }

@@ -86,10 +86,10 @@ class DatabaseDataHandlerTest extends PHPUnit_Framework_TestCase {
 
 	public function testGettingComplexFilters()
 	{
-		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\DatabaseHandler[canUseComplexFilters]');
+		$handler = m::mock('Cartalyst\DataGrid\DataHandlers\DatabaseHandler[supportsRegexFilters]');
 		$handler->__construct($dataGrid = $this->getMockDataGrid());
 
-		$handler->shouldReceive('canUseComplexFilters')->andReturn(true);
+		$handler->shouldReceive('supportsRegexFilters')->andReturn(true);
 
 		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
 			array('foo' => '/^\d{1,5}.*?$/'),
@@ -147,6 +147,39 @@ class DatabaseDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$handler->globalFilter($query, 'like', 'Global Filter');
 	}
 
+	public function testOperatorFilters()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('foo' => '|>=5|<=20|<>10|!=11|'),
+			array('qux' => '|>3|<5|'),
+		));
+
+		$dataGrid->getData()->shouldReceive('where')->with('foo', '>=', '5')->once();
+		$dataGrid->getData()->shouldReceive('where')->with('foo', '<=', '20')->once();
+		$dataGrid->getData()->shouldReceive('where')->with('foo', '<>', '10')->once();
+		$dataGrid->getData()->shouldReceive('where')->with('foo', '!=', '11')->once();
+		$dataGrid->getData()->shouldReceive('where')->with('bar.baz', '>', '3')->once();
+		$dataGrid->getData()->shouldReceive('where')->with('bar.baz', '<', '5')->once();
+
+		$handler->prepareFilters();
+	}
+
+	public function testRegexFilters()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('foo' => '/^B.*?\sCorlett$/'),
+		));
+
+		$dataGrid->getData()->shouldReceive('whereRaw')->with('foo regex ?', array('^B.*?\sCorlett$'))->once();
+
+		$dataGrid->getData()->shouldReceive('getQuery')->once()->andReturn($query = m::mock('Illuminate\Database\Query\Builder'));
+		$query->shouldReceive('getConnection')->once()->andReturn(m::mock('Illuminate\Database\MySqlConnection'));
+
+		$handler->prepareFilters();
+	}
+
 	public function testFilteredCount()
 	{
 		$handler = new Handler($dataGrid = $this->getMockDataGrid());
@@ -163,6 +196,7 @@ class DatabaseDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getSort')->once()->andReturn('qux');
 		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getDirection')->once()->andReturn('desc');
 		$dataGrid->getData()->shouldReceive('getQuery')->once()->andReturn($query = m::mock('Illuminate\Database\Query\Builder'));
+
 
 		$query->shouldReceive('orderBy')->with('bar.baz', 'desc')->once();
 

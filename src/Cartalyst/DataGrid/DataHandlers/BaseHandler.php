@@ -292,7 +292,7 @@ abstract class BaseHandler implements HandlerInterface {
 	 *
 	 * @return void
 	 */
-	abstract public function canUseComplexFilters();
+	abstract public function supportsRegexFilters();
 
 	/**
 	 * Calculates sort from the request.
@@ -489,37 +489,33 @@ abstract class BaseHandler implements HandlerInterface {
 	{
 		// Conditional check for whether the collection supports
 		// complex filters or not.
-		if ($this->canUseComplexFilters())
+		if ($this->supportsRegexFilters() and preg_match('/^\/(.*)\/$/', $filterValue, $matches))
 		{
-			// Regular expresssion
-			if (preg_match('/^\/(.*)\/$/', $filterValue, $matches))
+			return array(array('regex', $matches[1]));
+		}
+
+		// Operator
+		if (preg_match('/^\|(.*)\|$/', $filterValue, $matches))
+		{
+			$clauses = explode('|', $matches[1]);
+			$operators = array('<=', '>=', '<>', '!=', '=', '<', '>');
+
+			$features = array();
+
+			foreach ($clauses as $clause)
 			{
-				return array(array('regex', $matches[1]));
-			}
-
-			// Operator
-			if (preg_match('/^\|(.*)\|$/', $filterValue, $matches))
-			{
-				$clauses = explode('|', $matches[1]);
-				$operators = array('<=', '>=', '<>', '!=', '=', '<', '>');
-
-				$features = array();
-
-				foreach ($clauses as $clause)
+				foreach ($operators as $operator)
 				{
-					foreach ($operators as $operator)
+					if (strpos($clause, $operator) === 0)
 					{
-						if (strpos($clause, $operator) === 0)
-						{
-							$features[] = array($operator, substr($clause, strlen($operator)));
+						$features[] = array($operator, substr($clause, strlen($operator)));
 
-							break;
-						}
+						break;
 					}
 				}
-
-				return $features;
 			}
+
+			return $features;
 		}
 
 		return array(array('like', $filterValue));

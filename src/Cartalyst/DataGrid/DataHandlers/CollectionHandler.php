@@ -228,11 +228,11 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 	}
 
 	/**
-	 * Flag for whether the handler supports complex filters.
+	 * Flag for whether the handler supports regex filters.
 	 *
 	 * @return void
 	 */
-	public function canUseComplexFilters()
+	public function supportsRegexFilters()
 	{
 		return false;
 	}
