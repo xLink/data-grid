@@ -98,7 +98,7 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array($expected[0], $expected[2]), array_values($data->all()));
 	}
 
-	public function atestOperatorFilters1()
+	public function testOperatorFilters1()
 	{
 		$handler = new Handler($dataGrid = $this->getMockDataGrid());
 
@@ -109,8 +109,68 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$handler->prepareFilters();
 
 		$expected = $this->getValidatedData();
-		$this->assertCount(2, $data = $handler->getData());
-		$this->assertEquals(array($expected[0], $expected[2]), array_values($data->all()));
+		$this->assertCount(4, $data = $handler->getData());
+		$this->assertEquals(array($expected[0], $expected[2], $expected[3], $expected[4]), array_values($data->all()));
+	}
+
+	public function testOperatorFilters2()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('age' => '|<21|'),
+		));
+
+		$handler->prepareFilters();
+
+		$expected = $this->getValidatedData();
+		$this->assertCount(1, $data = $handler->getData());
+		$this->assertEquals(array($expected[5]), array_values($data->all()));
+	}
+
+	public function testOperatorFilters3()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('age' => '|>20|'),
+		));
+
+		$handler->prepareFilters();
+
+		$expected = $this->getValidatedData();
+		$this->assertCount(5, $data = $handler->getData());
+		$this->assertEquals(array($expected[0], $expected[1], $expected[2], $expected[3], $expected[4]), array_values($data->all()));
+	}
+
+	public function testOperatorFilters4()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('age' => '|<>20|!=21|'),
+		));
+
+		$handler->prepareFilters();
+
+		$expected = $this->getValidatedData();
+		$this->assertCount(4, $data = $handler->getData());
+		$this->assertEquals(array($expected[0], $expected[1], $expected[2], $expected[3]), array_values($data->all()));
+	}
+
+	public function testRegexFilter()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('first_name' => '/^.*?e.*?$/'),
+		));
+
+		$handler->prepareFilters();
+
+		$expected = $this->getValidatedData();
+		$this->assertCount(3, $data = $handler->getData());
+		$this->assertEquals(array($expected[0], $expected[3], $expected[5]), array_values($data->all()));
 	}
 
 	public function testGlobalFilters()

@@ -282,7 +282,36 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 	 */
 	protected function checkColumnFilterValue($operator, $columnValue, $filterValue)
 	{
-		return (stripos($columnValue, $filterValue) !== false);
+		switch ($operator)
+		{
+			case 'like':
+				return (stripos($columnValue, $filterValue) !== false);
+
+			case '<=':
+				return (floatval($filterValue) >= floatval($columnValue));
+
+			case '>=':
+				return (floatval($filterValue) <= floatval($columnValue));
+
+			case '<>':
+			case '!=':
+				return ($filterValue != $columnValue);
+
+			case '=':
+				return ($filterValue == $columnValue);
+
+			case '<':
+				return ($filterValue > $columnValue);
+
+			case '>':
+				return ($filterValue < $columnValue);
+
+			case 'regex':
+				return preg_match('/'.$filterValue.'/', $columnValue);
+		}
+
+		// No applicable filter
+		return true;
 	}
 
 }
