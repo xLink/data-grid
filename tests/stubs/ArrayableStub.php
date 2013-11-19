@@ -11,6 +11,7 @@ class ArrayableStub implements ArrayableInterface {
 			'last_name'  => 'Syme',
 			'gender'     => 'male',
 			'sortable'   => 'foo-13',
+			'age'        => 30,
 		);
 	}
 

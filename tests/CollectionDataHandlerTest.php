@@ -234,6 +234,7 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 			'first_name',
 			'gender' => 'sex',
 			'sortable',
+			'age',
 		));
 		return $dataGrid;
 	}
@@ -245,6 +246,7 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$object1->last_name  = 'Corlett';
 		$object1->gender     = 'male';
 		$object1->sortable   = 'foo-1';
+		$object1->age        = 22;
 
 		return array(
 			$object1,
@@ -254,24 +256,28 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 				'last_name'  => 'Gaspar',
 				'gender'     => 'male',
 				'sortable'   => 'foo-100',
+				'age'        => 25,
 			),
 			array(
 				'first_name' => 'Jared',
 				'last_name'  => 'West',
 				'gender'     => 'male',
 				'sortable'   => 'foo-101',
+				'age'        => 24,
 			),
 			array(
 				'first_name' => 'Clarissa',
 				'last_name'  => 'Syme',
 				'gender'     => 'female',
 				'sortable'   => 'foo-20',
+				'age'        => 21,
 			),
 			array(
 				'first_name' => 'Jessica',
 				'last_name'  => 'Hick',
 				'gender'     => 'female',
 				'sortable'   => 'foo-3',
+				'age'        => 20,
 			),
 		);
 	}
@@ -284,36 +290,42 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 				'last_name'  => 'Corlett',
 				'gender'     => 'male',
 				'sortable'   => 'foo-1',
+				'age'        => 22,
 			),
 			array(
 				'first_name' => 'Dan',
 				'last_name'  => 'Syme',
 				'gender'     => 'male',
 				'sortable'   => 'foo-13',
+				'age'        => 30,
 			),
 			array(
 				'first_name' => 'Bruno',
 				'last_name'  => 'Gaspar',
 				'gender'     => 'male',
 				'sortable'   => 'foo-100',
+				'age'        => 25,
 			),
 			array(
 				'first_name' => 'Jared',
 				'last_name'  => 'West',
 				'gender'     => 'male',
 				'sortable'   => 'foo-101',
+				'age'        => 24,
 			),
 			array(
 				'first_name' => 'Clarissa',
 				'last_name'  => 'Syme',
 				'gender'     => 'female',
 				'sortable'   => 'foo-20',
+				'age'        => 21,
 			),
 			array(
 				'first_name' => 'Jessica',
 				'last_name'  => 'Hick',
 				'gender'     => 'female',
 				'sortable'   => 'foo-3',
+				'age'        => 20,
 			),
 		);
 	}
