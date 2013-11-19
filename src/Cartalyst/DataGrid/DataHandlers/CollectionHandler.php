@@ -231,7 +231,19 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 				$column = $index;
 			}
 
-			if ( ! $this->checkColumnFilterValue($operator, $item[$column], $value))
+			$columnValue = $item[$column];
+
+			if (is_array($columnValue))
+			{
+				foreach ($columnValue as $arrayColumnValue)
+				{
+					if ( ! $this->checkColumnFilterValue($operator, $arrayColumnValue, $value))
+					{
+						return false;
+					}
+				}
+			}
+			elseif ( ! $this->checkColumnFilterValue($operator, $columnValue, $value))
 			{
 				return false;
 			}
@@ -254,9 +266,9 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 		{
 			if (is_array($columnValue))
 			{
-				foreach ($columnValue as $_columnKey => $_columnValue)
+				foreach ($columnValue as $arrayColumnValue)
 				{
-					if ($this->checkColumnFilterValue($operator, $_columnValue, $value))
+					if ($this->checkColumnFilterValue($operator, $arrayColumnValue, $value))
 					{
 						return true;
 					}
