@@ -111,13 +111,14 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 			return;
 		}
 
-		$this->data = $this->data->filter(function($item) use ($columnFilters, $globalFilters)
+		$me = $this;
+		$this->data = $this->data->filter(function($item) use ($me, $columnFilters, $globalFilters)
 		{
 			foreach ($columnFilters as $filter)
 			{
 				list($column, $operator, $value) = $filter;
 
-				if ( ! $this->checkColumnFilter($item, $column, $operator, $value))
+				if ( ! $me->checkColumnFilter($item, $column, $operator, $value))
 				{
 					return false;
 				}
@@ -127,54 +128,11 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 			{
 				list($operator, $value) = $filter;
 
-				return $this->checkGlobalFilter($item, $operator, $value);
+				return $me->checkGlobalFilter($item, $operator, $value);
 			}
 
 			return true;
 		});
-	}
-
-	protected function checkColumnFilter(array $item, $column, $operator, $value)
-	{
-		$columns = $this->dataGrid->getColumns();
-
-		if (($index = array_search($column, $columns)) !== false)
-		{
-			if ( ! is_numeric($index))
-			{
-				$column = $index;
-			}
-
-			if (stripos($item[$column], $value) === false)
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	protected function checkGlobalFilter(array $item, $operator, $value)
-	{
-		foreach ($item as $columnValue)
-		{
-			if (is_array($columnValue))
-			{
-				foreach ($columnValue as $_columnKey => $_columnValue)
-				{
-					if (stripos($_columnValue, $value) !== false)
-					{
-						return true;
-					}
-				}
-			}
-			elseif (stripos($columnValue, $value) !== false)
-			{
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
@@ -250,7 +208,81 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 	 */
 	public function supportsRegexFilters()
 	{
+		return true;
+	}
+
+	/**
+	 * Checks a coclumn filter against the given item in the collection.
+	 *
+	 * @param  array   $item
+	 * @param  string  $column
+	 * @param  string  $operator
+	 * @param  mixed   $value
+	 * @return bool
+	 */
+	public function checkColumnFilter(array $item, $column, $operator, $value)
+	{
+		$columns = $this->dataGrid->getColumns();
+
+		if (($index = array_search($column, $columns)) !== false)
+		{
+			if ( ! is_numeric($index))
+			{
+				$column = $index;
+			}
+
+			if ( ! $this->checkColumnFilterValue($operator, $item[$column], $value))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks a filter globally against all columns.
+	 *
+	 * @param  array   $item
+	 * @param  string  $operator
+	 * @param  mixed   $value
+	 * @return bool
+	 */
+	public function checkGlobalFilter(array $item, $operator, $value)
+	{
+		foreach ($item as $columnValue)
+		{
+			if (is_array($columnValue))
+			{
+				foreach ($columnValue as $_columnKey => $_columnValue)
+				{
+					if ($this->checkColumnFilterValue($operator, $_columnValue, $value))
+					{
+						return true;
+					}
+				}
+			}
+			elseif ($this->checkColumnFilterValue($operator, $columnValue, $value))
+			{
+				return true;
+			}
+		}
+
 		return false;
+	}
+
+	/**
+	 * The "guts" of checking whether a filtered value matches a column value,
+	 * given the operator.
+	 *
+	 * @param  string  $operator
+	 * @param  mixed   $columnValue
+	 * @param  mixed   $filterValue
+	 * @return bool
+	 */
+	protected function checkColumnFilterValue($operator, $columnValue, $filterValue)
+	{
+		return (stripos($columnValue, $filterValue) !== false);
 	}
 
 }
