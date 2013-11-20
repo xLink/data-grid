@@ -190,7 +190,7 @@
 
 			this.$body.on('click', '[data-sort]'+this.grid, function(){
 
-				_this.$results.empty(); //safty
+				// _this.$results.empty(); //safty
 				_this._extractSortsFromClick($(this) , $(this).data('sort'));
 
 			});
@@ -1131,6 +1131,12 @@
 			this.$filters.empty();
 
 			// Updated
+			$(this).trigger('dg:update');
+
+		},
+
+		_refresh: function() {
+
 			$(this).trigger('dg:update');
 
 		},
