@@ -25,8 +25,8 @@
 	var defaults = {
 			source: null,
 			dividend: 1,
-			threshold: 100,
-			throttle: 100,
+			threshold: 50,
+			throttle: 50,
 			paginationType: 'single',
 			sortClasses: {
 				asc: 'asc',
@@ -206,7 +206,7 @@
 			this.$filters.on('click', '> *', function(e) {
 
 				e.preventDefault();
-				_this.$results.empty(); //safty
+				//_this.$results.empty(); //safty
 				_this._removeFilters($(this).index());
 
 			});
