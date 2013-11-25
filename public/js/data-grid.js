@@ -190,7 +190,10 @@
 
 			this.$body.on('click', '[data-sort]'+this.grid, function(){
 
-				// _this.$results.empty(); //safty
+				if(_this.opt.paginationType === 'infinite')
+				{
+					_this.$results.empty(); //safty
+				}
 				_this._extractSortsFromClick($(this) , $(this).data('sort'));
 
 			});
@@ -206,7 +209,10 @@
 			this.$filters.on('click', '> *', function(e) {
 
 				e.preventDefault();
-				//_this.$results.empty(); //safty
+				if(_this.opt.paginationType === 'infinite')
+				{
+					_this.$results.empty(); //safty
+				}
 				_this._removeFilters($(this).index());
 
 			});
