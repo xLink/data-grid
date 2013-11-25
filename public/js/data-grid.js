@@ -371,6 +371,12 @@
 				value: $input.val()
 			});
 
+			// Safety
+			if(this.opt.paginationType === 'infinite')
+			{
+				this.$results.empty();
+			}
+
 			// Reset
 			$input.val('').data('old', '');
 			this._goToPage(1);
@@ -421,6 +427,12 @@
 						value: curr,
 						type: 'live'
 					});
+				}
+
+				// Safety
+				if(_this.opt.paginationType === 'infinite')
+				{
+					_this.$results.empty();
 				}
 
 				$input.data('old', curr);
