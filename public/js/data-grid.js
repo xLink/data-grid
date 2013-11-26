@@ -859,7 +859,10 @@
 					_this.$results.append(_this.tmpl['results'](response));
 				}
 
-				_this.$pagination.html(_this.tmpl['pagination'](_this._buildPagination(response)));
+				if( response.pages_count > 1 )
+				{
+					_this.$pagination.html(_this.tmpl['pagination'](_this._buildPagination(response)));
+				}
 
 				if ( ! response.results.length)
 				{
