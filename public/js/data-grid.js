@@ -201,7 +201,6 @@
 			this.$body.on('click', '[data-filter]'+this.grid, function(e) {
 
 				e.preventDefault();
-				_this.$results.empty(); //safty
 				_this._extractFiltersFromClick($(this).data('filter'), $(this).data('label'));
 
 			});
@@ -573,8 +572,8 @@
 				}
 			}
 
+			_this.$results.empty(); //safty
 			$(this).trigger('dg:update');
-
 			this._goToPage(1);
 
 		},
