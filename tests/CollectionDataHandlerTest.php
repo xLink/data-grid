@@ -98,6 +98,81 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array($expected[0], $expected[2]), array_values($data->all()));
 	}
 
+	public function testOperatorFilters1()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('age' => '|>=21|<=25|'),
+		));
+
+		$handler->prepareFilters();
+
+		$expected = $this->getValidatedData();
+		$this->assertCount(4, $data = $handler->getData());
+		$this->assertEquals(array($expected[0], $expected[2], $expected[3], $expected[4]), array_values($data->all()));
+	}
+
+	public function testOperatorFilters2()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('age' => '|<21|'),
+		));
+
+		$handler->prepareFilters();
+
+		$expected = $this->getValidatedData();
+		$this->assertCount(1, $data = $handler->getData());
+		$this->assertEquals(array($expected[5]), array_values($data->all()));
+	}
+
+	public function testOperatorFilters3()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('age' => '|>20|'),
+		));
+
+		$handler->prepareFilters();
+
+		$expected = $this->getValidatedData();
+		$this->assertCount(5, $data = $handler->getData());
+		$this->assertEquals(array($expected[0], $expected[1], $expected[2], $expected[3], $expected[4]), array_values($data->all()));
+	}
+
+	public function testOperatorFilters4()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('age' => '|<>20|!=21|'),
+		));
+
+		$handler->prepareFilters();
+
+		$expected = $this->getValidatedData();
+		$this->assertCount(4, $data = $handler->getData());
+		$this->assertEquals(array($expected[0], $expected[1], $expected[2], $expected[3]), array_values($data->all()));
+	}
+
+	public function testRegexFilter()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getFilters')->once()->andReturn(array(
+			array('first_name' => '/^.*?e.*?$/'),
+		));
+
+		$handler->prepareFilters();
+
+		$expected = $this->getValidatedData();
+		$this->assertCount(3, $data = $handler->getData());
+		$this->assertEquals(array($expected[0], $expected[3], $expected[5]), array_values($data->all()));
+	}
+
 	public function testGlobalFilters()
 	{
 		$handler = new Handler($dataGrid = $this->getMockDataGrid());
@@ -234,6 +309,7 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 			'first_name',
 			'gender' => 'sex',
 			'sortable',
+			'age',
 		));
 		return $dataGrid;
 	}
@@ -245,6 +321,7 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 		$object1->last_name  = 'Corlett';
 		$object1->gender     = 'male';
 		$object1->sortable   = 'foo-1';
+		$object1->age        = 22;
 
 		return array(
 			$object1,
@@ -254,24 +331,28 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 				'last_name'  => 'Gaspar',
 				'gender'     => 'male',
 				'sortable'   => 'foo-100',
+				'age'        => 25,
 			),
 			array(
 				'first_name' => 'Jared',
 				'last_name'  => 'West',
 				'gender'     => 'male',
 				'sortable'   => 'foo-101',
+				'age'        => 24,
 			),
 			array(
 				'first_name' => 'Clarissa',
 				'last_name'  => 'Syme',
 				'gender'     => 'female',
 				'sortable'   => 'foo-20',
+				'age'        => 21,
 			),
 			array(
 				'first_name' => 'Jessica',
 				'last_name'  => 'Hick',
 				'gender'     => 'female',
 				'sortable'   => 'foo-3',
+				'age'        => 20,
 			),
 		);
 	}
@@ -284,36 +365,42 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 				'last_name'  => 'Corlett',
 				'gender'     => 'male',
 				'sortable'   => 'foo-1',
+				'age'        => 22,
 			),
 			array(
 				'first_name' => 'Dan',
 				'last_name'  => 'Syme',
 				'gender'     => 'male',
 				'sortable'   => 'foo-13',
+				'age'        => 30,
 			),
 			array(
 				'first_name' => 'Bruno',
 				'last_name'  => 'Gaspar',
 				'gender'     => 'male',
 				'sortable'   => 'foo-100',
+				'age'        => 25,
 			),
 			array(
 				'first_name' => 'Jared',
 				'last_name'  => 'West',
 				'gender'     => 'male',
 				'sortable'   => 'foo-101',
+				'age'        => 24,
 			),
 			array(
 				'first_name' => 'Clarissa',
 				'last_name'  => 'Syme',
 				'gender'     => 'female',
 				'sortable'   => 'foo-20',
+				'age'        => 21,
 			),
 			array(
 				'first_name' => 'Jessica',
 				'last_name'  => 'Hick',
 				'gender'     => 'female',
 				'sortable'   => 'foo-3',
+				'age'        => 20,
 			),
 		);
 	}

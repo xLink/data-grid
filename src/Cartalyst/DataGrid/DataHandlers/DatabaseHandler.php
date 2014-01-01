@@ -19,6 +19,7 @@
  */
 
 use Cartalyst\DataGrid\DataGrid;
+use Illuminate\Database\MySqlConnection as MySqlDatabaseConnection;
 use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -109,47 +110,24 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	 */
 	public function prepareFilters()
 	{
-		foreach ($this->request->getFilters() as $filter)
+		list($columnFilters, $globalFilters) = $this->getFilters();
+
+		foreach ($columnFilters as $filter)
 		{
-			// If the filter is an array where the key matches one of our
-			// columns, we're filtering that column.
-			if (is_array($filter))
-			{
-				$filterValue  = reset($filter);
-				$filterColumn = key($filter);
+			list($column, $operator, $value) = $filter;
 
-				if (($index = array_search($filterColumn, $this->dataGrid->getColumns())) !== false)
-				{
-					if (is_numeric($index))
-					{
-						$this->data->where(
-							$filterColumn,
-							'like',
-							"%{$filterValue}%"
-						);
-					}
-					else
-					{
-						$this->data->where(
-							$index,
-							'like',
-							"%{$filterValue}%"
-						);
-					}
-				}
-			}
+			$this->applyFilter($this->data, $column, $operator, $value);
+		}
 
-			// Otherwise if a string was provided, the
-			// filter is an "or where" filter across all
-			// columns.
-			elseif (is_string($filter))
+		foreach ($globalFilters as $filter)
+		{
+			list($operator, $value) = $filter;
+			$me = $this;
+
+			$this->data->whereNested(function($data) use ($me, $operator, $value)
 			{
-				$me = $this;
-				$this->data->whereNested(function($data) use ($me, $filter)
-				{
-					$me->globalFilter($data, $filter);
-				});
-			}
+				$me->globalFilter($data, $operator, $value);
+			});
 		}
 	}
 
@@ -159,21 +137,20 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	 * the value can be matched across any column.
 	 *
 	 * @param  Illuminate\Database\Query\Builder  $nestedQuery
-	 * @param  string  $filter
+	 * @param  string  $operator
+	 * @param  string  $value
 	 * @return void
 	 */
-	public function globalFilter(QueryBuilder $nestedQuery, $filter)
+	public function globalFilter(QueryBuilder $nestedQuery, $operator, $value)
 	{
-		foreach ($this->dataGrid->getColumns() as $key => $value)
+		foreach ($this->dataGrid->getColumns() as $key => $_value)
 		{
 			if (is_numeric($key))
 			{
-				$nestedQuery->orWhere($value, 'like', "%{$filter}%");
+				$key = $_value;
 			}
-			else
-			{
-				$nestedQuery->orWhere($key, 'like', "%{$filter}%");
-			}
+
+			$this->applyFilter($nestedQuery, $key, $operator, $value, 'or');
 		}
 	}
 
@@ -280,6 +257,79 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 			return (array) $result;
 
 		}, (array) $results);
+	}
+
+	/**
+	 * Flag for whether the handler supports regex filters.
+	 *
+	 * @return void
+	 */
+	public function supportsRegexFilters()
+	{
+		switch ($connection = $this->getConnection())
+		{
+			case $connection instanceof MySqlDatabaseConnection:
+				return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the connection associated with the handler's data set.
+	 *
+	 * @return \Illuminate\Database\ConnectionInterface
+	 */
+	protected function getConnection()
+	{
+		$data = $this->data;
+
+		if ($data instanceof EloquentQueryBuilder)
+		{
+			$data = $data->getQuery();
+		}
+
+		return $data->getConnection();
+	}
+
+	/**
+	 * Applies a filter to the given query.
+	 *
+	 * @param  mixed   $query
+	 * @param  string  $column
+	 * @param  string  $operator
+	 * @param  mixed   $value
+	 * @param  string  $boolean
+	 * @return void
+	 */
+	protected function applyFilter($query, $column, $operator, $value, $boolean = 'and')
+	{
+		$method = ($boolean === 'and') ? 'where' : 'orWhere';
+
+		switch ($operator)
+		{
+			case 'like':
+				$value = "%{$value}%";
+				break;
+
+			case 'regex':
+
+				if ($this->supportsRegexFilters())
+				{
+					$method .= 'Raw';
+				}
+
+				switch ($connection = $this->getConnection())
+				{
+					case $connection instanceof MySqlDatabaseConnection:
+						$query->$method("{$column} {$operator} ?", array($value));
+						return;
+				}
+
+				return;
+		}
+
+		$query->$method($column, $operator, $value);
 	}
 
 }
