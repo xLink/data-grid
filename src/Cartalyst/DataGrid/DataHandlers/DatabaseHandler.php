@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Contracts\ArrayableInterface;
 
 class DatabaseHandler extends BaseHandler implements HandlerInterface {
@@ -89,7 +90,11 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 		// for joined tables.
 		foreach ($this->dataGrid->getColumns() as $key => $value)
 		{
-			if (is_numeric($key))
+			if ($value instanceof Expression)
+			{
+				$toSelect[] = $value;
+			}
+			elseif (is_numeric($key))
 			{
 				$toSelect[] = $value;
 			}
