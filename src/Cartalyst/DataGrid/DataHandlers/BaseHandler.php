@@ -125,11 +125,11 @@ abstract class BaseHandler implements HandlerInterface {
 		// Apply all the filters requested
 		$this->prepareFilters();
 
-		// Setup the requested sorting
-		$this->prepareSort();
-
 		// Setup filtered count
 		$this->prepareFilteredCount();
+
+		// Setup the requested sorting
+		$this->prepareSort();
 
 		// And we'll setup pagination, pagination
 		// is rather unique in the data grid.
