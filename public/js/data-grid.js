@@ -81,6 +81,9 @@
 			_this.$filters      = $(filters + _this.grid);
 			_this.$body         = $(document.body);
 
+			// Source
+			_this.source = _this.$results.data('source') || _this.opt.source;
+
 			// Safty Check
 			if (_this.$results.get(0).tagName.toLowerCase() === 'table')
 			{
@@ -89,9 +92,6 @@
 
 			// Options
 			_this.opt = $.extend({}, defaults, options);
-
-			// Source
-			_this.source = _this.opt.source || _this.$results.data('source');
 
 			// Setup Default Hash
 			defaultHash = _this.key;
@@ -201,6 +201,7 @@
 			this.$body.on('click', '[data-filter]'+this.grid, function(e) {
 
 				e.preventDefault();
+				_this.$results.empty(); //safty
 				_this._extractFiltersFromClick($(this).data('filter'), $(this).data('label'));
 
 			});
@@ -572,8 +573,8 @@
 				}
 			}
 
-			_this.$results.empty(); //safty
 			$(this).trigger('dg:update');
+
 			this._goToPage(1);
 
 		},
@@ -767,9 +768,10 @@
 			{
 				var defaultURI = window.location.protocol + '//' + window.location.host + window.location.pathname;
 
-				// Check for query strings
+
 				if( window.location.href.indexOf('?') > -1 )
 				{
+					console.log('true');
 					var indexOfQuery = window.location.href.indexOf('?');
 					var indexOfHash = window.location.href.indexOf('#');
 
@@ -871,7 +873,7 @@
 					_this.$results.append(_this.tmpl['results'](response));
 				}
 
-				if( response.pages_count > 1 || _this.opt.paginationType !== 'infinite' )
+				if( response.pages_count > 1 )
 				{
 					_this.$pagination.html(_this.tmpl['pagination'](_this._buildPagination(response)));
 				}
