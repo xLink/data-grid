@@ -767,6 +767,19 @@
 			{
 				var defaultURI = window.location.protocol + '//' + window.location.host + window.location.pathname;
 
+				// Check for query strings
+				if( window.location.href.indexOf('?') > -1 )
+				{
+					var indexOfQuery = window.location.href.indexOf('?');
+					var indexOfHash = window.location.href.indexOf('#');
+
+					if( indexOfHash > -1 ) {
+						defaultURI += window.location.href.slice( indexOfQuery, indexOfHash);
+					}else{
+						defaultURI += window.location.href.substr(indexOfQuery);
+					}
+				}
+
 				window.history.pushState(null, null, defaultURI +'#'+ base);
 			}
 
