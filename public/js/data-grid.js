@@ -770,7 +770,6 @@
 				// Check for query strings
 				if( window.location.href.indexOf('?') > -1 )
 				{
-					console.log('true');
 					var indexOfQuery = window.location.href.indexOf('?');
 					var indexOfHash = window.location.href.indexOf('#');
 
