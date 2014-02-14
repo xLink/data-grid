@@ -81,17 +81,17 @@
 			_this.$filters      = $(filters + _this.grid);
 			_this.$body         = $(document.body);
 
-			// Safty Check
-			if (_this.$results.get(0).tagName.toLowerCase() === 'table')
-			{
-				_this.$results = $(results + this.grid).find('tbody');
-			}
-
 			// Options
 			_this.opt = $.extend({}, defaults, options);
 
 			// Source
 			_this.source = _this.$results.data('source') || _this.opt.source;
+
+			// Safty Check
+			if (_this.$results.get(0).tagName.toLowerCase() === 'table')
+			{
+				_this.$results = $(results + this.grid).find('tbody');
+			}
 
 			// Setup Default Hash
 			defaultHash = _this.key;
