@@ -370,11 +370,13 @@
 
 			clearTimeout(searchTimeout);
 
-			if (el.find('select').length)
-			{
-				column = el.find('select').val();
+			var searchSelect = el.find('select:not([data-select-filter])');
 
-				el.find('select').prop('selectedIndex', 0);
+			if (searchSelect.length)
+			{
+				column = searchSelect.val();
+
+				searchSelect.prop('selectedIndex', 0);
 			}
 
 			// If theres a live search item with the same value
@@ -420,9 +422,11 @@
 			searchTimeout = setTimeout(function()
 			{
 
-				if (el.find('select').length)
+				var searchSelect = el.find('select:not([data-select-filter])');
+
+				if (searchSelect.length)
 				{
-					column = el.find('select').val();
+					column = searchSelect.val();
 				}
 
 				var $input = el.find('input');
