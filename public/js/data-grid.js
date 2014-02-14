@@ -215,7 +215,7 @@
 				}
 				_this._removeFilters($(this).index());
 
-				_this.$body.find('[data-select-filter]'+this.grid).find('option:eq(0)').prop('selected', true);
+				_this.$body.find('[data-select-filter]'+_this.grid).find('option:eq(0)').prop('selected', true);
 
 				$(_this).trigger('dg:update');
 
