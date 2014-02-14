@@ -215,6 +215,8 @@
 				}
 				_this._removeFilters($(this).index());
 
+				_this.$body.find('[data-select-filter] option:eq(0)').prop('selected', true);
+
 				$(_this).trigger('dg:update');
 
 			});
@@ -222,6 +224,8 @@
 			_this._selectFilter($('[data-select-filter]'));
 
 			this.$body.on('change', '[data-select-filter]', function(){
+
+				$(this).unbind('change');
 
 				_this._selectFilter($(this));
 
@@ -1132,18 +1136,18 @@
 
 			this.$body.find('[data-select-filter]').on('change', function() {
 
-				var filter = _this.$body.find(':selected').data('label');
-				var col = _this.$body.find(':selected').data('filter');
+				var filter = _this.$body.find(':selected').data('filter');
+				var label = _this.$body.find(':selected').data('label');
 
 				_this._removeFilters();
 
 				appliedFilters = [];
 
 				if (filter !== undefined) {
-					_this._applyFilter({column: col, value: filter});
+					_this._extractFiltersFromClick(filter, label);
+				} else {
+					_this._reset();
 				}
-
-				_this._refresh();
 			});
 
 		},
