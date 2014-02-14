@@ -215,6 +215,16 @@
 				}
 				_this._removeFilters($(this).index());
 
+				$(_this).trigger('dg:update');
+
+			});
+
+			_this._selectFilter($('[data-select-filter]'));
+
+			this.$body.on('change', '[data-select-filter]', function(){
+
+				_this._selectFilter($(this));
+
 			});
 
 			this.$pagination.on('click', '[data-page]', function(e) {
@@ -1113,7 +1123,28 @@
 			// TODO: See about removing this
 			this.$filters.html( this.tmpl['filters']({ filters: appliedFilters }));
 			this._goToPage(1);
-			$(this).trigger('dg:update');
+
+		},
+
+		_selectFilter: function(el)
+		{
+			var _this = this;
+
+			this.$body.find('[data-select-filter]').on('change', function() {
+
+				var filter = _this.$body.find(':selected').data('label');
+				var col = _this.$body.find(':selected').data('filter');
+
+				_this._removeFilters();
+
+				appliedFilters = [];
+
+				if (filter !== undefined) {
+					_this._applyFilter({column: col, value: filter});
+				}
+
+				_this._refresh();
+			});
 
 		},
 
