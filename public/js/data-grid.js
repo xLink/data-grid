@@ -81,9 +81,6 @@
 			_this.$filters      = $(filters + _this.grid);
 			_this.$body         = $(document.body);
 
-			// Source
-			_this.source = _this.$results.data('source') || _this.opt.source;
-
 			// Safty Check
 			if (_this.$results.get(0).tagName.toLowerCase() === 'table')
 			{
@@ -92,6 +89,9 @@
 
 			// Options
 			_this.opt = $.extend({}, defaults, options);
+
+			// Source
+			_this.source = _this.$results.data('source') || _this.opt.source;
 
 			// Setup Default Hash
 			defaultHash = _this.key;
