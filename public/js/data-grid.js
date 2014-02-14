@@ -215,15 +215,15 @@
 				}
 				_this._removeFilters($(this).index());
 
-				_this.$body.find('[data-select-filter] option:eq(0)').prop('selected', true);
+				_this.$body.find('[data-select-filter]'+this.grid).find('option:eq(0)').prop('selected', true);
 
 				$(_this).trigger('dg:update');
 
 			});
 
-			_this._selectFilter($('[data-select-filter]'));
+			_this._selectFilter($('[data-select-filter]'+this.grid));
 
-			this.$body.on('change', '[data-select-filter]', function(){
+			this.$body.on('change', '[data-select-filter]'+this.grid, function(){
 
 				$(this).unbind('change');
 
@@ -1134,7 +1134,7 @@
 		{
 			var _this = this;
 
-			this.$body.find('[data-select-filter]').on('change', function() {
+			this.$body.find('[data-select-filter]'+this.grid).on('change', function() {
 
 				var filter = _this.$body.find(':selected').data('filter');
 				var label = _this.$body.find(':selected').data('label');
