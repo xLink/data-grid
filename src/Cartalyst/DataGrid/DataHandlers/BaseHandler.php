@@ -305,8 +305,7 @@ abstract class BaseHandler implements HandlerInterface {
 	{
 		if ( ! $column)
 		{
-			$columns = $this->dataGrid->getColumns();
-			$column = reset($columns);
+			return;
 		}
 
 		$key = array_search($column, $this->dataGrid->getColumns());

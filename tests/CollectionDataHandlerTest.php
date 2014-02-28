@@ -262,6 +262,24 @@ class CollectionDataHandlerTest extends PHPUnit_Framework_TestCase {
 		}
 	}
 
+	public function testPrepareSortWithoutColumn()
+	{
+		$handler = new Handler($dataGrid = $this->getMockDataGrid());
+
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getSort')->once();
+
+		$handler->prepareSort();
+
+		$expected = $this->getValidatedData();
+		$this->assertCount(count($expected), $data = $handler->getData());
+		$ordered = array(0, 1, 2, 3, 4, 5);
+
+		foreach (array_values($data->all()) as $index => $item)
+		{
+			$this->assertEquals($expected[$ordered[$index]], $item);
+		}
+	}
+
 	/**
 	 * @expectedException RuntimeException
 	 */

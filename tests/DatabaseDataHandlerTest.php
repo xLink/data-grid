@@ -201,12 +201,7 @@ class DatabaseDataHandlerTest extends PHPUnit_Framework_TestCase {
 	public function testSortingWhenNoOrdersArePresent()
 	{
 		$handler = new Handler($dataGrid = $this->getMockDataGrid());
-		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getSort')->once()->andReturn('qux');
-		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getDirection')->once()->andReturn('desc');
-		$dataGrid->getData()->shouldReceive('getQuery')->once()->andReturn($query = m::mock('Illuminate\Database\Query\Builder'));
-
-
-		$query->shouldReceive('orderBy')->with('bar.baz', 'desc')->once();
+		$dataGrid->getEnvironment()->getRequestProvider()->shouldReceive('getSort')->once();
 
 		$handler->prepareSort();
 	}
