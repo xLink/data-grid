@@ -171,35 +171,37 @@ class DatabaseHandler extends BaseHandler implements HandlerInterface {
 	 */
 	public function prepareSort()
 	{
-		$column    = $this->calculateSortColumn($this->request->getSort());
-		$direction = $this->request->getDirection();
-
-		$data = $this->data;
-
-		if ($data instanceof HasMany or $data instanceof BelongsToMany)
+		if ($column = $this->calculateSortColumn($this->request->getSort()))
 		{
-			$data = $data->getQuery();
-		}
+			$direction = $this->request->getDirection();
 
-		if ($data instanceof EloquentQueryBuilder)
-		{
-			$data = $data->getQuery();
-		}
+			$data = $this->data;
 
-		// We are going to prepend our sort order to the data
-		// as SQL allows for multiple sort. By appending it, a predefined
-		// sort may override ours.
-		if (is_array($data->orders))
-		{
-			array_unshift($data->orders, compact('column', 'direction'));
-		}
+			if ($data instanceof HasMany or $data instanceof BelongsToMany)
+			{
+				$data = $data->getQuery();
+			}
 
-		// If no orders have been defined, the orders property
-		// is set to null. At this point, we cannot unshift a
-		// sort order to the front, so we will use the API.
-		else
-		{
-			$data->orderBy($column, $direction);
+			if ($data instanceof EloquentQueryBuilder)
+			{
+				$data = $data->getQuery();
+			}
+
+			// We are going to prepend our sort order to the data
+			// as SQL allows for multiple sort. By appending it, a predefined
+			// sort may override ours.
+			if (is_array($data->orders))
+			{
+				array_unshift($data->orders, compact('column', 'direction'));
+			}
+
+			// If no orders have been defined, the orders property
+			// is set to null. At this point, we cannot unshift a
+			// sort order to the front, so we will use the API.
+			else
+			{
+				$data->orderBy($column, $direction);
+			}
 		}
 	}
 

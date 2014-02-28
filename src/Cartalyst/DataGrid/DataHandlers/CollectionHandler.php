@@ -152,17 +152,19 @@ class CollectionHandler extends BaseHandler implements HandlerInterface {
 	 */
 	public function prepareSort()
 	{
-		$column = $this->calculateSortColumn($this->request->getSort());
-		$direction = $this->request->getDirection();
-
-		$this->data = $this->data->sort(function($a, $b) use ($column, $direction)
+		if ($column = $this->calculateSortColumn($this->request->getSort()))
 		{
-			$result = strnatcasecmp($a[$column], $b[$column]);
+			$direction = $this->request->getDirection();
 
-			$invert = ($direction == 'desc');
+			$this->data = $this->data->sort(function($a, $b) use ($column, $direction)
+			{
+				$result = strnatcasecmp($a[$column], $b[$column]);
 
-			return $result * ($invert ? -1 : 1);
-		});
+				$invert = ($direction == 'desc');
+
+				return $result * ($invert ? -1 : 1);
+			});
+		}
 	}
 
 	/**
