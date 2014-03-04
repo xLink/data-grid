@@ -354,11 +354,6 @@ abstract class BaseHandler implements HandlerInterface {
 			throw new \InvalidArgumentException("Invalid threshold of [$threshold], must be [1] or more.");
 		}
 
-		if ($throttle < $threshold)
-		{
-			throw new \InvalidArgumentException("Invalid throttle of [$throttle], must be greater than the threshold, which is [$threshold].");
-		}
-
 		// If our results count is less than the threshold,
 		// we're always returning one page with all of the items
 		// on it. This will effectively remove pagination.
@@ -377,7 +372,7 @@ abstract class BaseHandler implements HandlerInterface {
 
 		// Now, if the results per page is greater than the
 		// maximum per page, reduce it down accordingly
-		if ($perPage > $maximumPerPage)
+		if ($perPage > $maximumPerPage && $maximumPerPage > 0)
 		{
 			$perPage = $maximumPerPage;
 		}
